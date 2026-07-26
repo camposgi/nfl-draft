@@ -1796,6 +1796,11 @@ document.getElementById('mainScr').addEventListener('click',function(e){
         <div class="ccat-name">PASSING</div>
         <div class="ccat-target">QB · 55K / 75K yds</div>
       </div>
+      <div class="copt-cat" id="ccatTD" onclick="setChallCat('TD',this)">
+        <div class="ccat-ico">🏆</div>
+        <div class="ccat-name">TOUCHDOWNS</div>
+        <div class="ccat-target">Team · 300 / 380 TDs</div>
+      </div>
     </div>
     <div class="fopt-lbl" style="margin:18px 0 10px">Difficulty</div>
     <div class="copt-diff">
@@ -2183,50 +2188,50 @@ function showFantResults(){
 
 // -- THE CHALLENGE (v2 — team logos) ----------------------------------
 const CHALL_TEAM_STATS={
-  ARI:{name:"Cardinals",WR:1006,WRn:"Michael Wilson",RB:514,RBn:"Tyler Allgeier",QB:3366,QBn:"Jacoby Brissett",WR2:608,WR2n:"Marvin Harrison",RB2:269,RB2n:"Zonovan Knight",QB2:37,QB2n:"Gardner Minshew"},
-  ATL:{name:"Falcons",WR:919,WRn:"Drake London",RB:1478,RBn:"Bijan Robinson",QB:2660,QBn:"Tua Tagovailoa",WR2:313,WR2n:"Olamide Zaccheaus",RB2:400,RB2n:"Brian Robinson",QB2:1982,QB2n:"Michael Penix"},
-  BAL:{name:"Ravens",WR:1211,WRn:"Zay Flowers",RB:1595,RBn:"Derrick Henry",QB:2549,QBn:"Lamar Jackson",WR2:224,WR2n:"Rashod Bateman",RB2:93,RB2n:"Justice Hill",QB2:426,QB2n:"Tyler Huntley"},
-  BUF:{name:"Bills",WR:719,WRn:"Khalil Shakir",RB:1621,RBn:"James Cook",QB:3668,QBn:"Josh Allen",WR2:682,WR2n:"DJ Moore",RB2:275,RB2n:"Ray Davis",QB2:88,QB2n:"Shane Buechele"},
-  CAR:{name:"Panthers",WR:1014,WRn:"Tetairoa McMillan",RB:511,RBn:"Chuba Hubbard",QB:3011,QBn:"Bryce Young",WR2:394,WR2n:"Jalen Coker",RB2:94,RB2n:"Trevor Etienne",QB2:188,QB2n:"Kenny Pickett"},
-  CHI:{name:"Bears",WR:661,WRn:"Rome Odunze",RB:1087,RBn:"D\'Andre Swift",QB:3942,QBn:"Caleb Williams",WR2:652,WR2n:"Luther Burden",RB2:783,RB2n:"Kyle Monangai",QB2:47,QB2n:"Tyson Bagent"},
-  CIN:{name:"Bengals",WR:1412,WRn:"Ja\'Marr Chase",RB:1019,RBn:"Chase Brown",QB:2479,QBn:"Joe Flacco",WR2:846,WR2n:"Tee Higgins",RB2:382,RB2n:"Samaje Perine",QB2:1809,QB2n:"Joe Burrow"},
-  CLE:{name:"Browns",WR:602,WRn:"Jerry Jeudy",RB:827,RBn:"Quinshon Judkins",QB:1400,QBn:"Shedeur Sanders",WR2:338,WR2n:"Isaiah Bond",RB2:175,RB2n:"Dylan Sampson",QB2:937,QB2n:"Dillon Gabriel"},
-  DAL:{name:"Cowboys",WR:1429,WRn:"George Pickens",RB:1201,RBn:"Javonte Williams",QB:4552,QBn:"Dak Prescott",WR2:1077,WR2n:"CeeDee Lamb",RB2:250,RB2n:"Malik Davis",QB2:183,QB2n:"Joe Milton"},
-  DEN:{name:"Broncos",WR:1017,WRn:"Courtland Sutton",RB:772,RBn:"J.K. Dobbins",QB:3931,QBn:"Bo Nix",WR2:910,WR2n:"Jaylen Waddle",RB2:540,RB2n:"RJ Harvey",QB2:185,QB2n:"Jarrett Stidham"},
-  DET:{name:"Lions",WR:1401,WRn:"Amon-Ra St. Brown",RB:1223,RBn:"Jahmyr Gibbs",QB:4564,QBn:"Jared Goff",WR2:1117,WR2n:"Jameson Williams",RB2:462,RB2n:"Isiah Pacheco",QB2:62,QB2n:"Teddy Bridgewater"},
-  GB:{name:"Packers",WR:611,WRn:"Christian Watson",RB:929,RBn:"Josh Jacobs",QB:3381,QBn:"Jordan Love",WR2:361,WR2n:"Matthew Golden",RB2:106,RB2n:"Chris Brooks",QB2:779,QB2n:"Tyrod Taylor"},
-  HOU:{name:"Texans",WR:1117,WRn:"Nico Collins",RB:716,RBn:"David Montgomery",QB:3041,QBn:"C.J. Stroud",WR2:525,WR2n:"Jayden Higgins",RB2:703,RB2n:"Woody Marks",QB2:915,QB2n:"Davis Mills"},
-  IND:{name:"Colts",WR:1003,WRn:"Alec Pierce",RB:1585,RBn:"Jonathan Taylor",QB:3101,QBn:"Daniel Jones",WR2:566,WR2n:"Josh Downs",RB2:96,RB2n:"DJ Giddens",QB2:415,QB2n:"Riley Leonard"},
-  JAX:{name:"Jaguars",WR:847,WRn:"Parker Washington",RB:500,RBn:"Chris Rodriguez",QB:4007,QBn:"Trevor Lawrence",WR2:835,WR2n:"Jakobi Meyers",RB2:307,RB2n:"Bhayshul Tuten",QB2:19,QB2n:"Nick Mullens"},
-  KC:{name:"Chiefs",WR:571,WRn:"Rashee Rice",RB:1027,RBn:"Kenneth Walker",QB:3587,QBn:"Patrick Mahomes",WR2:532,WR2n:"Xavier Worthy",RB2:312,RB2n:"Emari Demercado",QB2:1259,QB2n:"Justin Fields"},
-  LAC:{name:"Chargers",WR:789,WRn:"Ladd McConkey",RB:643,RBn:"Kimani Vidal",QB:3727,QBn:"Justin Herbert",WR2:735,WR2n:"Quentin Johnston",RB2:545,RB2n:"Omarion Hampton",QB2:226,QB2n:"Trey Lance"},
-  LAR:{name:"Rams",WR:1715,WRn:"Puka Nacua",RB:1252,RBn:"Kyren Williams",QB:4707,QBn:"Matthew Stafford",WR2:789,WR2n:"Davante Adams",RB2:746,RB2n:"Blake Corum",QB2:190,QB2n:"Ty Simpson"},
-  LV:{name:"Raiders",WR:696,WRn:"Tre Tucker",RB:975,RBn:"Ashton Jeanty",QB:1721,QBn:"Kirk Cousins",WR2:444,WR2n:"Jalen Nailor",RB2:9,RB2n:"Dylan Laube",QB2:102,QB2n:"Aidan O\'Connell"},
-  MIA:{name:"Dolphins",WR:317,WRn:"Malik Washington",RB:1350,RBn:"De\'Von Achane",QB:622,QBn:"Quinn Ewers",WR2:203,WR2n:"Jalen Tolbert",RB2:288,RB2n:"Jaylen Wright",QB2:422,QB2n:"Malik Willis"},
-  MIN:{name:"Vikings",WR:1048,WRn:"Justin Jefferson",RB:758,RBn:"Jordan Mason",QB:1632,QBn:"J.J. McCarthy",WR2:643,WR2n:"Jauan Jennings",RB2:548,RB2n:"Aaron Jones",QB2:1216,QB2n:"Carson Wentz"},
-  NE:{name:"Patriots",WR:1003,WRn:"A.J. Brown",RB:911,RBn:"TreVeyon Henderson",QB:4394,QBn:"Drake Maye",WR2:724,WR2n:"Romeo Doubs",RB2:603,RB2n:"Rhamondre Stevenson",QB2:210,QB2n:"Joe Milton"},
-  NO:{name:"Saints",WR:1163,WRn:"Chris Olave",RB:1107,RBn:"Travis Etienne",QB:2384,QBn:"Tyler Shough",WR2:293,WR2n:"Devaughn Vele",RB2:471,RB2n:"Alvin Kamara",QB2:1586,QB2n:"Spencer Rattler"},
-  NYG:{name:"Giants",WR:538,WRn:"Darius Slayton",RB:740,RBn:"Tyrone Tracy",QB:2272,QBn:"Jaxson Dart",WR2:443,WR2n:"Darnell Mooney",RB2:437,RB2n:"Devin Singletary",QB2:567,QB2n:"Jameis Winston"},
-  NYJ:{name:"Jets",WR:453,WRn:"Adonai Mitchell",RB:1065,RBn:"Breece Hall",QB:3025,QBn:"Geno Smith",WR2:395,WR2n:"Garrett Wilson",RB2:236,RB2n:"Isaiah Davis",QB2:739,QB2n:"Brady Cook"},
-  PHI:{name:"Eagles",WR:1008,WRn:"DeVonta Smith",RB:1140,RBn:"Saquon Barkley",QB:3224,QBn:"Jalen Hurts",WR2:587,WR2n:"Marquise Brown",RB2:356,RB2n:"Tank Bigsby",QB2:293,QB2n:"Andy Dalton"},
-  PIT:{name:"Steelers",WR:850,WRn:"DK Metcalf",RB:1076,RBn:"Rico Dowdle",QB:3322,QBn:"Aaron Rodgers",WR2:784,WR2n:"Michael Pittman",RB2:958,RB2n:"Jaylen Warren",QB2:310,QB2n:"Mason Rudolph"},
-  SEA:{name:"Seahawks",WR:1793,WRn:"Jaxon Smith-Njigba",RB:730,RBn:"Zach Charbonnet",QB:4048,QBn:"Sam Darnold",WR2:687,WR2n:"Rashid Shaheed",RB2:496,RB2n:"Emanuel Wilson",QB2:15,QB2n:"Drew Lock"},
-  SF:{name:"49ers",WR:528,WRn:"Ricky Pearsall",RB:1202,RBn:"Christian McCaffrey",QB:2167,QBn:"Brock Purdy",WR2:368,WR2n:"Mike Evans",RB2:180,RB2n:"Jordan James",QB2:2151,QB2n:"Mac Jones"},
-  TB:{name:"Buccaneers",WR:938,WRn:"Emeka Egbuka",RB:588,RBn:"Bucky Irving",QB:3693,QBn:"Baker Mayfield",WR2:360,WR2n:"Chris Godwin",RB2:537,RB2n:"Kenny Gainwell",QB2:771,QB2n:"Jake Browning"},
-  TEN:{name:"Titans",WR:1014,WRn:"Wan\'Dale Robinson",RB:1082,RBn:"Tony Pollard",QB:3169,QBn:"Cam Ward",WR2:515,WR2n:"Elic Ayomanor",RB2:333,RB2n:"Michael Carter",QB2:313,QB2n:"Mitchell Trubisky"},
-  WAS:{name:"Commanders",WR:582,WRn:"Terry McLaurin",RB:805,RBn:"Jacory Croskey-Merritt",QB:1695,QBn:"Marcus Mariota",WR2:350,WR2n:"Van Jefferson",RB2:572,RB2n:"Rachaad White",QB2:1262,QB2n:"Jayden Daniels"}
+  ARI:{name:"Cardinals",WR:1006,WRn:"Michael Wilson",RB:514,RBn:"Tyler Allgeier",QB:3366,QBn:"Jacoby Brissett",WR2:608,WR2n:"Marvin Harrison",RB2:269,RB2n:"Zonovan Knight",QB2:37,QB2n:"Gardner Minshew",TD:29,TDn:"Kyler Murray",TD2:16,TD2n:"Trey McBride"},
+  ATL:{name:"Falcons",WR:919,WRn:"Drake London",RB:1478,RBn:"Bijan Robinson",QB:2660,QBn:"Tua Tagovailoa",WR2:313,WR2n:"Olamide Zaccheaus",RB2:400,RB2n:"Brian Robinson",QB2:1982,QB2n:"Michael Penix",TD:29,TDn:"Kirk Cousins",TD2:15,TD2n:"Bijan Robinson"},
+  BAL:{name:"Ravens",WR:1211,WRn:"Zay Flowers",RB:1595,RBn:"Derrick Henry",QB:2549,QBn:"Lamar Jackson",WR2:224,WR2n:"Rashod Bateman",RB2:93,RB2n:"Justice Hill",QB2:426,QB2n:"Tyler Huntley",TD:41,TDn:"Lamar Jackson",TD2:18,TD2n:"Derrick Henry"},
+  BUF:{name:"Bills",WR:719,WRn:"Khalil Shakir",RB:1621,RBn:"James Cook",QB:3668,QBn:"Josh Allen",WR2:682,WR2n:"DJ Moore",RB2:275,RB2n:"Ray Davis",QB2:88,QB2n:"Shane Buechele",TD:46,TDn:"Josh Allen",TD2:20,TD2n:"Dalton Kincaid"},
+  CAR:{name:"Panthers",WR:1014,WRn:"Tetairoa McMillan",RB:511,RBn:"Chuba Hubbard",QB:3011,QBn:"Bryce Young",WR2:394,WR2n:"Jalen Coker",RB2:94,RB2n:"Trevor Etienne",QB2:188,QB2n:"Kenny Pickett",TD:22,TDn:"Bryce Young",TD2:10,TD2n:"Diontae Johnson"},
+  CHI:{name:"Bears",WR:661,WRn:"Rome Odunze",RB:1087,RBn:"D\'Andre Swift",QB:3942,QBn:"Caleb Williams",WR2:652,WR2n:"Luther Burden",RB2:783,RB2n:"Kyle Monangai",QB2:47,QB2n:"Tyson Bagent",TD:33,TDn:"Caleb Williams",TD2:14,TD2n:"D'Andre Swift"},
+  CIN:{name:"Bengals",WR:1412,WRn:"Ja\'Marr Chase",RB:1019,RBn:"Chase Brown",QB:2479,QBn:"Joe Flacco",WR2:846,WR2n:"Tee Higgins",RB2:382,RB2n:"Samaje Perine",QB2:1809,QB2n:"Joe Burrow",TD:34,TDn:"Joe Burrow",TD2:15,TD2n:"Ja'Marr Chase"},
+  CLE:{name:"Browns",WR:602,WRn:"Jerry Jeudy",RB:827,RBn:"Quinshon Judkins",QB:1400,QBn:"Shedeur Sanders",WR2:338,WR2n:"Isaiah Bond",RB2:175,RB2n:"Dylan Sampson",QB2:937,QB2n:"Dillon Gabriel",TD:22,TDn:"Deshaun Watson",TD2:10,TD2n:"Jerry Jeudy"},
+  DAL:{name:"Cowboys",WR:1429,WRn:"George Pickens",RB:1201,RBn:"Javonte Williams",QB:4552,QBn:"Dak Prescott",WR2:1077,WR2n:"CeeDee Lamb",RB2:250,RB2n:"Malik Davis",QB2:183,QB2n:"Joe Milton",TD:31,TDn:"Dak Prescott",TD2:14,TD2n:"CeeDee Lamb"},
+  DEN:{name:"Broncos",WR:1017,WRn:"Courtland Sutton",RB:772,RBn:"J.K. Dobbins",QB:3931,QBn:"Bo Nix",WR2:910,WR2n:"Jaylen Waddle",RB2:540,RB2n:"RJ Harvey",QB2:185,QB2n:"Jarrett Stidham",TD:32,TDn:"Bo Nix",TD2:14,TD2n:"Courtland Sutton"},
+  DET:{name:"Lions",WR:1401,WRn:"Amon-Ra St. Brown",RB:1223,RBn:"Jahmyr Gibbs",QB:4564,QBn:"Jared Goff",WR2:1117,WR2n:"Jameson Williams",RB2:462,RB2n:"Isiah Pacheco",QB2:62,QB2n:"Teddy Bridgewater",TD:48,TDn:"Jared Goff",TD2:21,TD2n:"Jahmyr Gibbs"},
+  GB:{name:"Packers",WR:611,WRn:"Christian Watson",RB:929,RBn:"Josh Jacobs",QB:3381,QBn:"Jordan Love",WR2:361,WR2n:"Matthew Golden",RB2:106,RB2n:"Chris Brooks",QB2:779,QB2n:"Tyrod Taylor",TD:38,TDn:"Jordan Love",TD2:17,TD2n:"Josh Jacobs"},
+  HOU:{name:"Texans",WR:1117,WRn:"Nico Collins",RB:716,RBn:"David Montgomery",QB:3041,QBn:"C.J. Stroud",WR2:525,WR2n:"Jayden Higgins",RB2:703,RB2n:"Woody Marks",QB2:915,QB2n:"Davis Mills",TD:38,TDn:"C.J. Stroud",TD2:16,TD2n:"Nico Collins"},
+  IND:{name:"Colts",WR:1003,WRn:"Alec Pierce",RB:1585,RBn:"Jonathan Taylor",QB:3101,QBn:"Daniel Jones",WR2:566,WR2n:"Josh Downs",RB2:96,RB2n:"DJ Giddens",QB2:415,QB2n:"Riley Leonard",TD:28,TDn:"Anthony Richardson",TD2:12,TD2n:"Jonathan Taylor"},
+  JAX:{name:"Jaguars",WR:847,WRn:"Parker Washington",RB:500,RBn:"Chris Rodriguez",QB:4007,QBn:"Trevor Lawrence",WR2:835,WR2n:"Jakobi Meyers",RB2:307,RB2n:"Bhayshul Tuten",QB2:19,QB2n:"Nick Mullens",TD:23,TDn:"Trevor Lawrence",TD2:10,TD2n:"Brian Thomas"},
+  KC:{name:"Chiefs",WR:571,WRn:"Rashee Rice",RB:1027,RBn:"Kenneth Walker",QB:3587,QBn:"Patrick Mahomes",WR2:532,WR2n:"Xavier Worthy",RB2:312,RB2n:"Emari Demercado",QB2:1259,QB2n:"Justin Fields",TD:42,TDn:"Patrick Mahomes",TD2:18,TD2n:"Travis Kelce"},
+  LAC:{name:"Chargers",WR:789,WRn:"Ladd McConkey",RB:643,RBn:"Kimani Vidal",QB:3727,QBn:"Justin Herbert",WR2:735,WR2n:"Quentin Johnston",RB2:545,RB2n:"Omarion Hampton",QB2:226,QB2n:"Trey Lance",TD:30,TDn:"Justin Herbert",TD2:13,TD2n:"Ladd McConkey"},
+  LAR:{name:"Rams",WR:1715,WRn:"Puka Nacua",RB:1252,RBn:"Kyren Williams",QB:4707,QBn:"Matthew Stafford",WR2:789,WR2n:"Davante Adams",RB2:746,RB2n:"Blake Corum",QB2:190,QB2n:"Ty Simpson",TD:40,TDn:"Matthew Stafford",TD2:17,TD2n:"Cooper Kupp"},
+  LV:{name:"Raiders",WR:696,WRn:"Tre Tucker",RB:975,RBn:"Ashton Jeanty",QB:1721,QBn:"Kirk Cousins",WR2:444,WR2n:"Jalen Nailor",RB2:9,RB2n:"Dylan Laube",QB2:102,QB2n:"Aidan O\'Connell",TD:24,TDn:"Aidan O'Connell",TD2:10,TD2n:"Brock Bowers"},
+  MIA:{name:"Dolphins",WR:317,WRn:"Malik Washington",RB:1350,RBn:"De\'Von Achane",QB:622,QBn:"Quinn Ewers",WR2:203,WR2n:"Jalen Tolbert",RB2:288,RB2n:"Jaylen Wright",QB2:422,QB2n:"Malik Willis",TD:30,TDn:"Tua Tagovailoa",TD2:13,TD2n:"Tyreek Hill"},
+  MIN:{name:"Vikings",WR:1048,WRn:"Justin Jefferson",RB:758,RBn:"Jordan Mason",QB:1632,QBn:"J.J. McCarthy",WR2:643,WR2n:"Jauan Jennings",RB2:548,RB2n:"Aaron Jones",QB2:1216,QB2n:"Carson Wentz",TD:37,TDn:"Sam Darnold",TD2:16,TD2n:"Justin Jefferson"},
+  NE:{name:"Patriots",WR:1003,WRn:"A.J. Brown",RB:911,RBn:"TreVeyon Henderson",QB:4394,QBn:"Drake Maye",WR2:724,WR2n:"Romeo Doubs",RB2:603,RB2n:"Rhamondre Stevenson",QB2:210,QB2n:"Joe Milton",TD:22,TDn:"Drake Maye",TD2:10,TD2n:"Demario Douglas"},
+  NO:{name:"Saints",WR:1163,WRn:"Chris Olave",RB:1107,RBn:"Travis Etienne",QB:2384,QBn:"Tyler Shough",WR2:293,WR2n:"Devaughn Vele",RB2:471,RB2n:"Alvin Kamara",QB2:1586,QB2n:"Spencer Rattler",TD:28,TDn:"Derek Carr",TD2:12,TD2n:"Chris Olave"},
+  NYG:{name:"Giants",WR:538,WRn:"Darius Slayton",RB:740,RBn:"Tyrone Tracy",QB:2272,QBn:"Jaxson Dart",WR2:443,WR2n:"Darnell Mooney",RB2:437,RB2n:"Devin Singletary",QB2:567,QB2n:"Jameis Winston",TD:21,TDn:"Daniel Jones",TD2:9,TD2n:"Malik Nabers"},
+  NYJ:{name:"Jets",WR:453,WRn:"Adonai Mitchell",RB:1065,RBn:"Breece Hall",QB:3025,QBn:"Geno Smith",WR2:395,WR2n:"Garrett Wilson",RB2:236,RB2n:"Isaiah Davis",QB2:739,QB2n:"Brady Cook",TD:24,TDn:"Aaron Rodgers",TD2:10,TD2n:"Davante Adams"},
+  PHI:{name:"Eagles",WR:1008,WRn:"DeVonta Smith",RB:1140,RBn:"Saquon Barkley",QB:3224,QBn:"Jalen Hurts",WR2:587,WR2n:"Marquise Brown",RB2:356,RB2n:"Tank Bigsby",QB2:293,QB2n:"Andy Dalton",TD:43,TDn:"Jalen Hurts",TD2:19,TD2n:"A.J. Brown"},
+  PIT:{name:"Steelers",WR:850,WRn:"DK Metcalf",RB:1076,RBn:"Rico Dowdle",QB:3322,QBn:"Aaron Rodgers",WR2:784,WR2n:"Michael Pittman",RB2:958,RB2n:"Jaylen Warren",QB2:310,QB2n:"Mason Rudolph",TD:31,TDn:"Justin Fields",TD2:13,TD2n:"George Pickens"},
+  SEA:{name:"Seahawks",WR:1793,WRn:"Jaxon Smith-Njigba",RB:730,RBn:"Zach Charbonnet",QB:4048,QBn:"Sam Darnold",WR2:687,WR2n:"Rashid Shaheed",RB2:496,RB2n:"Emanuel Wilson",QB2:15,QB2n:"Drew Lock",TD:28,TDn:"Geno Smith",TD2:12,TD2n:"Tyler Lockett"},
+  SF:{name:"49ers",WR:528,WRn:"Ricky Pearsall",RB:1202,RBn:"Christian McCaffrey",QB:2167,QBn:"Brock Purdy",WR2:368,WR2n:"Mike Evans",RB2:180,RB2n:"Jordan James",QB2:2151,QB2n:"Mac Jones",TD:33,TDn:"Brock Purdy",TD2:14,TD2n:"Deebo Samuel"},
+  TB:{name:"Buccaneers",WR:938,WRn:"Emeka Egbuka",RB:588,RBn:"Bucky Irving",QB:3693,QBn:"Baker Mayfield",WR2:360,WR2n:"Chris Godwin",RB2:537,RB2n:"Kenny Gainwell",QB2:771,QB2n:"Jake Browning",TD:31,TDn:"Baker Mayfield",TD2:13,TD2n:"Mike Evans"},
+  TEN:{name:"Titans",WR:1014,WRn:"Wan\'Dale Robinson",RB:1082,RBn:"Tony Pollard",QB:3169,QBn:"Cam Ward",WR2:515,WR2n:"Elic Ayomanor",RB2:333,RB2n:"Michael Carter",QB2:313,QB2n:"Mitchell Trubisky",TD:23,TDn:"Will Levis",TD2:10,TD2n:"Calvin Ridley"},
+  WAS:{name:"Commanders",WR:582,WRn:"Terry McLaurin",RB:805,RBn:"Jacory Croskey-Merritt",QB:1695,QBn:"Marcus Mariota",WR2:350,WR2n:"Van Jefferson",RB2:572,RB2n:"Rachaad White",QB2:1262,QB2n:"Jayden Daniels",TD:35,TDn:"Jayden Daniels",TD2:15,TD2n:"Terry McLaurin"}
 };
 function challLogoUrl(abbr){
   const m=LOGO_MAP[abbr];
   return m?"https://a.espncdn.com/i/teamlogos/nfl/500/"+m+".png":"";
 }
-const CHALL_CFG2={WR:{label:'Receiving',mults:[10,8,6,4,2],targets:{normal:40000,hard:50000}},RB:{label:'Rushing',mults:[10,8,6,4,2],targets:{normal:20000,hard:26000}},QB:{label:'Passing',mults:[5,4,3,2,1.5],targets:{normal:55000,hard:75000}}};
+const CHALL_CFG2={WR:{label:'Receiving',mults:[10,8,6,4,2],targets:{normal:40000,hard:50000},unit:'yds'},RB:{label:'Rushing',mults:[10,8,6,4,2],targets:{normal:20000,hard:26000},unit:'yds'},QB:{label:'Passing',mults:[5,4,3,2,1.5],targets:{normal:55000,hard:75000},unit:'yds'},TD:{label:'Touchdowns',mults:[5,4,3,2,1.5],targets:{normal:300,hard:380},unit:'TDs'}};
 const CHALL_TEAMS_32=['ARI','ATL','BAL','BUF','CAR','CHI','CIN','CLE','DAL','DEN','DET','GB','HOU','IND','JAX','KC','LAC','LAR','LV','MIA','MIN','NE','NO','NYG','NYJ','PHI','PIT','SEA','SF','TB','TEN','WAS'];
 const CHALL_MULT_CLS={10:'cmult-10',8:'cmult-8',6:'cmult-6',4:'cmult-4',2:'cmult-2',1.5:'cmult-2',1:'cmult-1'};
 let CHALL_STATE={cat:'WR',diff:'normal',teams:[],mults:[],total:0,spun:false,locked:[],currentAbbr:[],lockedCount:0,spinIv:null,usedTeams:{}};
 function setChallCat(cat,el){CHALL_STATE.cat=cat;document.querySelectorAll('.copt-cat').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');_updateChallTarget();}
 function setChallDiff(diff,el){CHALL_STATE.diff=diff;document.querySelectorAll('.cdiff-pill').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');_updateChallTarget();}
-function _updateChallTarget(){var cfg=CHALL_CFG2[CHALL_STATE.cat];var tgt=cfg.targets[CHALL_STATE.diff];var el=document.getElementById('challTargetLine');if(el)el.innerHTML='Target: <strong style="color:var(--txt)">'+tgt.toLocaleString()+'</strong> '+cfg.label.toLowerCase()+' yards from 10 '+CHALL_STATE.cat+'s';}
+function _updateChallTarget(){var cfg=CHALL_CFG2[CHALL_STATE.cat];var tgt=cfg.targets[CHALL_STATE.diff];var unit=cfg.unit||'yds';var el=document.getElementById('challTargetLine');if(el)el.innerHTML='Target: <strong style="color:var(--txt)">'+tgt.toLocaleString()+'</strong> '+cfg.label.toLowerCase()+' '+unit+' from 10 '+CHALL_STATE.cat+'s';}
 function initChallenge(){
   if(CHALL_STATE.spinIv){clearInterval(CHALL_STATE.spinIv);CHALL_STATE.spinIv=null;}
   var cfg=CHALL_CFG2[CHALL_STATE.cat];
@@ -2335,7 +2340,7 @@ function _challStopAndChoose(){
     var p=document.getElementById('cplayer'+i);
     if(p)p.textContent=stat.name;
     var y=document.getElementById('cyds'+i);
-    if(y)y.textContent=yds.toLocaleString()+' yds';
+    var _unit=CHALL_CFG2[CHALL_STATE.cat]&&CHALL_CFG2[CHALL_STATE.cat].unit?CHALL_CFG2[CHALL_STATE.cat].unit:'yds';if(y)y.textContent=yds.toLocaleString()+' '+_unit;
     var c=document.getElementById('ccontrib'+i);
     if(c)c.textContent=(m!==1?m+'x × ':'')+contrib.toLocaleString();
   }
@@ -2361,7 +2366,7 @@ function lockSlot(idx){
   if(lg){lg.classList.remove('spinning');lg.src=challLogoUrl(abbr);}
   var tEl=document.getElementById('cteam'+idx); if(tEl)tEl.textContent=(CHALL_TEAM_STATS[abbr]&&CHALL_TEAM_STATS[abbr].name)||abbr;
   var pEl=document.getElementById('cplayer'+idx); if(pEl)pEl.textContent=player;
-  var yEl=document.getElementById('cyds'+idx); if(yEl)yEl.textContent=yds.toLocaleString()+' yds';
+  var yEl=document.getElementById('cyds'+idx); var _u=CHALL_CFG2[CHALL_STATE.cat]&&CHALL_CFG2[CHALL_STATE.cat].unit?CHALL_CFG2[CHALL_STATE.cat].unit:'yds';if(yEl)yEl.textContent=yds.toLocaleString()+' '+_u;
   var cEl=document.getElementById('ccontrib'+idx); if(cEl)cEl.textContent=(m!==1?m+'x × ':'')+contrib.toLocaleString();
   var totalEl=document.getElementById('challTotalDisp');
   if(totalEl)totalEl.textContent=CHALL_STATE.total.toLocaleString();
@@ -2376,7 +2381,7 @@ function lockSlot(idx){
     setTimeout(_challSpin,400);
   }
 }
-function showChallResults(){var cfg=CHALL_CFG2[CHALL_STATE.cat];var tgt=cfg.targets[CHALL_STATE.diff];var total=CHALL_STATE.total;var hit=total>=tgt;var pct=Math.round((total/tgt)*100);var badge=document.getElementById('challResBadge');var totalEl=document.getElementById('challResTotal');var targetEl=document.getElementById('challResTarget');var verdictEl=document.getElementById('challResVerdict');var breakdown=document.getElementById('challResBreakdown');if(badge)badge.textContent=hit?'CHALLENGE CLEARED':'CHALLENGE FAILED';if(totalEl){totalEl.textContent=total.toLocaleString()+' yds';totalEl.style.color=hit?'var(--grn)':'var(--red)';}if(targetEl)targetEl.textContent='Target: '+tgt.toLocaleString()+' - You hit '+pct+'%';var verdict;if(pct>=130)verdict='LEGENDARY';else if(pct>=115)verdict='DOMINANT';else if(pct>=100)verdict='CHALLENGE CLEARED';else if(pct>=90)verdict='SO CLOSE';else if(pct>=75)verdict='NOT ENOUGH';else verdict='BUST';if(verdictEl){verdictEl.textContent=verdict;verdictEl.style.color=hit?'var(--grn)':'var(--red)';}if(breakdown){var rows='';CHALL_STATE.teams.forEach(function(abbr,i){var td=CHALL_TEAM_STATS[abbr];var m=CHALL_STATE.mults[i];var yds=td?td[CHALL_STATE.cat]:0;var contrib=Math.round(yds*m);var mcls=CHALL_MULT_CLS[m]||'cmult-1';var mLabel=Number.isInteger(m)?m+'x':m+'x';rows+='<div class="cres-row"><img class="cres-logo" src="'+challLogoUrl(abbr)+'" alt="'+abbr+'"><div class="cres-name">'+((td&&td.name)||abbr)+'<br><span style="color:var(--muted);font-weight:400;font-size:.65rem">'+(td?td[CHALL_STATE.cat+'n']:'')+'</span></div><span class="cres-mult '+mcls+'">'+mLabel+'</span><div class="cres-yds-val">'+contrib.toLocaleString()+'</div></div>';});breakdown.innerHTML=rows;}show('challResScr',null);}
+function showChallResults(){var cfg=CHALL_CFG2[CHALL_STATE.cat];var tgt=cfg.targets[CHALL_STATE.diff];var total=CHALL_STATE.total;var hit=total>=tgt;var pct=Math.round((total/tgt)*100);var badge=document.getElementById('challResBadge');var totalEl=document.getElementById('challResTotal');var targetEl=document.getElementById('challResTarget');var verdictEl=document.getElementById('challResVerdict');var breakdown=document.getElementById('challResBreakdown');if(badge)badge.textContent=hit?'CHALLENGE CLEARED':'CHALLENGE FAILED';var _ru=CHALL_CFG2[CHALL_STATE.cat]&&CHALL_CFG2[CHALL_STATE.cat].unit?CHALL_CFG2[CHALL_STATE.cat].unit:'yds';if(totalEl){totalEl.textContent=total.toLocaleString()+' '+_ru;totalEl.style.color=hit?'var(--grn)':'var(--red)';}if(targetEl)targetEl.textContent='Target: '+tgt.toLocaleString()+' - You hit '+pct+'%';var verdict;if(pct>=130)verdict='LEGENDARY';else if(pct>=115)verdict='DOMINANT';else if(pct>=100)verdict='CHALLENGE CLEARED';else if(pct>=90)verdict='SO CLOSE';else if(pct>=75)verdict='NOT ENOUGH';else verdict='BUST';if(verdictEl){verdictEl.textContent=verdict;verdictEl.style.color=hit?'var(--grn)':'var(--red)';}if(breakdown){var rows='';CHALL_STATE.teams.forEach(function(abbr,i){var td=CHALL_TEAM_STATS[abbr];var m=CHALL_STATE.mults[i];var yds=td?td[CHALL_STATE.cat]:0;var contrib=Math.round(yds*m);var mcls=CHALL_MULT_CLS[m]||'cmult-1';var mLabel=Number.isInteger(m)?m+'x':m+'x';rows+='<div class="cres-row"><img class="cres-logo" src="'+challLogoUrl(abbr)+'" alt="'+abbr+'"><div class="cres-name">'+((td&&td.name)||abbr)+'<br><span style="color:var(--muted);font-weight:400;font-size:.65rem">'+(td?td[CHALL_STATE.cat+'n']:'')+'</span></div><span class="cres-mult '+mcls+'">'+mLabel+'</span><div class="cres-yds-val">'+contrib.toLocaleString()+'</div></div>';});breakdown.innerHTML=rows;}show('challResScr',null);}
 
 
 
@@ -3415,6 +3420,7 @@ function mpReset() {
           <div class="mp-mode-pill sel" id="mpCat_WR" onclick="mpSetCat('WR',this)">WR</div>
           <div class="mp-mode-pill" id="mpCat_RB" onclick="mpSetCat('RB',this)">RB</div>
           <div class="mp-mode-pill" id="mpCat_QB" onclick="mpSetCat('QB',this)">QB</div>
+          <div class="mp-mode-pill" id="mpCat_TD" onclick="mpSetCat('TD',this)">TD</div>
         </div>
         <div class="mp-mode-row">
           <div class="mp-mode-pill sel" id="mpDiff_normal" onclick="mpSetDiff('normal',this)">Normal</div>
