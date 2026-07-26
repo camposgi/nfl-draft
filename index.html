@@ -2434,6 +2434,7 @@ function mpReset() {
   if (MP.ref) { MP.ref = null; }
   MP.role = null; MP.code = null; MP.myName = ''; MP.oppName = '';
   MP.phase = 'idle'; MP.myScore = null; MP.oppScore = null; MP.precomputed = null;
+  MP.draftPicks = []; MP.challSpinIdx = 0; MP.oppDone = false;
   mpHideBar();
 }
 
@@ -2563,7 +2564,6 @@ function mpListenForOpponent() {
   }
 
   // Both listen for opponent score updates
-  const myKey = MP.role;
   const oppKey = MP.role === 'p1' ? 'p2' : 'p1';
   const oppRef = MP.ref.child(oppKey);
   const unsub2 = oppRef.on('value', snap => {
@@ -2579,6 +2579,10 @@ function mpListenForOpponent() {
     }
   });
   MP.listeners.push(() => oppRef.off('value', unsub2));
+  // For draft modes, also listen for opponent pick toasts
+  if (MP.mode === 'draft' || MP.mode === 'alltime') {
+    mpListenForOppPicks();
+  }
 }
 
 function mpWriteMyScore(score, done) {
@@ -2619,13 +2623,13 @@ function mpShowOppToast(msg) {
 // ── Start game ───────────────────────────────────────────────────────────────
 function mpStartGame() {
   mpShowBar();
-  show('mpGoScr', null); // brief VS flash then start
-
-  if (MP.mode === 'challenge') {
-    mpStartChallenge();
-  } else if (MP.mode === 'draft' || MP.mode === 'alltime') {
-    mpStartDraft();
-  }
+  mpShowVsFlash(() => {
+    if (MP.mode === 'challenge') {
+      mpStartChallenge();
+    } else if (MP.mode === 'draft' || MP.mode === 'alltime') {
+      mpStartDraft();
+    }
+  });
 }
 
 // ── CHALLENGE MP ─────────────────────────────────────────────────────────────
@@ -2989,18 +2993,7 @@ function mpShowVsFlash(cb) {
   setTimeout(() => { div.remove(); if(cb) cb(); }, 1800);
 }
 
-// Patch show() to intercept mpGoScr
-const _origShow = show;
-function show(scr, mode) {
-  if (scr === 'mpGoScr') {
-    mpShowVsFlash(() => {
-      if (MP.mode === 'challenge') mpStartChallenge();
-      else if (MP.mode === 'draft' || MP.mode === 'alltime') mpStartDraft();
-    });
-    return;
-  }
-  return _origShow(scr, mode);
-}
+// show() not patched — VS flash handled directly in mpStartGame
 
 // ── Opponent pick listener for draft modes ────────────────────────────────
 function mpListenForOppPicks() {
