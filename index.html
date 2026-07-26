@@ -1801,6 +1801,11 @@ document.getElementById('mainScr').addEventListener('click',function(e){
         <div class="ccat-name">TOUCHDOWNS</div>
         <div class="ccat-target">Team · 300 / 380 TDs</div>
       </div>
+      <div class="copt-cat" id="ccatRecTD" onclick="setChallCat('RecTD',this)">
+        <div class="ccat-ico">🙌</div>
+        <div class="ccat-name">REC TDs</div>
+        <div class="ccat-target">WR/TE · 100 / 130 TDs</div>
+      </div>
     </div>
     <div class="fopt-lbl" style="margin:18px 0 10px">Difficulty</div>
     <div class="copt-diff">
@@ -2225,13 +2230,19 @@ function challLogoUrl(abbr){
   const m=LOGO_MAP[abbr];
   return m?"https://a.espncdn.com/i/teamlogos/nfl/500/"+m+".png":"";
 }
-const CHALL_CFG2={WR:{label:'Receiving',mults:[10,8,6,4,2],targets:{normal:40000,hard:50000},unit:'yds'},RB:{label:'Rushing',mults:[10,8,6,4,2],targets:{normal:20000,hard:26000},unit:'yds'},QB:{label:'Passing',mults:[5,4,3,2,1.5],targets:{normal:55000,hard:75000},unit:'yds'},TD:{label:'Touchdowns',mults:[5,4,3,2,1.5],targets:{normal:300,hard:380},unit:'TDs'}};
+const CHALL_CFG2={
+  WR:{label:'Receiving',mults:[10,8,6,4,2],targets:{normal:40000,hard:50000},unit:'yds',desc:'receiving yards from 10 WRs'},
+  RB:{label:'Rushing',mults:[10,8,6,4,2],targets:{normal:20000,hard:26000},unit:'yds',desc:'rushing yards from 10 RBs'},
+  QB:{label:'Passing',mults:[5,4,3,2,1.5],targets:{normal:55000,hard:75000},unit:'yds',desc:'passing yards from 10 QBs'},
+  TD:{label:'Total TDs',mults:[5,4,3,2,1.5],targets:{normal:300,hard:380},unit:'TDs',desc:'total offensive TDs from 10 teams',needsApi:true},
+  RecTD:{label:'Receiving TDs',mults:[5,4,3,2,1.5],targets:{normal:100,hard:130},unit:'TDs',desc:'receiving TDs from 10 WR/TE leaders',needsApi:true}
+};
 const CHALL_TEAMS_32=['ARI','ATL','BAL','BUF','CAR','CHI','CIN','CLE','DAL','DEN','DET','GB','HOU','IND','JAX','KC','LAC','LAR','LV','MIA','MIN','NE','NO','NYG','NYJ','PHI','PIT','SEA','SF','TB','TEN','WAS'];
 const CHALL_MULT_CLS={10:'cmult-10',8:'cmult-8',6:'cmult-6',4:'cmult-4',2:'cmult-2',1.5:'cmult-2',1:'cmult-1'};
 let CHALL_STATE={cat:'WR',diff:'normal',teams:[],mults:[],total:0,spun:false,locked:[],currentAbbr:[],lockedCount:0,spinIv:null,usedTeams:{}};
 function setChallCat(cat,el){CHALL_STATE.cat=cat;document.querySelectorAll('.copt-cat').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');_updateChallTarget();}
 function setChallDiff(diff,el){CHALL_STATE.diff=diff;document.querySelectorAll('.cdiff-pill').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');_updateChallTarget();}
-function _updateChallTarget(){var cfg=CHALL_CFG2[CHALL_STATE.cat];var tgt=cfg.targets[CHALL_STATE.diff];var unit=cfg.unit||'yds';var el=document.getElementById('challTargetLine');if(el)el.innerHTML='Target: <strong style="color:var(--txt)">'+tgt.toLocaleString()+'</strong> '+cfg.label.toLowerCase()+' '+unit+' from 10 '+CHALL_STATE.cat+'s';}
+function _updateChallTarget(){var cfg=CHALL_CFG2[CHALL_STATE.cat];var tgt=cfg.targets[CHALL_STATE.diff];var el=document.getElementById('challTargetLine');var loadNote=cfg.needsApi?' <span style="color:var(--acc);font-size:.7rem">(loading 2025 stats…)</span>':'';if(el)el.innerHTML='Target: <strong style="color:var(--txt)">'+tgt.toLocaleString()+'</strong> '+(cfg.desc||'from 10 teams')+loadNote;}
 function initChallenge(){
   if(CHALL_STATE.spinIv){clearInterval(CHALL_STATE.spinIv);CHALL_STATE.spinIv=null;}
   var cfg=CHALL_CFG2[CHALL_STATE.cat];
@@ -3391,6 +3402,143 @@ function mpReset() {
   mpHideBar();
 }
 
+
+// ════════════════════════════════════════════════════════════════════
+// CHALLENGE TD STATS — Sleeper 2025 season data
+// ════════════════════════════════════════════════════════════════════
+
+const _CHALL_TD_CACHE_KEY = 'challTDStats_2025';
+const _CHALL_TD_CACHE_TTL = 86400000; // 24 hours
+
+let _challTDLoaded = false;
+let _challTDLoading = false;
+
+async function loadChallTDStats() {
+  if (_challTDLoaded) return true;
+  if (_challTDLoading) return false;
+  _challTDLoading = true;
+
+  // Check localStorage cache
+  try {
+    const cached = localStorage.getItem(_CHALL_TD_CACHE_KEY);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (parsed._ts && (Date.now() - parsed._ts) < _CHALL_TD_CACHE_TTL) {
+        _injectChallTDStats(parsed);
+        _challTDLoaded = true;
+        _challTDLoading = false;
+        return true;
+      }
+    }
+  } catch(e) {}
+
+  try {
+    // Fetch 2025 season stats for scoring positions
+    const url = 'https://api.sleeper.com/stats/nfl/2025?season_type=regular' +
+      '&position[]=QB&position[]=RB&position[]=WR&position[]=TE&limit=500';
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const players = await res.json();
+
+    // Build per-team aggregates
+    const teams = {};
+    players.forEach(p => {
+      if (!p.player || !p.team || !p.stats) return;
+      const t = p.team;
+      if (!teams[t]) teams[t] = {
+        totalTD: 0, totalTDLeader: '', totalTDLeaderPts: 0,
+        recTD: 0,   recTDLeader: '',   recTDLeaderPts: 0,
+        recTD2: 0,  recTD2Leader: ''
+      };
+
+      const s        = p.stats;
+      const passTD   = s.pass_td  || 0;
+      const rushTD   = s.rush_td  || 0;
+      const recTD    = s.rec_td   || 0;
+      const totalTD  = passTD + rushTD + recTD;
+      const name     = p.player.first_name + ' ' + p.player.last_name;
+
+      teams[t].totalTD += totalTD;
+      if (totalTD > teams[t].totalTDLeaderPts) {
+        teams[t].totalTDLeaderPts = totalTD;
+        teams[t].totalTDLeader = name;
+      }
+
+      // Receiving TDs — WR + TE only
+      if (['WR','TE'].includes(p.player.position)) {
+        if (recTD > teams[t].recTDLeaderPts) {
+          // Demote current leader to #2
+          teams[t].recTD2        = teams[t].recTDLeaderPts;
+          teams[t].recTD2Leader  = teams[t].recTDLeader;
+          teams[t].recTDLeaderPts = recTD;
+          teams[t].recTDLeader   = name;
+        }
+        teams[t].recTD += recTD;
+      }
+    });
+
+    teams._ts = Date.now();
+    try { localStorage.setItem(_CHALL_TD_CACHE_KEY, JSON.stringify(teams)); } catch(e) {}
+
+    _injectChallTDStats(teams);
+    _challTDLoaded = true;
+    _challTDLoading = false;
+    _updateChallTarget(); // refresh target line now that data is loaded
+    return true;
+  } catch(e) {
+    console.warn('TD stats load failed:', e);
+    _challTDLoading = false;
+    // Fall back to hardcoded 2024 values already in CHALL_TEAM_STATS
+    return false;
+  }
+}
+
+function _injectChallTDStats(teams) {
+  Object.keys(teams).forEach(abbr => {
+    if (abbr === '_ts') return;
+    if (!CHALL_TEAM_STATS[abbr]) return;
+    const t = teams[abbr];
+    // Total TD
+    if (t.totalTD > 0) {
+      CHALL_TEAM_STATS[abbr].TD   = t.totalTD;
+      CHALL_TEAM_STATS[abbr].TDn  = t.totalTDLeader || CHALL_TEAM_STATS[abbr].TDn;
+      // Fallback (usedTeams): use half total as secondary
+      CHALL_TEAM_STATS[abbr].TD2  = Math.round(t.totalTD * 0.6);
+      CHALL_TEAM_STATS[abbr].TD2n = t.totalTDLeader ? t.totalTDLeader + ' (alt)' : CHALL_TEAM_STATS[abbr].TD2n;
+    }
+    // Receiving TD
+    CHALL_TEAM_STATS[abbr].RecTD  = t.recTD   || 0;
+    CHALL_TEAM_STATS[abbr].RecTDn = t.recTDLeader || '—';
+    CHALL_TEAM_STATS[abbr].RecTD2  = t.recTD2  || Math.round((t.recTD || 0) * 0.5);
+    CHALL_TEAM_STATS[abbr].RecTD2n = t.recTD2Leader || (t.recTDLeader ? t.recTDLeader + ' (2nd)' : '—');
+  });
+}
+
+// Hook into setChallCat to trigger load when TD/RecTD selected
+const _origSetChallCat = setChallCat;
+function setChallCat(cat, el) {
+  _origSetChallCat(cat, el);
+  if ((cat === 'TD' || cat === 'RecTD') && !_challTDLoaded) {
+    loadChallTDStats().then(ok => {
+      if (ok) {
+        _updateChallTarget();
+        // Remove loading note if challenge is already on screen
+        const tl = document.getElementById('challTargetLine');
+        if (tl) _updateChallTarget();
+      }
+    });
+  }
+}
+
+// Also load when challOptScr is first shown (pre-warm)
+const _origShow2 = show;
+function show(scr, mode) {
+  if (scr === 'challOptScr' && !_challTDLoaded && !_challTDLoading) {
+    loadChallTDStats();
+  }
+  return _origShow2(scr, mode);
+}
+
 // Init slot grid on load
 (function(){buildFantSlotGrid();})();
 </script>
@@ -3421,6 +3569,7 @@ function mpReset() {
           <div class="mp-mode-pill" id="mpCat_RB" onclick="mpSetCat('RB',this)">RB</div>
           <div class="mp-mode-pill" id="mpCat_QB" onclick="mpSetCat('QB',this)">QB</div>
           <div class="mp-mode-pill" id="mpCat_TD" onclick="mpSetCat('TD',this)">TD</div>
+          <div class="mp-mode-pill" id="mpCat_RecTD" onclick="mpSetCat('RecTD',this)">RecTD</div>
         </div>
         <div class="mp-mode-row">
           <div class="mp-mode-pill sel" id="mpDiff_normal" onclick="mpSetDiff('normal',this)">Normal</div>
