@@ -124,6 +124,62 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .pos-logo{width:28px;height:28px;object-fit:contain;margin:0 auto 6px;display:block}
 .slot-logo{width:22px;height:22px;object-fit:contain;flex-shrink:0}
 .fcard-logo{width:28px;height:28px;object-fit:contain;float:right;margin-left:4px}
+
+/* ── LEGENDS RESULTS REDESIGN ──────────────────────────────────────── */
+.rr-wrap{width:100%;max-width:540px;margin:0 auto;padding:0 4px}
+.rr-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;font-size:.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.rr-mode-badge{color:var(--acc);opacity:.85}
+.rr-hero{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px}
+.rr-big-score{font-size:clamp(3rem,12vw,5.2rem);font-weight:900;line-height:1;letter-spacing:-3px;color:var(--txt)}
+.rr-verdict-col{text-align:right}
+.rr-verdict-badge{font-size:clamp(1.1rem,4vw,1.6rem);font-weight:900;text-transform:uppercase;letter-spacing:1px}
+.rr-vsub{font-size:.82rem;color:#f97316;font-weight:700;margin-top:3px}
+.rr-best{font-size:.78rem;color:var(--muted);margin-bottom:14px}
+.rr-bar-wrap{display:flex;gap:4px;margin-bottom:14px;height:14px}
+.rr-seg{flex:1;border-radius:3px;background:var(--surf2)}
+.rr-seg.on{background:#f97316}
+.rr-seg.half{background:repeating-linear-gradient(45deg,#f9731640,#f9731640 3px,transparent 3px,transparent 6px);border:1px solid #f97316}
+.rr-pct{font-size:.82rem;font-weight:700;color:var(--txt);margin-bottom:22px;display:flex;align-items:center;gap:6px}
+.rr-pct-arrow{color:#f97316;font-size:1rem}
+.rr-picks{width:100%;margin-bottom:26px}
+.rr-row{display:flex;align-items:center;padding:13px 0;border-bottom:1px solid var(--brd);gap:12px}
+.rr-row:last-child{border-bottom:none}
+.rr-pos-lbl{font-size:.72rem;font-weight:800;color:var(--muted);width:30px;flex-shrink:0;letter-spacing:.5px}
+.rr-logo-circle{width:38px;height:38px;border-radius:50%;background:var(--surf2);border:1px solid var(--brd);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
+.rr-logo-circle img{width:28px;height:28px;object-fit:contain}
+.rr-name-wrap{flex:1;min-width:0}
+.rr-pname{font-size:.95rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:6px}
+.rr-fit-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.rr-right-info{text-align:right;flex-shrink:0}
+.rr-ovr-line{font-size:.78rem;font-weight:700;color:var(--muted);white-space:nowrap}
+.rr-ovr-num{font-weight:900;color:var(--txt)}
+.rr-check{font-size:1.1rem;margin-top:2px;display:block}
+.rr-teams-lbl{font-size:.62rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.rr-teams-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:28px;justify-content:flex-start}
+.rr-team-item{display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;width:52px}
+.rr-team-num{position:absolute;top:-4px;left:-4px;width:18px;height:18px;border-radius:50%;background:var(--surf2);border:1px solid var(--brd);font-size:.58rem;font-weight:800;display:flex;align-items:center;justify-content:center;color:var(--txt)}
+.rr-team-logo{width:44px;height:44px;border-radius:50%;background:var(--surf2);border:1px solid var(--brd);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.rr-team-logo img{width:34px;height:34px;object-fit:contain}
+.rr-team-year{font-size:.56rem;color:var(--muted);font-weight:600;text-align:center}
+
+
+/* ── PLAYER SEARCH ──────────────────────────────────────────────────── */
+.psearch-wrap{position:relative;margin-bottom:12px}
+.psearch-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.9rem;pointer-events:none}
+.psearch{width:100%;padding:10px 12px 10px 34px;background:var(--surf2);border:1px solid var(--brd);border-radius:10px;color:var(--txt);font-size:.9rem;outline:none;transition:border-color .2s}
+.psearch:focus{border-color:var(--acc)}
+.psearch::placeholder{color:var(--muted)}
+.psearch-hint{font-size:.7rem;color:var(--muted);margin-bottom:10px;padding-left:2px}
+.pcard.hidden{display:none}
+
+
+/* ── RESULTS STAT STRIP ──────────────────────────────────────────────── */
+.rr-statstrip{display:flex;gap:1px;background:var(--brd);border-radius:12px;overflow:hidden;margin-bottom:20px;border:1px solid var(--brd)}
+.rr-stat{flex:1;background:var(--surf);padding:12px 14px}
+.rr-stat-lbl{font-size:.6rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.rr-stat-val{font-size:1.3rem;font-weight:900;color:var(--txt)}
+.rr-stat-sub{font-size:.62rem;color:var(--muted);margin-top:2px}
+
 </style>
 </head>
 <body>
@@ -217,6 +273,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
           <h3 id="pickTitle">Pick Your Quarterback</h3>
           <p id="pickSub">Choose from the <span id="pickTeamSpan" style="font-weight:700">—</span></p>
         </div>
+        <div class="psearch-wrap">
+          <span class="psearch-icon">🔍</span>
+          <input type="text" id="playerSearch" class="psearch" placeholder="Search players..." oninput="filterPlayers(this.value)" autocomplete="off">
+        </div>
+        <div class="psearch-hint" id="searchHint">Start typing a name or position (ex: RB).</div>
         <div class="pgrid" id="playerGrid"></div>
         <button id="confBtn" class="confbtn" onclick="confirmPick()">Draft This Player →</button>
       </div>
@@ -243,25 +304,47 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 </div>
 
 <!-- RECORD BUILDER RESULTS -->
-<div id="recResScr" class="scr" style="padding:36px 20px">
-  <div class="res-lbl">Record Builder Results</div>
-  <div class="rrbx">
-    <div class="rrbl">Target Record</div>
-    <div class="rrbr" id="rrbRecord">—</div>
-    <div class="rrbsub" id="rrbLabel">—</div>
-    <div class="rrbcmp">
-      <div class="rrbc"><div class="rrbcl">Your OVR</div><div class="rrbcv" id="rrbYours">—</div></div>
-      <div class="rrbc"><div class="rrbcl">Target OVR</div><div class="rrbcv" id="rrbTarget" style="color:var(--acc)">—</div></div>
-      <div class="rrbc"><div class="rrbcl">Diff</div><div class="rrbcv" id="rrbDiff">—</div></div>
+<div id="recResScr" class="scr" style="padding:28px 16px;align-items:flex-start">
+  <div class="rr-wrap">
+    <div class="rr-meta">
+      <span class="rr-mode-badge">🏆 Legends Mode</span>
+      <span id="rrChallengeLbl">BUILD A — TEAM</span>
     </div>
-  </div>
-  <div class="vrd-main" id="rrbVerdict"></div>
-  <div class="vrd-sub" id="rrbVsub"></div>
-  <div class="fgrid" id="recFinalGrid"></div>
-  <div class="res-acts">
-    <button class="btn-s" onclick="copyResult()">📤 Copy</button>
-    <button class="btn-s" onclick="show('mainScr',null)">🏠 Menu</button>
-    <button class="btn-p" onclick="show('recScr',null)">🔄 Try Again</button>
+    <div class="rr-hero">
+      <div class="rr-big-score" id="rrBigScore">—</div>
+      <div class="rr-verdict-col">
+        <div class="rr-verdict-badge" id="rrVerdictBadge">—</div>
+        <div class="rr-vsub" id="rrVsubLine">—</div>
+      </div>
+    </div>
+    <div class="rr-best" id="rrBestLine">—</div>
+    <div class="rr-bar-wrap" id="rrBarWrap"></div>
+    <div class="rr-pct" id="rrPctLine"><span class="rr-pct-arrow">↗</span><span id="rrPctText">—</span></div>
+    <div class="rr-statstrip">
+      <div class="rr-stat">
+        <div class="rr-stat-lbl">RECORD</div>
+        <div class="rr-stat-val" id="rrStatRecord">—</div>
+        <div class="rr-stat-sub" id="rrStatRecordSub">—</div>
+      </div>
+      <div class="rr-stat">
+        <div class="rr-stat-lbl">BEST POSSIBLE</div>
+        <div class="rr-stat-val" id="rrStatBest">—</div>
+        <div class="rr-stat-sub" id="rrStatBestSub">—</div>
+      </div>
+      <div class="rr-stat">
+        <div class="rr-stat-lbl">GRADE</div>
+        <div class="rr-stat-val" id="rrStatGrade">—</div>
+        <div class="rr-stat-sub" id="rrStatGradeSub">—</div>
+      </div>
+    </div>
+    <div class="rr-picks" id="rrPicksList"></div>
+    <div class="rr-teams-lbl">TEAMS DRAWN</div>
+    <div class="rr-teams-grid" id="rrTeamsGrid"></div>
+    <div class="res-acts" style="justify-content:flex-start">
+      <button class="btn-s" onclick="copyResult()">📤 Share</button>
+      <button class="btn-s" onclick="show('mainScr',null)">🏠 Menu</button>
+      <button class="btn-p" onclick="show('recScr',null)">🔄 Try Again</button>
+    </div>
   </div>
 </div>
 
@@ -516,7 +599,7 @@ const CURRENT_TEAMS=[
  TE:[{n:"George Kittle",r:93,st:"1,020 yds best blocking TE in NFL elite"},{n:"Jake Tonges",r:67,st:"Depth TE"}],
  OL:[{n:"Trent Williams",r:97,st:"6x Pro Bowl consensus best OL in NFL 33M/yr"},{n:"Dominick Puni",r:76,st:"2024 3rd-round guard"},{n:"Jake Brendel",r:74,st:"Veteran center"}],
  DEF:{n:"49ers Defense",r:87,st:"Nick Bosa 23M Fred Warner elite LB Dre Greenlaw returns"}}
-];];
+];
 
 const ALLTIME_ERAS=[
 {abbr:"70sPIT",name:"70s Steelers",
@@ -908,7 +991,7 @@ function showPositionPicker(){
 
     const logoUrl=getLogoUrl(G.team.abbr);
     btn.innerHTML=`
-      ${logoUrl?`<img class="pos-logo" src="${logoUrl}" alt="" onerror="this.style.display='none'">`:`<div style="font-size:1.6rem;margin-bottom:6px">${posEmoji(pos)}</div>`}
+      ${logoUrl?`<img class="pos-logo" src="${logoUrl}" alt="" onerror="this.hidden=1">`:`<div style="font-size:1.6rem;margin-bottom:6px">${posEmoji(pos)}</div>`}
       <div class="pname">${pos}</div>
       <div style="font-size:.74rem;color:var(--muted);margin-bottom:4px">${posLabels[pos]||pos}</div>
       
@@ -948,6 +1031,12 @@ function showPickPhase(pos){
   const spanEl=document.getElementById('pickTeamSpan');
   if(subEl) subEl.style.display='block';
   if(spanEl) spanEl.textContent=teamName;
+
+  // Reset search box
+  const srch=document.getElementById('playerSearch');
+  if(srch){srch.value='';srch.placeholder='Search '+teamName+' players...';}
+  const hint=document.getElementById('searchHint');
+  if(hint) hint.style.display='block';
   // Reset grid columns for player cards
   const pgrid=document.getElementById('playerGrid');
   if(pgrid) pgrid.style.gridTemplateColumns='';
@@ -972,6 +1061,8 @@ function showPickPhase(pos){
 
       // No fit hints on player cards
 
+      card.dataset.name=player.n.toLowerCase();
+      card.dataset.stat=(player.st||'').toLowerCase();
       card.innerHTML=`
         <div class="pchk">✓</div>
           <div class="pname">${player.n}</div>
@@ -1008,6 +1099,18 @@ function getPlayers(pos){
     players=G.team[pos]||G.team[pos.toLowerCase()]||[];
   }
   return players.length>0?players:[{n:'Generic '+pos,r:70,st:'Starter'}];
+}
+
+function filterPlayers(query){
+  const q=query.toLowerCase().trim();
+  const hint=document.getElementById('searchHint');
+  if(hint) hint.style.display=q?'none':'block';
+  document.querySelectorAll('.pcard').forEach(card=>{
+    if(!q){card.classList.remove('hidden');return;}
+    const nameMatch=card.dataset.name&&card.dataset.name.includes(q);
+    const statMatch=card.dataset.stat&&card.dataset.stat.includes(q);
+    card.classList.toggle('hidden',!(nameMatch||statMatch));
+  });
 }
 
 function selectCard(card, player){
@@ -1088,7 +1191,7 @@ function buildDraftResults(ovrVal){
       card.style.borderTopColor=posColor(player.r);
       card.style.animationDelay=(i*0.06)+'s';
       const flogo=getLogoUrl(team.abbr);
-      card.innerHTML=`<div class="fpos">${pos}${flogo?`<img class="fcard-logo" src="${flogo}" alt="" onerror="this.style.display='none'">`:''}</div>
+      card.innerHTML=`<div class="fpos">${pos}${flogo?`<img class="fcard-logo" src="${flogo}" alt="" onerror="this.hidden=1">`:''}</div>
         <div class="fname">${player.n}<span class="frat ${rc}">${player.r}</span></div>
         <div class="fteam">${teamName}</div>`;
       fg.appendChild(card);
@@ -1096,52 +1199,155 @@ function buildDraftResults(ovrVal){
   }
 }
 
+
+function ovrToRecord(ovr){
+  return RECORDS.reduce((best,r)=>Math.abs(r.target-ovr)<Math.abs(best.target-ovr)?r:best);
+}
+function getBestPossibleOvr(roster){
+  const bests=roster.map(({pos,team})=>{
+    let players=[];
+    if(pos==='DEF'){const d=team.DEF||team.def;players=d?[d]:[];}
+    else if(pos==='OL'){
+      const ol=team.OL||team.ol||[];
+      if(ol.length){const avg=Math.round(ol.reduce((a,b)=>a+b.r,0)/ol.length);players=[{r:avg}];}
+    } else {players=team[pos]||team[pos.toLowerCase()]||[];}
+    if(!players.length)return 70;
+    return Math.max(...players.map(p=>p.r));
+  });
+  return avg(bests);
+}
+
 function buildRecordResults(ovrVal){
   const rec=G.record;
   const diff=ovrVal-rec.target;
   const ab=Math.abs(diff);
+  const total=G.roster.length;
 
-  document.getElementById('rrbRecord').textContent=rec.w+'-'+rec.l;
-  document.getElementById('rrbRecord').style.color=rec.color;
-  document.getElementById('rrbLabel').textContent=rec.label;
-  document.getElementById('rrbYours').textContent=ovrVal;
-  document.getElementById('rrbTarget').textContent=rec.target;
+  // Challenge label
+  const clbl=document.getElementById('rrChallengeLbl');
+  if(clbl) clbl.textContent='BUILD A '+rec.w+'-'+rec.l+' TEAM';
 
-  const diffEl=document.getElementById('rrbDiff');
-  diffEl.textContent=(diff>0?'+':'')+diff;
-  diffEl.style.color=ab<=3?'#00E676':ab<=10?'#FFD740':'#FF5722';
+  // Big score = target record
+  const bs=document.getElementById('rrBigScore');
+  if(bs){bs.textContent=rec.w+'-'+rec.l;bs.style.color=ab<=3?'#10b981':ab<=8?'#fbbf24':'#f87171';}
 
-  let verdict,vsub;
-  if(ab<=3){verdict='Perfect Season!';vsub='OVR nailed it. This team wins exactly '+rec.w+'-'+rec.l+'.';}
-  else if(ab<=6){verdict='Very Close!';vsub='Only '+ab+' OVR '+(diff>0?'above':'below')+' target. Nearly perfect.';}
-  else if(ab<=10){verdict='Close Enough';vsub=ab+' OVR off target. Solid attempt.';}
-  else if(ab<=15){verdict='Off the Mark';vsub=ab+' OVR off. This team might not hit '+rec.w+' wins.';}
-  else{verdict='Way Off';vsub='Your roster is '+ab+' OVR from the target. Back to the drawing board.';}
+  // Verdict badge
+  let verdict,vsub,pct;
+  if(ab<=1){verdict='PERFECT SEASON';vsub='OVR nailed it exactly.';pct='Top 2% of players';}
+  else if(ab<=3){verdict='NEARLY PERFECT';vsub='Only '+ab+' OVR off target.';pct='Top 5% of players';}
+  else if(ab<=6){verdict='VERY CLOSE';vsub=ab+' OVR '+(diff>0?'above':'below')+' target.';pct='Top 15% of players';}
+  else if(ab<=10){verdict='CLOSE ENOUGH';vsub=ab+' OVR off — solid attempt.';pct='Top 30% of players';}
+  else if(ab<=15){verdict='OFF THE MARK';vsub=ab+' OVR away from target.';pct='Bottom half';}
+  else{verdict='WAY OFF';vsub='Back to the drawing board.';pct='—';}
 
-  const vv=document.getElementById('rrbVerdict');
-  if(vv){vv.textContent=verdict;vv.style.color=ab<=3?'#00E676':ab<=10?'#FFD740':'#FF5722';}
-  const vsel=document.getElementById('rrbVsub');
-  if(vsel) vsel.textContent=vsub;
+  const vb=document.getElementById('rrVerdictBadge');
+  if(vb){vb.textContent=verdict;vb.style.color=ab<=3?'#10b981':ab<=8?'#fbbf24':'#f87171';}
+  const vsl=document.getElementById('rrVsubLine');
+  if(vsl) vsl.textContent=vsub;
 
-  const fg=document.getElementById('recFinalGrid');
-  if(fg){
-    fg.innerHTML='';
+  // Best possible line
+  const bl=document.getElementById('rrBestLine');
+  if(bl) bl.textContent='Target OVR: '+rec.target+' · Your OVR: '+ovrVal+(ab<=3?' · Best possible: '+rec.target:'');
+
+  // Progress bar — one segment per pick, orange if fitting
+  const barWrap=document.getElementById('rrBarWrap');
+  if(barWrap){
+    barWrap.innerHTML='';
+    G.roster.forEach(({player})=>{
+      const fc=fitClass(player.r,rec.target);
+      const seg=document.createElement('div');
+      seg.className='rr-seg'+(fc==='fp'?' on':fc==='fh'?' half':'');
+      barWrap.appendChild(seg);
+    });
+  }
+
+  // Percentile
+  const pt=document.getElementById('rrPctText');
+  if(pt) pt.textContent=pct;
+
+  // ── Stat strip: RECORD / BEST POSSIBLE / GRADE ────────────────────────────
+  // RECORD: what record does the player's OVR correspond to?
+  const achievedRec=ovrToRecord(ovrVal);
+  const srEl=document.getElementById('rrStatRecord');
+  if(srEl){srEl.textContent=achievedRec.w+'-'+achievedRec.l;srEl.style.color=achievedRec.color;}
+  const srSub=document.getElementById('rrStatRecordSub');
+  if(srSub) srSub.textContent=achievedRec.label;
+
+  // BEST POSSIBLE: best OVR from drawn teams → record
+  const bestOvr=getBestPossibleOvr(G.roster);
+  const bestRec=ovrToRecord(bestOvr);
+  const sbEl=document.getElementById('rrStatBest');
+  if(sbEl){sbEl.textContent=bestRec.w+'-'+bestRec.l;sbEl.style.color=bestRec.color;}
+  const sbSub=document.getElementById('rrStatBestSub');
+  if(sbSub) sbSub.textContent='OVR '+bestOvr+' ceiling';
+
+  // GRADE: based on proximity to target
+  let grade,gradeColor;
+  if(ab===0){grade='S';gradeColor='#FFD700';}
+  else if(ab<=1){grade='A+';gradeColor='#10b981';}
+  else if(ab<=3){grade='A';gradeColor='#10b981';}
+  else if(ab<=5){grade='A-';gradeColor='#69F0AE';}
+  else if(ab<=7){grade='B+';gradeColor='#40C4FF';}
+  else if(ab<=10){grade='B';gradeColor='#40C4FF';}
+  else if(ab<=14){grade='C';gradeColor='#fbbf24';}
+  else{grade='D';gradeColor='#f87171';}
+  const sgEl=document.getElementById('rrStatGrade');
+  if(sgEl){sgEl.textContent=grade;sgEl.style.color=gradeColor;}
+  const sgSub=document.getElementById('rrStatGradeSub');
+  if(sgSub) sgSub.textContent=ab+' OVR from target';
+
+  // Player picks rows
+  const pl=document.getElementById('rrPicksList');
+  if(pl){
+    pl.innerHTML='';
     G.roster.forEach(({pos,player,team},i)=>{
       const fc=fitClass(player.r,rec.target);
-      const teamName=G.mode==='alltime'?team.name:(team.city+' '+team.name);
-      const card=document.createElement('div');
-      card.className='fcard';
-      card.style.borderTopColor=fc==='fp'?'#10b981':fc==='fh'?'#fbbf24':'#6b7280';
-      card.style.animationDelay=(i*0.06)+'s';
-      const rflogo=getLogoUrl(team.abbr);
-      card.innerHTML=`<div class="fpos">${pos}${rflogo?`<img class="fcard-logo" src="${rflogo}" alt="" onerror="this.style.display='none'">`:''}</div>
-        <div class="fname">${player.n} <span class="fitbdg ${fc}" style="font-size:.58rem">${fitLabel(player.r,rec.target)}</span></div>
-        <div class="fteam">${player.r} OVR · ${teamName}</div>`;
-      fg.appendChild(card);
+      const isPerfect=fc==='fp';
+      const isHigh=fc==='fh';
+      const dotColor=isPerfect?'#10b981':isHigh?'#fbbf24':'#6b7280';
+      const checkMark=isPerfect?'<span style="color:#10b981;font-size:.85rem">✓</span>':
+                      isHigh?'<span style="color:#fbbf24;font-size:.75rem">↑</span>':
+                      '<span style="color:#6b7280;font-size:.75rem">↓</span>';
+      const flogo=getLogoUrl(team.abbr);
+      const teamLbl=G.mode==='alltime'?team.name:(team.city+' '+team.name);
+      const row=document.createElement('div');
+      row.className='rr-row';
+      row.style.animationDelay=(i*0.05)+'s';
+      row.innerHTML=
+        '<div class="rr-pos-lbl">'+pos+'</div>'+
+        '<div class="rr-logo-circle">'+(flogo?'<img src="'+flogo+'" alt="" onerror="this.hidden=1">':'')+'</div>'+
+        '<div class="rr-name-wrap">'+
+          '<div class="rr-pname">'+
+            '<span style="background:'+dotColor+';width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0"></span>'+
+            player.n+
+          '</div>'+
+          '<div style="font-size:.67rem;color:var(--muted);margin-top:2px">'+teamLbl+'</div>'+
+        '</div>'+
+        '<div class="rr-right-info">'+
+          '<div class="rr-ovr-line"><span class="rr-ovr-num">'+player.r+'</span> OVR</div>'+
+          '<div style="text-align:right;margin-top:3px">'+checkMark+'</div>'+
+        '</div>';
+      pl.appendChild(row);
+    });
+  }
+
+  // Teams drawn grid
+  const tg=document.getElementById('rrTeamsGrid');
+  if(tg){
+    tg.innerHTML='';
+    G.roster.forEach(({team},i)=>{
+      const flogo=getLogoUrl(team.abbr);
+      const item=document.createElement('div');
+      item.className='rr-team-item';
+      const yearLbl=G.mode==='alltime'?team.name.replace(/[^0-9s]/g,'').slice(0,4)||team.abbr:team.abbr;
+      item.innerHTML=
+        '<div class="rr-team-num">'+(i+1)+'</div>'+
+        '<div class="rr-team-logo">'+(flogo?'<img src="'+flogo+'" alt="" onerror="this.hidden=1">':'<span style="font-size:.55rem;color:var(--muted)">'+team.abbr+'</span>')+'</div>'+
+        '<div class="rr-team-year">'+yearLbl+'</div>';
+      tg.appendChild(item);
     });
   }
 }
-
 // ── PLAY AGAIN / COPY ──────────────────────────────────────────────────────────
 function playAgain(){startGame();}
 
