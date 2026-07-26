@@ -1607,11 +1607,11 @@ document.getElementById('mainScr').addEventListener('click',function(e){
 .cres-mult{padding:2px 7px;border-radius:6px;font-size:.65rem;font-weight:900;min-width:32px;text-align:center}
 .cres-name{flex:1;font-weight:700;font-size:.72rem;line-height:1.3}
 .cres-yds-val{color:var(--acc);font-weight:900;font-size:.8rem;text-align:right;white-space:nowrap}
-.cslot.spinning-slot{cursor:pointer;border-color:rgba(251,191,36,.35)!important;transition:border-color .15s,transform .15s,box-shadow .15s}
-.cslot.spinning-slot:hover{border-color:var(--yel)!important;transform:scale(1.025);box-shadow:0 0 20px rgba(251,191,36,.3)}
-.cslot-tap{font-size:.5rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(251,191,36,.6);margin-top:2px;text-align:center;animation:tapPulse 1.3s ease-in-out infinite}
-@keyframes tapPulse{0%,100%{opacity:.3}55%{opacity:1}}
-.chalk-picked{font-size:.72rem;color:rgba(255,255,255,.5);letter-spacing:2px;text-transform:uppercase;margin-top:6px}
+.cslot.spinning-anim{border-color:var(--brd)!important;opacity:.75}
+.cslot.choosing{cursor:pointer;border-color:rgba(251,191,36,.5)!important;transition:border-color .15s,transform .15s,box-shadow .15s;animation:choosePulse 1.4s ease-in-out infinite}
+.cslot.choosing:hover{border-color:var(--yel)!important;transform:scale(1.03);box-shadow:0 0 22px rgba(251,191,36,.35);animation:none}
+@keyframes choosePulse{0%,100%{box-shadow:0 0 0 0 rgba(251,191,36,0)}50%{box-shadow:0 0 14px 3px rgba(251,191,36,.22)}}
+.chalk-picked{font-size:.72rem;color:rgba(255,255,255,.55);letter-spacing:2px;text-transform:uppercase;margin-top:6px;font-weight:700}
 </style>
 
 <!-- FANTASY SETUP SCREEN -->
@@ -2165,12 +2165,13 @@ function initChallenge(){
   CHALL_STATE.locked=new Array(10).fill(false);
   CHALL_STATE.currentAbbr=new Array(10).fill('');
   CHALL_STATE.lockedCount=0;CHALL_STATE.teams=new Array(10);
+  CHALL_STATE.phase='idle';
   var cc=document.getElementById('challChalkCat');
   if(cc)cc.textContent=cfg.label+' · '+(CHALL_STATE.diff==='hard'?'Hard':'Normal');
   var td2=document.getElementById('challTotalDisp');
   if(td2)td2.textContent='0';
   var pc=document.getElementById('challPickedCount');
-  if(pc)pc.textContent='0 / 10 picked';
+  if(pc)pc.textContent='Pick 1';
   var nb=document.getElementById('challNextBtn');
   if(nb)nb.style.display='none';
   var grid=document.getElementById('challSlotGrid');
@@ -2181,27 +2182,41 @@ function initChallenge(){
     var hasM=(m!==1);
     var mcls=CHALL_MULT_CLS[m]||'cmult-1';
     var mLabel=Number.isInteger(m)?m+'x':m+'x';
-    html+='<div class="cslot'+(hasM?' mult-slot':'')+' spinning-slot" id="cslot'+i+'" onclick="lockSlot('+i+')">'+
+    html+='<div class="cslot'+(hasM?' mult-slot':'')+'" id="cslot'+i+'" onclick="lockSlot('+i+')">'+
       '<div class="cmult-tag '+mcls+'">'+mLabel+'</div>'+
-      '<img class="cslot-logo spinning" id="clogo'+i+'" src="" alt="">'+
+      '<img class="cslot-logo" id="clogo'+i+'" src="" alt="">'+
       '<div class="cslot-info">'+
         '<div class="cslot-team" id="cteam'+i+'">...</div>'+
         '<div class="cslot-player" id="cplayer'+i+'"></div>'+
         '<div class="cslot-yds" id="cyds'+i+'"></div>'+
         '<div class="cslot-contrib" id="ccontrib'+i+'"></div>'+
       '</div>'+
-      '<div class="cslot-tap">tap to lock</div>'+
     '</div>';
   }
   grid.innerHTML=html;
   show('challDraftScr',null);
-  _startChallSpin();
+  _challSpin();
 }
-function _startChallSpin(){
+function _challSpin(){
+  if(CHALL_STATE.spinIv){clearInterval(CHALL_STATE.spinIv);CHALL_STATE.spinIv=null;}
+  CHALL_STATE.phase='spinning';
+  // Mark all unlocked slots as spinning (disable click)
   for(var i=0;i<10;i++){
-    var r=CHALL_TEAMS_32[Math.floor(Math.random()*CHALL_TEAMS_32.length)];
-    CHALL_STATE.currentAbbr[i]=r;
+    if(CHALL_STATE.locked[i])continue;
+    var slot=document.getElementById('cslot'+i);
+    if(slot){slot.classList.remove('choosing');slot.classList.add('spinning-anim');slot.style.pointerEvents='none';}
+    var lg=document.getElementById('clogo'+i);
+    if(lg)lg.classList.add('spinning');
+    var t=document.getElementById('cteam'+i);
+    if(t)t.textContent='...';
+    var p=document.getElementById('cplayer'+i);
+    if(p)p.textContent='';
+    var y=document.getElementById('cyds'+i);
+    if(y)y.textContent='';
+    var c=document.getElementById('ccontrib'+i);
+    if(c)c.textContent='';
   }
+  // Shuffle logos during spin
   CHALL_STATE.spinIv=setInterval(function(){
     for(var i=0;i<10;i++){
       if(CHALL_STATE.locked[i])continue;
@@ -2209,13 +2224,44 @@ function _startChallSpin(){
       CHALL_STATE.currentAbbr[i]=rand;
       var lg=document.getElementById('clogo'+i);
       if(lg)lg.src=challLogoUrl(rand);
-      var t=document.getElementById('cteam'+i);
-      if(t)t.textContent=(CHALL_TEAM_STATS[rand]&&CHALL_TEAM_STATS[rand].name)||rand;
     }
-  },90);
+  },80);
+  // Auto-stop after 1.8s
+  setTimeout(function(){
+    clearInterval(CHALL_STATE.spinIv);CHALL_STATE.spinIv=null;
+    _challStopAndChoose();
+  },1800);
+}
+function _challStopAndChoose(){
+  CHALL_STATE.phase='choosing';
+  var picked=CHALL_STATE.lockedCount+1;
+  var pc=document.getElementById('challPickedCount');
+  if(pc)pc.textContent='Pick '+picked;
+  for(var i=0;i<10;i++){
+    if(CHALL_STATE.locked[i])continue;
+    var abbr=CHALL_STATE.currentAbbr[i];
+    var td=CHALL_TEAM_STATS[abbr];
+    var m=CHALL_STATE.mults[i];
+    var cat=CHALL_STATE.cat;
+    var yds=td?td[cat]:0;
+    var contrib=Math.round(yds*m);
+    var slot=document.getElementById('cslot'+i);
+    if(slot){slot.classList.remove('spinning-anim');slot.classList.add('choosing');slot.style.pointerEvents='';}
+    var lg=document.getElementById('clogo'+i);
+    if(lg){lg.classList.remove('spinning');lg.src=challLogoUrl(abbr);}
+    var t=document.getElementById('cteam'+i);
+    if(t)t.textContent=(td&&td.name)||abbr;
+    var p=document.getElementById('cplayer'+i);
+    if(p)p.textContent=td?td[cat+'n']:'';
+    var y=document.getElementById('cyds'+i);
+    if(y)y.textContent=yds.toLocaleString()+' yds';
+    var c=document.getElementById('ccontrib'+i);
+    if(c)c.textContent=(m!==1?m+'x × ':'')+contrib.toLocaleString();
+  }
 }
 function lockSlot(idx){
   if(CHALL_STATE.locked[idx])return;
+  if(CHALL_STATE.phase!=='choosing')return;
   CHALL_STATE.locked[idx]=true;
   CHALL_STATE.lockedCount++;
   var abbr=CHALL_STATE.currentAbbr[idx];
@@ -2228,28 +2274,24 @@ function lockSlot(idx){
   var contrib=Math.round(yds*m);
   CHALL_STATE.total+=contrib;
   var slot=document.getElementById('cslot'+idx);
-  if(slot){slot.classList.remove('spinning-slot');slot.classList.add('locked');slot.onclick=null;}
+  if(slot){slot.classList.remove('choosing','spinning-anim');slot.classList.add('locked');slot.style.pointerEvents='none';slot.onclick=null;}
   var lg=document.getElementById('clogo'+idx);
   if(lg){lg.classList.remove('spinning');lg.src=challLogoUrl(abbr);}
-  var tEl=document.getElementById('cteam'+idx);
-  if(tEl)tEl.textContent=(td&&td.name)||abbr;
-  var pEl=document.getElementById('cplayer'+idx);
-  if(pEl)pEl.textContent=player;
-  var yEl=document.getElementById('cyds'+idx);
-  if(yEl)yEl.textContent=yds.toLocaleString()+' yds';
-  var cEl=document.getElementById('ccontrib'+idx);
-  if(cEl)cEl.textContent=(m!==1?m+'x × ':'')+contrib.toLocaleString();
-  var th=document.querySelector('#cslot'+idx+' .cslot-tap');
-  if(th)th.style.display='none';
+  var tEl=document.getElementById('cteam'+idx); if(tEl)tEl.textContent=(td&&td.name)||abbr;
+  var pEl=document.getElementById('cplayer'+idx); if(pEl)pEl.textContent=player;
+  var yEl=document.getElementById('cyds'+idx); if(yEl)yEl.textContent=yds.toLocaleString()+' yds';
+  var cEl=document.getElementById('ccontrib'+idx); if(cEl)cEl.textContent=(m!==1?m+'x × ':'')+contrib.toLocaleString();
   var totalEl=document.getElementById('challTotalDisp');
   if(totalEl)totalEl.textContent=CHALL_STATE.total.toLocaleString();
-  var pc2=document.getElementById('challPickedCount');
-  if(pc2)pc2.textContent=CHALL_STATE.lockedCount+' / 10 picked';
   if(CHALL_STATE.lockedCount===10){
-    clearInterval(CHALL_STATE.spinIv);CHALL_STATE.spinIv=null;
+    var pc=document.getElementById('challPickedCount');
+    if(pc)pc.textContent='All picked!';
     var nb=document.getElementById('challNextBtn');
     if(nb)nb.style.display='';
     setTimeout(showChallResults,700);
+  } else {
+    // Brief pause then spin remaining
+    setTimeout(_challSpin,400);
   }
 }
 function showChallResults(){var cfg=CHALL_CFG2[CHALL_STATE.cat];var tgt=cfg.targets[CHALL_STATE.diff];var total=CHALL_STATE.total;var hit=total>=tgt;var pct=Math.round((total/tgt)*100);var badge=document.getElementById('challResBadge');var totalEl=document.getElementById('challResTotal');var targetEl=document.getElementById('challResTarget');var verdictEl=document.getElementById('challResVerdict');var breakdown=document.getElementById('challResBreakdown');if(badge)badge.textContent=hit?'CHALLENGE CLEARED':'CHALLENGE FAILED';if(totalEl){totalEl.textContent=total.toLocaleString()+' yds';totalEl.style.color=hit?'var(--grn)':'var(--red)';}if(targetEl)targetEl.textContent='Target: '+tgt.toLocaleString()+' - You hit '+pct+'%';var verdict;if(pct>=130)verdict='LEGENDARY';else if(pct>=115)verdict='DOMINANT';else if(pct>=100)verdict='CHALLENGE CLEARED';else if(pct>=90)verdict='SO CLOSE';else if(pct>=75)verdict='NOT ENOUGH';else verdict='BUST';if(verdictEl){verdictEl.textContent=verdict;verdictEl.style.color=hit?'var(--grn)':'var(--red)';}if(breakdown){var rows='';CHALL_STATE.teams.forEach(function(abbr,i){var td=CHALL_TEAM_STATS[abbr];var m=CHALL_STATE.mults[i];var yds=td?td[CHALL_STATE.cat]:0;var contrib=Math.round(yds*m);var mcls=CHALL_MULT_CLS[m]||'cmult-1';var mLabel=Number.isInteger(m)?m+'x':m+'x';rows+='<div class="cres-row"><img class="cres-logo" src="'+challLogoUrl(abbr)+'" alt="'+abbr+'"><div class="cres-name">'+((td&&td.name)||abbr)+'<br><span style="color:var(--muted);font-weight:400;font-size:.65rem">'+(td?td[CHALL_STATE.cat+'n']:'')+'</span></div><span class="cres-mult '+mcls+'">'+mLabel+'</span><div class="cres-yds-val">'+contrib.toLocaleString()+'</div></div>';});breakdown.innerHTML=rows;}show('challResScr',null);}
