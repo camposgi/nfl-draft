@@ -180,6 +180,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .rr-stat-val{font-size:1.3rem;font-weight:900;color:var(--txt)}
 .rr-stat-sub{font-size:.62rem;color:var(--muted);margin-top:2px}
 
+
+/* ── RECORD MODE VARIANT BUTTONS ──────────────────────────────────────── */
+.rec-variant-row{display:flex;gap:12px;justify-content:center;margin-bottom:24px;flex-wrap:wrap}
+.rec-var-card{flex:1;min-width:200px;max-width:240px;background:var(--surf);border:2px solid var(--brd);border-radius:16px;padding:20px 16px;cursor:pointer;transition:all .2s;text-align:left}
+.rec-var-card:hover{border-color:var(--acc);transform:translateY(-3px)}
+.rec-var-card.sel{border-color:var(--acc);background:rgba(124,58,237,.08)}
+.rec-var-ico{font-size:1.8rem;margin-bottom:8px}
+.rec-var-ttl{font-size:.95rem;font-weight:800;margin-bottom:4px}
+.rec-var-dsc{font-size:.72rem;color:var(--muted);line-height:1.5}
+.rec-var-tag{display:inline-block;margin-top:8px;padding:3px 10px;border-radius:999px;font-size:.62rem;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+
 </style>
 </head>
 <body>
@@ -231,7 +242,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div id="recScr" class="scr">
   <div class="badge">📊 Record Builder</div>
   <h1 class="mm-title" style="font-size:clamp(1.9rem,6vw,3.8rem)">Choose Your<br><span class="hl">Target Record</span></h1>
-  <p class="mm-sub" style="margin-bottom:28px">Draft a team that matches the quality of your chosen record. Fit matters more than OVR.</p>
+  <p class="mm-sub" style="margin-bottom:20px">Draft a team that matches your chosen record. Fit matters more than OVR.</p>
+  <div class="rec-variant-row">
+    <div class="rec-var-card sel" id="varRegular" onclick="selectVariant('regular')">
+      <div class="rec-var-ico">🏈</div>
+      <div class="rec-var-ttl">Regular</div>
+      <div class="rec-var-dsc">8 picks: QB · RB · RB · WR · WR · TE · O-Line · Defense</div>
+      <div class="rec-var-tag" style="background:rgba(124,58,237,.15);color:#a78bfa">Classic</div>
+    </div>
+    <div class="rec-var-card" id="varUltimate" onclick="selectVariant('ultimate')">
+      <div class="rec-var-ico">⚡</div>
+      <div class="rec-var-ttl">Ultimate</div>
+      <div class="rec-var-dsc">10 picks: adds Head Coach + Flex (any skill position)</div>
+      <div class="rec-var-tag" style="background:rgba(251,191,36,.15);color:#fbbf24">New</div>
+    </div>
+  </div>
   <div class="rec-grid" id="recGrid"></div>
   <div class="rec-info" id="recInfo" style="display:none">
     <div class="ril">Selected Record</div>
@@ -322,19 +347,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
     <div class="rr-pct" id="rrPctLine"><span class="rr-pct-arrow">↗</span><span id="rrPctText">—</span></div>
     <div class="rr-statstrip">
       <div class="rr-stat">
-        <div class="rr-stat-lbl">RECORD</div>
+        <div class="rr-stat-lbl">YOUR RECORD</div>
         <div class="rr-stat-val" id="rrStatRecord">—</div>
         <div class="rr-stat-sub" id="rrStatRecordSub">—</div>
+      </div>
+      <div class="rr-stat">
+        <div class="rr-stat-lbl">TARGET</div>
+        <div class="rr-stat-val" id="rrStatTarget">—</div>
+        <div class="rr-stat-sub" id="rrStatTargetSub">—</div>
       </div>
       <div class="rr-stat">
         <div class="rr-stat-lbl">BEST POSSIBLE</div>
         <div class="rr-stat-val" id="rrStatBest">—</div>
         <div class="rr-stat-sub" id="rrStatBestSub">—</div>
-      </div>
-      <div class="rr-stat">
-        <div class="rr-stat-lbl">GRADE</div>
-        <div class="rr-stat-val" id="rrStatGrade">—</div>
-        <div class="rr-stat-sub" id="rrStatGradeSub">—</div>
       </div>
     </div>
     <div class="rr-picks" id="rrPicksList"></div>
@@ -373,7 +398,7 @@ function getLogoUrl(abbr){
   const c=LOGO_MAP[abbr];
   return c?`https://a.espncdn.com/i/teamlogos/nfl/500/${c}.png`:null;
 }
-const DPOS=["QB","RB","RB","WR","WR","WR","TE","OL","DEF"]; // 9 picks
+const DPOS=["QB","RB","RB","WR","WR","TE","OL","DEF"]; // 8 picks
 const CURRENT_TEAMS=[
 {abbr:"BUF",city:"Buffalo",name:"Bills",
  QB:[{n:"Josh Allen",r:97,st:"MVP-level 4,300+ yds rushing threat elite"},{n:"Kyle Allen",r:70,st:"Veteran backup"}],
@@ -381,224 +406,256 @@ const CURRENT_TEAMS=[
  WR:[{n:"Khalil Shakir",r:83,st:"684 yds WR1 2025 BUF ascending route runner"},{n:"Keon Coleman",r:79,st:"Big-bodied receiver 2024 breakout"},{n:"Mack Hollins",r:69,st:"Veteran big WR depth"}],
  TE:[{n:"Dawson Knox",r:77,st:"2x Pro Bowl pass catcher"},{n:"Dalton Kincaid",r:75,st:"75 rec as rookie 2023"}],
  OL:[{n:"Dion Dawkins",r:86,st:"Pro Bowl LT"},{n:"Spencer Brown",r:78,st:"Veteran RT"},{n:"O'Cyrus Torrence",r:76,st:"Guard starter"}],
- DEF:{n:"Bills Defense",r:84,st:"Von Miller-era depth Greg Rousseau Ed Oliver"}},
+ DEF:{n:"Bills Defense",r:84,st:"Von Miller-era depth Greg Rousseau Ed Oliver"},
+ HC:{n:"Sean McDermott",r:83,st:"8 seasons AFC dominance disciplined SB contender"}},
 {abbr:"MIA",city:"Miami",name:"Dolphins",
  QB:[{n:"Tua Tagovailoa",r:84,st:"2025 MIA starter healthy 2,660 yds 20 TD explosive"},{n:"Quinn Ewers",r:73,st:"2025 draft pick backup mobile"}],
  RB:[{n:"De'Von Achane",r:87,st:"8.9 YPC explosive speed back"},{n:"Jaylen Wright",r:74,st:"Efficient 2024 4th-round pick"}],
  WR:[{n:"Jaylen Waddle",r:88,st:"910 yds WR1 2025 MIA elite speed RAC specialist"},{n:"Tutu Atwell",r:73,st:"Deep speed threat"},{n:"Terrace Marshall Jr",r:69,st:"Depth receiver"}],
  TE:[{n:"Greg Dulcich",r:72,st:"Receiving tight end"},{n:"Cole Turner",r:66,st:"Developmental"}],
  OL:[{n:"Austin Jackson",r:76,st:"Starting LT"},{n:"Patrick Paul",r:74,st:"Young OT"},{n:"Aaron Brewer",r:73,st:"Center"}],
- DEF:{n:"Dolphins Defense",r:74,st:"Rebuilding secondary 2025"}},
+ DEF:{n:"Dolphins Defense",r:74,st:"Rebuilding secondary 2025"},
+ HC:{n:"Mike McDaniel",r:78,st:"Air Raid innovator creative play-caller"}},
 {abbr:"NE",city:"New England",name:"Patriots",
  QB:[{n:"Drake Maye",r:82,st:"2025 Year 2 breakout potential 2,276 yds 2024"},{n:"Tommy DeVito",r:70,st:"Backup signed 2025"}],
  RB:[{n:"Rhamondre Stevenson",r:79,st:"1,040 yds workhorse"},{n:"TreVeyon Henderson",r:73,st:"2024 pick speed back"}],
  WR:[{n:"Stefon Diggs",r:86,st:"1,013 yds WR1 2025 NE elite route runner"},{n:"Romeo Doubs",r:78,st:"Signed 2025 proven WR2"},{n:"DeMario Douglas",r:72,st:"561 yds 2023"}],
  TE:[{n:"Hunter Henry",r:76,st:"508 yds 2023 reliable"},{n:"CJ Dippre",r:66,st:"Developing TE"}],
  OL:[{n:"Will Campbell",r:83,st:"2025 top-5 pick elite OT from LSU"},{n:"Michael Onwenu",r:77,st:"Versatile guard"},{n:"Morgan Moses",r:74,st:"Veteran RT"}],
- DEF:{n:"Patriots Defense",r:76,st:"Harold Landry leads rebuilt unit 2025"}},
+ DEF:{n:"Patriots Defense",r:76,st:"Harold Landry leads rebuilt unit 2025"},
+ HC:{n:"Mike Vrabel",r:85,st:"Ex-Titans 54-45 defense-first disciplined"}},
 {abbr:"NYJ",city:"New York",name:"Jets",
  QB:[{n:"Justin Fields",r:82,st:"1,259 yds 8 TD 2025 NYJ starter dual-threat rusher"},{n:"Brady Cook",r:65,st:"Backup 2025"}],
  RB:[{n:"Breece Hall",r:87,st:"994 yds explosive dual threat"},{n:"Braelon Allen",r:76,st:"2024 2nd-round pick versatile"},{n:"Isaiah Davis",r:67,st:"Depth"}],
  WR:[{n:"Garrett Wilson",r:90,st:"1,100 yds 2024 elite route runner"},{n:"Adonai Mitchell",r:77,st:"2024 2nd-round pick WR2"},{n:"Tim Patrick",r:70,st:"Veteran big-body receiver"}],
  TE:[{n:"Mason Taylor",r:76,st:"2025 2nd-round pick LSU receiving TE"},{n:"Jeremy Ruckert",r:68,st:"Blocking TE"}],
  OL:[{n:"Olu Fashanu",r:79,st:"2024 1st-round LT developing"},{n:"Joe Tippmann",r:78,st:"Solid center"},{n:"Dylan Parham",r:74,st:"Veteran guard"}],
- DEF:{n:"Jets Defense",r:83,st:"Minkah Fitzpatrick Sauce Gardner gone but D still solid"}},
+ DEF:{n:"Jets Defense",r:83,st:"Minkah Fitzpatrick Sauce Gardner gone but D still solid"},
+ HC:{n:"Aaron Glenn",r:72,st:"2025 rookie HC ex-Lions DC"}},
 {abbr:"BAL",city:"Baltimore",name:"Ravens",
  QB:[{n:"Lamar Jackson",r:98,st:"3x MVP 4,172 yds 915 rush yds 2024 dominant"},{n:"Tyler Huntley",r:68,st:"Backup"}],
  RB:[{n:"Derrick Henry",r:87,st:"4x Pro Bowl power back 1,921 yds 2024"},{n:"Justice Hill",r:74,st:"Speed back"},{n:"Rasheen Ali",r:70,st:"2023 pick explosive"}],
  WR:[{n:"Zay Flowers",r:84,st:"858 yds rookie 2023 WR1 ascending"},{n:"Rashod Bateman",r:75,st:"Healthy WR2 2024"}],
  TE:[{n:"Mark Andrews",r:90,st:"3x Pro Bowl 544 yds 2023 elite"},{n:"Durham Smythe",r:68,st:"Veteran blocker"}],
  OL:[{n:"Ronnie Stanley",r:82,st:"Elite LT when healthy"},{n:"Andrew Vorhees",r:76,st:"Young guard"},{n:"John Simpson",r:74,st:"Veteran guard"}],
- DEF:{n:"Ravens Defense",r:86,st:"Roquan Smith Kyle Hamilton Trey Hendrickson dominant"}},
+ DEF:{n:"Ravens Defense",r:86,st:"Roquan Smith Kyle Hamilton Trey Hendrickson dominant"},
+ HC:{n:"John Harbaugh",r:92,st:"4 AFC title games 1 SB ring elite HC"}},
 {abbr:"CIN",city:"Cincinnati",name:"Bengals",
  QB:[{n:"Joe Burrow",r:93,st:"Returns from wrist surgery 2025 elite when healthy"},{n:"Joe Flacco",r:72,st:"Veteran backup signed 2025"}],
  RB:[{n:"Chase Brown",r:82,st:"948 yds starter 2024 efficient"},{n:"Samaje Perine",r:69,st:"Veteran depth"}],
  WR:[{n:"Ja'Marr Chase",r:97,st:"1,216 yds 7 TD 2023 elite WR1"},{n:"Tee Higgins",r:89,st:"23M/yr 656 yds in 12 games"},{n:"Andrei Iosivas",r:72,st:"2023 3rd-round WR slot"}],
  TE:[{n:"Mike Gesicki",r:74,st:"Signed 2025 receiving specialist"},{n:"Drew Sample",r:68,st:"Run blocker veteran"}],
  OL:[{n:"Orlando Brown Jr",r:80,st:"LT starter"},{n:"Amarius Mims",r:77,st:"2024 1st-round OT developing"},{n:"Ted Karras",r:75,st:"Team captain center"}],
- DEF:{n:"Bengals Defense",r:80,st:"Trey Hendrickson traded to BAL revamped D-line"}},
+ DEF:{n:"Bengals Defense",r:80,st:"Trey Hendrickson traded to BAL revamped D-line"},
+ HC:{n:"Zac Taylor",r:81,st:"SB LVI run offensive-minded ascending"}},
 {abbr:"CLE",city:"Cleveland",name:"Browns",
  QB:[{n:"Deshaun Watson",r:72,st:"Returns from Achilles 2025 massive contract"},{n:"Shedeur Sanders",r:75,st:"2025 2nd-round pick ascending"},{n:"Dillon Gabriel",r:70,st:"Oregon standout 2025 pick"}],
  RB:[{n:"Quinshon Judkins",r:80,st:"2025 2nd-round pick Ohio State explosive"},{n:"Dylan Sampson",r:70,st:"Young depth 2025"}],
  WR:[{n:"Jerry Jeudy",r:82,st:"Acquired 2024 1,229 yds WR1"},{n:"Cedric Tillman",r:73,st:"Improving WR2 2024"},{n:"Malachi Corley",r:70,st:"Slot receiver"}],
  TE:[{n:"Harold Fannin Jr",r:74,st:"2025 2nd-round pick Bowling Green receiving TE"},{n:"Jack Stoll",r:66,st:"Veteran blocker"}],
  OL:[{n:"Dawand Jones",r:77,st:"Massive OT developing"},{n:"Zion Johnson",r:78,st:"Solid guard"},{n:"Elgton Jenkins",r:80,st:"Elite versatile center/guard"}],
- DEF:{n:"Browns Defense",r:75,st:"Jared Verse Alex Wright rebuild after Garrett trade"}},
+ DEF:{n:"Browns Defense",r:75,st:"Jared Verse Alex Wright rebuild after Garrett trade"},
+ HC:{n:"Kevin Stefanski",r:77,st:"2020 COTY steady rebuilder"}},
 {abbr:"PIT",city:"Pittsburgh",name:"Steelers",
  QB:[{n:"Aaron Rodgers",r:88,st:"Signed 2025 4x MVP elite when healthy"},{n:"Mason Rudolph",r:71,st:"2-1 late 2023 veteran backup"},{n:"Will Howard",r:65,st:"2025 Ohio State pick"}],
  RB:[{n:"Jaylen Warren",r:80,st:"919 yds 2025 PIT primary runner efficient"},{n:"Kenny Gainwell",r:73,st:"514 yds PIT receiving back versatile"}],
  WR:[{n:"DK Metcalf",r:90,st:"Signed from SEA 2025 1,114 yds 2023 elite"},{n:"Michael Pittman Jr",r:83,st:"Signed from IND 2025 1,152 yds 2023"},{n:"Roman Wilson",r:72,st:"2024 3rd-round pick WR2"}],
  TE:[{n:"Pat Freiermuth",r:78,st:"585 yds 2023 reliable"},{n:"Darnell Washington",r:74,st:"Elite blocker 2024"}],
  OL:[{n:"Broderick Jones",r:78,st:"2023 1st-round LT developing"},{n:"Troy Fautanu",r:76,st:"2024 1st-round guard"},{n:"Zach Frazier",r:75,st:"Solid young center"}],
- DEF:{n:"Steelers Defense",r:85,st:"T.J. Watt 19 sacks led NFL top-5 unit"}},
+ DEF:{n:"Steelers Defense",r:85,st:"T.J. Watt 19 sacks led NFL top-5 unit"},
+ HC:{n:"Mike McCarthy",r:82,st:"1 SB ring 159-104 proven winner"}},
 {abbr:"HOU",city:"Houston",name:"Texans",
  QB:[{n:"C.J. Stroud",r:91,st:"OROY 4,108 yds 23 TD 2023 playoff win"},{n:"Davis Mills",r:68,st:"Veteran backup"}],
  RB:[{n:"David Montgomery",r:82,st:"Signed from DET 2025 1,015 yds 13 TD 2023"},{n:"Woody Marks",r:72,st:"Efficient depth back"}],
  WR:[{n:"Nico Collins",r:87,st:"1,297 yds 8 TD breakout 2023"},{n:"Tank Dell",r:81,st:"709 yds 7 TD before injury"},{n:"Jayden Higgins",r:75,st:"2025 2nd-round pick Iowa State rising"}],
  TE:[{n:"Dalton Schultz",r:79,st:"726 yds 2023 reliable"},{n:"Brevin Jordan",r:72,st:"Speed receiving TE"}],
  OL:[{n:"Laremy Tunsil",r:90,st:"2x Pro Bowl elite LT"},{n:"Wyatt Teller",r:80,st:"Pro Bowl guard signed 2025"},{n:"Braden Smith",r:79,st:"Elite RT"}],
- DEF:{n:"Texans Defense",r:80,st:"Will Anderson Jr Danielle Hunter pass rush dominant"}},
+ DEF:{n:"Texans Defense",r:80,st:"Will Anderson Jr Danielle Hunter pass rush dominant"},
+ HC:{n:"DeMeco Ryans",r:83,st:"DOTY to HC 23-11 ascending star"}},
 {abbr:"IND",city:"Indianapolis",name:"Colts",
  QB:[{n:"Daniel Jones",r:80,st:"Signed 2025 50M motivated QB bounce-back"},{n:"Anthony Richardson",r:78,st:"Elite athlete but inconsistent health"},{n:"Riley Leonard",r:65,st:"Rookie backup 2025"}],
  RB:[{n:"Jonathan Taylor",r:90,st:"741 yds before injury 2023 elite RB when healthy"},{n:"DJ Giddens",r:71,st:"Young explosive depth"}],
  WR:[{n:"Alec Pierce",r:76,st:"Developing deep threat"},{n:"Josh Downs",r:77,st:"Promising slot 2023 rookie"},{n:"Nick Westbrook-Ikhine",r:68,st:"Reliable depth"}],
  TE:[{n:"Tyler Warren",r:78,st:"2025 1st-round Penn State elite TE"},{n:"Mo Alie-Cox",r:70,st:"Blocking TE veteran"}],
  OL:[{n:"Quenton Nelson",r:95,st:"4x Pro Bowl best guard in NFL"},{n:"Bernhard Raimann",r:77,st:"LT developing"},{n:"Jimmy Morrissey",r:72,st:"Center"}],
- DEF:{n:"Colts Defense",r:78,st:"Sauce Gardner signed 2025 DeForest Buckner anchors"}},
+ DEF:{n:"Colts Defense",r:78,st:"Sauce Gardner signed 2025 DeForest Buckner anchors"},
+ HC:{n:"Shane Steichen",r:76,st:"OC to HC developing 2nd year"}},
 {abbr:"JAX",city:"Jacksonville",name:"Jaguars",
  QB:[{n:"Trevor Lawrence",r:85,st:"Young franchise QB 2024 shoulder injury"},{n:"Nick Mullens",r:68,st:"Veteran backup"}],
  RB:[{n:"Travis Etienne Jr",r:87,st:"1,107 yds 2025 JAX Pro Bowl dual threat"},{n:"Bhayshul Tuten",r:74,st:"Explosive 2024 pick backup"},{n:"DeeJay Dallas",r:67,st:"Veteran depth"}],
  WR:[{n:"Travis Hunter",r:87,st:"2025 #2 overall Colorado two-way elite WR"},{n:"Brian Thomas Jr",r:86,st:"1,282 yds 10 TD elite 2024 rookie"},{n:"Jakobi Meyers",r:79,st:"Signed 2025 veteran WR2 from LV"}],
  TE:[{n:"Brenton Strange",r:72,st:"2023 2nd-round TE developing"},{n:"Hunter Long",r:67,st:"Blocker"},{n:"Quintin Morris",r:66,st:"Depth"}],
  OL:[{n:"Anton Harrison",r:79,st:"2023 1st-round LT"},{n:"Walker Little",r:76,st:"Solid LG/OT"},{n:"Patrick Mekari",r:74,st:"Veteran guard"}],
- DEF:{n:"Jaguars Defense",r:79,st:"Josh Hines-Allen Travon Walker pass rush 2025"}},
+ DEF:{n:"Jaguars Defense",r:79,st:"Josh Hines-Allen Travon Walker pass rush 2025"},
+ HC:{n:"Liam Coen",r:70,st:"2025 rookie HC ex-Buccaneers OC"}},
 {abbr:"TEN",city:"Tennessee",name:"Titans",
  QB:[{n:"Cam Ward",r:82,st:"2025 #1 overall pick Miami exciting dual threat"},{n:"Will Levis",r:72,st:"Backup after Ward drafted"},{n:"Mitchell Trubisky",r:68,st:"Veteran insurance"}],
  RB:[{n:"Tony Pollard",r:80,st:"Signed from DAL 2024 899 yds"},{n:"Tyjae Spears",r:77,st:"Healthy 2024 efficient complementary back"},{n:"Nicholas Singleton",r:70,st:"2025 draft pick Penn State"}],
  WR:[{n:"Calvin Ridley",r:80,st:"Signed 2024 821 yds veteran WR1"},{n:"Wan'Dale Robinson",r:76,st:"Signed from NYG 2025 slot specialist"},{n:"Carnell Tate",r:72,st:"2025 1st-round pick Ohio State"}],
  TE:[{n:"Daniel Bellinger",r:74,st:"Signed from NYG 2025 starting TE"},{n:"Gunnar Helm",r:66,st:"2024 pick developing"}],
  OL:[{n:"JC Latham",r:78,st:"2024 1st-round LT developing"},{n:"Peter Skoronski",r:79,st:"Elite interior lineman"},{n:"Dan Moore Jr",r:76,st:"Veteran LT"}],
- DEF:{n:"Titans Defense",r:74,st:"Jeffery Simmons anchor rebuild underway"}},
+ DEF:{n:"Titans Defense",r:74,st:"Jeffery Simmons anchor rebuild underway"},
+ HC:{n:"Brian Callahan",r:73,st:"2nd-year HC offensive background"}},
 {abbr:"KC",city:"Kansas City",name:"Chiefs",
  QB:[{n:"Patrick Mahomes",r:99,st:"3x SB MVP 4,183 yds 27 TD 2023 GOAT"},{n:"Dillon Gabriel",r:68,st:"2025 rookie backup dual threat"}],
  RB:[{n:"Kareem Hunt",r:79,st:"611 yds 2025 KC veteran reliable runner"},{n:"Emari Demercado",r:69,st:"Depth back"}],
  WR:[{n:"Rashee Rice",r:86,st:"Returns from ACL 2025 explosive WR1"},{n:"Xavier Worthy",r:80,st:"2024 1st-round 638 yds 4.21 40 speed"},{n:"Tyquan Thornton",r:72,st:"Signed from NE speed threat"}],
  TE:[{n:"Travis Kelce",r:95,st:"Pro Bowl x9 84 rec 984 yds 2023 aging but elite"},{n:"Noah Gray",r:69,st:"Receiving depth TE"},{n:"Jake Briningstool",r:67,st:"2025 pick developing"}],
  OL:[{n:"Creed Humphrey",r:88,st:"2x Pro Bowl center top-3 NFL"},{n:"Trey Smith",r:87,st:"Pro Bowl guard"},{n:"Jaylon Moore",r:76,st:"LT starter"}],
- DEF:{n:"Chiefs Defense",r:84,st:"Chris Jones 10.5 sacks Spagnuolo elite system"}},
+ DEF:{n:"Chiefs Defense",r:84,st:"Chris Jones 10.5 sacks Spagnuolo elite system"},
+ HC:{n:"Andy Reid",r:97,st:"3 SB rings 267+ wins greatest active HC"}},
 {abbr:"LV",city:"Las Vegas",name:"Raiders",
  QB:[{n:"Geno Smith",r:82,st:"3,025 yds 2025 LV starter veteran accuracy proven"},{n:"Aidan O'Connell",r:72,st:"Backup proven starter"},{n:"Fernando Mendoza",r:68,st:"2025 high-upside rookie"}],
  RB:[{n:"Ashton Jeanty",r:88,st:"2025 top-5 pick Boise State Heisman finalist elite"},{n:"Dylan Laube",r:71,st:"Versatile receiving back"}],
  WR:[{n:"Jalen Nailor",r:77,st:"WR1 2025 emerging talent"},{n:"Jack Bech",r:72,st:"2024 2nd-round TCU receiver"},{n:"Tre Tucker",r:71,st:"Explosive slot 2024"}],
  TE:[{n:"Brock Bowers",r:88,st:"2024 1st-round Georgia elite TE ROTY"},{n:"Michael Mayer",r:72,st:"2023 2nd-round developing"}],
  OL:[{n:"Kolton Miller",r:84,st:"Pro Bowl LT 2023"},{n:"Jackson Powers-Johnson",r:77,st:"2024 1st-round guard"},{n:"Tyler Linderbaum",r:82,st:"Elite young center signed 2025"}],
- DEF:{n:"Raiders Defense",r:74,st:"Maxx Crosby Kwity Paye pass rush combo"}},
+ DEF:{n:"Raiders Defense",r:74,st:"Maxx Crosby Kwity Paye pass rush combo"},
+ HC:{n:"Pete Carroll",r:82,st:"1 SB ring legendary Legion of Boom builder"}},
 {abbr:"LAC",city:"Los Angeles",name:"Chargers",
  QB:[{n:"Justin Herbert",r:94,st:"3,870 yds 2024 playoff team Harbaugh era"},{n:"Trey Lance",r:68,st:"Developmental backup"}],
  RB:[{n:"Omarion Hampton",r:80,st:"2025 1st-round NC pick explosive starter"},{n:"Keaton Mitchell",r:75,st:"Speed back returning from injury"}],
  WR:[{n:"Ladd McConkey",r:84,st:"873 yds rookie 2024 Pro Bowl slot specialist"},{n:"Quentin Johnston",r:78,st:"Improved 2024 big-bodied WR"},{n:"Tre Harris",r:74,st:"2025 2nd-round Ole Miss receiver"}],
  TE:[{n:"David Njoku",r:81,st:"Signed from CLE 2025 Pro Bowl 882 yds 2023"},{n:"Charlie Kolar",r:73,st:"Solid blocker receiver"}],
  OL:[{n:"Rashawn Slater",r:90,st:"Elite LT recovered"},{n:"Joe Alt",r:82,st:"2024 1st-round OT elite"},{n:"Tyler Biadasz",r:77,st:"Solid center signed 2025"}],
- DEF:{n:"Chargers Defense",r:81,st:"Khalil Mack Derwin James Jr Bosa-adjacent pass rush"}},
+ DEF:{n:"Chargers Defense",r:81,st:"Khalil Mack Derwin James Jr Bosa-adjacent pass rush"},
+ HC:{n:"Jim Harbaugh",r:90,st:"Michigan legend proven winner near-miss SB"}},
 {abbr:"DEN",city:"Denver",name:"Broncos",
  QB:[{n:"Bo Nix",r:84,st:"2024 rookie 3,307 yds 24 TD impressive"},{n:"Jarrett Stidham",r:68,st:"Veteran backup"}],
  RB:[{n:"JK Dobbins",r:82,st:"Signed from LAC 2025 explosive when healthy"},{n:"RJ Harvey",r:77,st:"2025 2nd-round UCF explosive back"},{n:"Jaleel McLaughlin",r:74,st:"700+ yds efficient undrafted"}],
  WR:[{n:"Courtland Sutton",r:83,st:"1,017 yds WR1 2025 DEN veteran route runner"},{n:"Troy Franklin",r:76,st:"688 yds 2025 DEN breakout WR2"},{n:"Marvin Mims Jr",r:72,st:"Deep speed threat 2023 pick"}],
  TE:[{n:"Evan Engram",r:82,st:"Signed from JAX 2025 114 rec 1,114 yds Pro Bowl"},{n:"Adam Trautman",r:67,st:"Veteran blocker"}],
  OL:[{n:"Garett Bolles",r:80,st:"LT veteran"},{n:"Quinn Meinerz",r:78,st:"Strong guard Pro Bowl"},{n:"Luke Wattenberg",r:74,st:"Solid center"}],
- DEF:{n:"Broncos Defense",r:80,st:"Pat Surtain II best CB in NFL Nik Bonitto 15 sacks"}},
+ DEF:{n:"Broncos Defense",r:80,st:"Pat Surtain II best CB in NFL Nik Bonitto 15 sacks"},
+ HC:{n:"Sean Payton",r:87,st:"1 SB ring innovative offensive mind"}},
 {abbr:"DAL",city:"Dallas",name:"Cowboys",
  QB:[{n:"Dak Prescott",r:90,st:"Returns 2025 post-Achilles 4,516 yds 37 TD 2023"},{n:"Sam Howell",r:73,st:"Signed from SEA 2025 athletic backup"}],
  RB:[{n:"Javonte Williams",r:82,st:"1,201 yds 2025 DAL starter explosive"},{n:"Deuce Vaughn",r:71,st:"Speed depth back"}],
  WR:[{n:"CeeDee Lamb",r:97,st:"135 rec 1,749 yds 17 TD All-Pro 2023"},{n:"George Pickens",r:86,st:"Signed from PIT 2025 1,140 yds 2023 elite talent"},{n:"KaVontae Turpin",r:72,st:"Electric return specialist slot"}],
  TE:[{n:"Jake Ferguson",r:82,st:"761 yds 5 TD breakout 2023"},{n:"Luke Schoonmaker",r:70,st:"2023 2nd-rounder developing"}],
  OL:[{n:"Tyler Smith",r:83,st:"Pro Bowl guard elite"},{n:"Terence Steele",r:78,st:"Solid RT"},{n:"Cooper Beebe",r:76,st:"2024 1st-round center"}],
- DEF:{n:"Cowboys Defense",r:86,st:"Micah Parsons 40M/yr Rashan Gary acquired 2025"}},
+ DEF:{n:"Cowboys Defense",r:86,st:"Micah Parsons 40M/yr Rashan Gary acquired 2025"},
+ HC:{n:"Brian Schottenheimer",r:70,st:"2025 rookie HC veteran OC son of Marty"}},
 {abbr:"NYG",city:"New York",name:"Giants",
  QB:[{n:"Jaxson Dart",r:76,st:"2025 1st-round Ole Miss starting QB 2025"},{n:"Jameis Winston",r:72,st:"Veteran backup experience"},{n:"Brandon Allen",r:62,st:"Emergency 3rd QB"}],
  RB:[{n:"Cam Skattebo",r:77,st:"2025 2nd-round Arizona State dual threat"},{n:"Devin Singletary",r:74,st:"Veteran reliable runner"},{n:"Tyrone Tracy Jr",r:73,st:"719 yds undrafted rookie 2024"}],
  WR:[{n:"Malik Nabers",r:89,st:"1,204 yds 7 TD 2024 6th overall elite rookie"},{n:"Darius Slayton",r:75,st:"Veteran WR2 deep threat"},{n:"Odell Beckham Jr",r:72,st:"Signed 2025 veteran presence"}],
  TE:[{n:"Isaiah Likely",r:80,st:"Signed from BAL 2025 near-top draft talent receiving TE"},{n:"Theo Johnson",r:67,st:"2024 3rd-round developing"}],
  OL:[{n:"Andrew Thomas",r:87,st:"Pro Bowl LT elite"},{n:"John Michael Schmitz",r:76,st:"2023 1st-round center"},{n:"Francis Mauigoa",r:74,st:"2025 top-15 pick OT"}],
- DEF:{n:"Giants Defense",r:82,st:"Abdul Carter #3 overall pass rusher Brian Burns 25M"}},
+ DEF:{n:"Giants Defense",r:82,st:"Abdul Carter #3 overall pass rusher Brian Burns 25M"},
+ HC:{n:"Brian Daboll",r:77,st:"2022 COTY offensive innovator"}},
 {abbr:"PHI",city:"Philadelphia",name:"Eagles",
  QB:[{n:"Jalen Hurts",r:94,st:"SB LIX champion 3,966 yds 26 TD 2024"},{n:"Kenny Pickett",r:74,st:"Backup signed"},{n:"Andy Dalton",r:67,st:"Veteran emergency"}],
  RB:[{n:"Saquon Barkley",r:97,st:"2,005 rush yds NFL record SB LIX champion 2024"},{n:"Kenny Gainwell",r:70,st:"3rd-down back"},{n:"Tank Bigsby",r:72,st:"2023 2nd-round speed back"}],
  WR:[{n:"AJ Brown",r:93,st:"1,003 yds 2025 PHI WR1 elite possession threat"},{n:"DeVonta Smith",r:88,st:"1,008 yds WR2 elite route runner"},{n:"Darnell Mooney",r:72,st:"Veteran slot WR depth"}],
  TE:[{n:"Dallas Goedert",r:87,st:"737 yds in 12 games top-3 TE"},{n:"Grant Calcaterra",r:68,st:"Backup receiver"}],
  OL:[{n:"Lane Johnson",r:94,st:"4x Pro Bowl RT best in NFL"},{n:"Landon Dickerson",r:86,st:"Pro Bowl guard"},{n:"Cam Jurgens",r:80,st:"Starting center 2025"}],
- DEF:{n:"Eagles Defense",r:83,st:"Jalen Carter Jordan Davis Zack Baun dominant"}},
+ DEF:{n:"Eagles Defense",r:83,st:"Jalen Carter Jordan Davis Zack Baun dominant"},
+ HC:{n:"Nick Sirianni",r:83,st:"SB LIX champion 43-33 ascending"}},
 {abbr:"WAS",city:"Washington",name:"Commanders",
  QB:[{n:"Jayden Daniels",r:88,st:"3,568 yds 25 TD OROY 2024 playoff run"},{n:"Marcus Mariota",r:67,st:"Veteran backup"}],
  RB:[{n:"Jacory Croskey-Merritt",r:79,st:"805 yds 2025 WAS breakout starter"},{n:"Chris Rodriguez Jr",r:74,st:"500 yds 2025 WAS backup physical"}],
  WR:[{n:"Terry McLaurin",r:86,st:"1,033 yds 2023 WR1 franchise cornerstone"},{n:"Dyami Brown",r:72,st:"Big-play threat WR2"},{n:"Treylon Burks",r:70,st:"Signed 2025 physical receiver"}],
  TE:[{n:"Chig Okonkwo",r:77,st:"Signed 2025 10M/yr receiving TE"},{n:"Ben Sinnott",r:70,st:"2024 2nd-round developing TE"}],
  OL:[{n:"Laremy Tunsil",r:88,st:"Elite LT signed 2025 21M/yr"},{n:"Sam Cosmi",r:79,st:"Pro Bowl-caliber guard"},{n:"Andrew Wylie",r:72,st:"Veteran interior"}],
- DEF:{n:"Commanders Defense",r:77,st:"Daron Payne Odafe Oweh 30M top LB 2025"}},
+ DEF:{n:"Commanders Defense",r:77,st:"Daron Payne Odafe Oweh 30M top LB 2025"},
+ HC:{n:"Dan Quinn",r:84,st:"SB 50 coach rising HC star"}},
 {abbr:"CHI",city:"Chicago",name:"Bears",
  QB:[{n:"Caleb Williams",r:88,st:"3,541 yds 24 TD improved 2nd-year 2025"},{n:"Tyson Bagent",r:68,st:"Backup 2024"}],
  RB:[{n:"D'Andre Swift",r:83,st:"Acquired 2024 1,049 yds 2023"},{n:"Roschon Johnson",r:71,st:"Physical depth back"},{n:"Kyle Monangai",r:68,st:"2024 Rutgers pick"}],
  WR:[{n:"DJ Moore",r:83,st:"682 yds WR1 2025 CHI veteran reliable"},{n:"Rome Odunze",r:82,st:"2024 9th overall ascending elite receiver"},{n:"Luther Burden III",r:78,st:"2025 2nd-round Missouri breakout"}],
  TE:[{n:"Colston Loveland",r:78,st:"2025 1st-round Michigan elite receiving TE"},{n:"Cole Kmet",r:77,st:"719 yds steady improvement veteran"}],
  OL:[{n:"Darnell Wright",r:78,st:"1st-round RT 2023 developing"},{n:"Jonah Jackson",r:79,st:"17M/yr pro guard"},{n:"Garrett Bradbury",r:74,st:"Veteran center"}],
- DEF:{n:"Bears Defense",r:77,st:"Montez Sweat Grady Jarrett Jalen Walker ascending 2025"}},
+ DEF:{n:"Bears Defense",r:77,st:"Montez Sweat Grady Jarrett Jalen Walker ascending 2025"},
+ HC:{n:"Ben Johnson",r:82,st:"2025 HC Lions OC mastermind"}},
 {abbr:"DET",city:"Detroit",name:"Lions",
  QB:[{n:"Jared Goff",r:90,st:"4,629 yds 32 TD 2024 elite accuracy"},{n:"Teddy Bridgewater",r:68,st:"Veteran backup"}],
  RB:[{n:"Jahmyr Gibbs",r:88,st:"945 yds 10 TD 2023 elite speed"},{n:"David Montgomery",r:79,st:"716 yds 2025 DET power runner veteran"},{n:"Sione Vaki",r:68,st:"2024 pick versatile"}],
  WR:[{n:"Amon-Ra St. Brown",r:92,st:"119 rec 1,515 yds 10 TD 2023 elite"},{n:"Jameson Williams",r:82,st:"Explosive 2024 breakout after suspension"}],
  TE:[{n:"Sam LaPorta",r:84,st:"889 yds ROTY candidate 2023 ascending"},{n:"Brock Wright",r:67,st:"Blocker"}],
  OL:[{n:"Penei Sewell",r:92,st:"Pro Bowl RT best young OL in NFL"},{n:"Frank Ragnow",r:86,st:"Pro Bowl center"},{n:"Tate Ratledge",r:76,st:"2025 pick guard"}],
- DEF:{n:"Lions Defense",r:82,st:"Aidan Hutchinson returns DJ Reed signed pass D elite"}},
+ DEF:{n:"Lions Defense",r:82,st:"Aidan Hutchinson returns DJ Reed signed pass D elite"},
+ HC:{n:"Dan Campbell",r:88,st:"Rebuilt Lions NFC champion fiery leader"}},
 {abbr:"GB",city:"Green Bay",name:"Packers",
  QB:[{n:"Jordan Love",r:86,st:"51M/yr 3,700+ yds 2024 franchise QB"},{n:"Kyle McCord",r:67,st:"Backup 2024 Syracuse"},{n:"Tyrod Taylor",r:64,st:"Veteran emergency"}],
  RB:[{n:"Josh Jacobs",r:87,st:"Signed 2024 1,329 yds Pro Bowl workhorse"},{n:"MarShawn Lloyd",r:72,st:"2023 3rd-round explosive"},{n:"Pierre Strong Jr",r:69,st:"Veteran depth"}],
  WR:[{n:"Jayden Reed",r:81,st:"793 yds 7 TD 2023 ascending WR1"},{n:"Christian Watson",r:77,st:"Deep threat"},{n:"Matthew Golden",r:74,st:"2025 2nd-round Texas explosive"}],
  TE:[{n:"Tucker Kraft",r:76,st:"Reliable reliable 2023 pick"},{n:"Luke Musgrave",r:74,st:"Promising before injury 2023"},{n:"Luke Lachey",r:66,st:"2025 3rd-round Iowa"}],
  OL:[{n:"Aaron Banks",r:81,st:"18M/yr Pro Bowl guard signed 2025"},{n:"Zach Tom",r:77,st:"Versatile OT/G"},{n:"Sean Rhyan",r:73,st:"2022 1st-round guard developing"}],
- DEF:{n:"Packers Defense",r:81,st:"Jaire Alexander Kenny Clark Quay Walker solid rebuilt unit"}},
+ DEF:{n:"Packers Defense",r:81,st:"Jaire Alexander Kenny Clark Quay Walker solid rebuilt unit"},
+ HC:{n:"Matt LaFleur",r:87,st:"57-18 win pct offensive genius"}},
 {abbr:"MIN",city:"Minnesota",name:"Vikings",
  QB:[{n:"JJ McCarthy",r:84,st:"Returns healthy from meniscus 2025 full-year starter"},{n:"Carson Wentz",r:70,st:"Veteran backup 2025 MIN reliable in relief"}],
  RB:[{n:"Aaron Jones",r:79,st:"Signed from GB 2024 veteran 10M/yr"},{n:"Jordan Mason",r:78,st:"Signed from SF 2025 efficient 4.8 YPC"},{n:"Demond Claiborne",r:66,st:"2025 rookie depth"}],
  WR:[{n:"Justin Jefferson",r:97,st:"Elite missed 8 games 2023 back healthy"},{n:"Jordan Addison",r:83,st:"911 yds 9 TD rookie 2023"},{n:"Jauan Jennings",r:76,st:"Signed from SF 2025 clutch WR2"}],
  TE:[{n:"T.J. Hockenson",r:86,st:"95 rec 960 yds torn ACL 8 games 2023 returning"},{n:"Josh Oliver",r:68,st:"Blocker"}],
  OL:[{n:"Christian Darrisaw",r:86,st:"Pro Bowl LT elite"},{n:"Donovan Jackson",r:78,st:"2024 1st-round guard"},{n:"Will Fries",r:76,st:"Solid interior lineman"}],
- DEF:{n:"Vikings Defense",r:78,st:"Dallas Turner ascending LB Byron Murphy II top CB"}},
+ DEF:{n:"Vikings Defense",r:78,st:"Dallas Turner ascending LB Byron Murphy II top CB"},
+ HC:{n:"Kevin O'Connell",r:84,st:"2022 COTY innovative offense"}},
 {abbr:"ATL",city:"Atlanta",name:"Falcons",
  QB:[{n:"Michael Penix Jr",r:80,st:"2024 8th overall took over Week 5 2,000 yds"},{n:"Kirk Cousins",r:76,st:"Co-starter ATL 2025 1,721 yds 10 GP"},{n:"Trevor Siemian",r:65,st:"Veteran backup"}],
  RB:[{n:"Bijan Robinson",r:89,st:"1,478 yds 7 TD 2025 ATL elite back"},{n:"Tyler Allgeier",r:74,st:"514 yds 2025 ATL complementary runner"},{n:"Brian Robinson Jr",r:72,st:"Physical backup runner"}],
  WR:[{n:"Drake London",r:83,st:"905 yds improving WR1 2023"},{n:"Jahan Dotson",r:76,st:"Signed from WAS 2025 upside WR2"},{n:"Olamide Zaccheaus",r:67,st:"Slot veteran depth"}],
  TE:[{n:"Kyle Pitts",r:85,st:"Overall #4 pick 667 yds 2023 elite when used"},{n:"Austin Hooper",r:67,st:"Veteran blocker"}],
  OL:[{n:"Chris Lindstrom",r:87,st:"2x Pro Bowl guard elite"},{n:"Jake Matthews",r:78,st:"Veteran LT"},{n:"Matthew Bergeron",r:74,st:"Young guard developing"}],
- DEF:{n:"Falcons Defense",r:75,st:"A.J. Terrell Jessie Bates III James Pearce Jr ascending"}},
+ DEF:{n:"Falcons Defense",r:75,st:"A.J. Terrell Jessie Bates III James Pearce Jr ascending"},
+ HC:{n:"Raheem Morris",r:77,st:"2024 HC defensive background ascending"}},
 {abbr:"CAR",city:"Carolina",name:"Panthers",
  QB:[{n:"Bryce Young",r:74,st:"#1 pick 2023 bounce-back 2025"},{n:"Kenny Pickett",r:72,st:"Veteran depth backup"},{n:"Haynes King",r:63,st:"Developmental rookie"}],
  RB:[{n:"Rico Dowdle",r:82,st:"1,076 yds 2025 CAR breakout star back"},{n:"Chuba Hubbard",r:73,st:"Backup runner physical"},{n:"Jonathon Brooks",r:70,st:"Returning from ACL 2025 promising"}],
  WR:[{n:"Tetairoa McMillan",r:80,st:"2025 1st-round Arizona elite big receiver"},{n:"Xavier Legette",r:74,st:"2024 1st-round developing"},{n:"Jalen Coker",r:72,st:"Emerging WR3 2024"}],
  TE:[{n:"Tommy Tremble",r:70,st:"FB/TE hybrid reliable"},{n:"James Mitchell",r:67,st:"Virginia Tech pick developing"}],
  OL:[{n:"Ikem Ekwonu",r:78,st:"2022 6th overall LT developing"},{n:"Robert Hunt",r:76,st:"19M/yr solid guard"},{n:"Taylor Moton",r:77,st:"Veteran RT solid"}],
- DEF:{n:"Panthers Defense",r:74,st:"Jaelan Phillips 36M Derrick Brown DT anchor"}},
+ DEF:{n:"Panthers Defense",r:74,st:"Jaelan Phillips 36M Derrick Brown DT anchor"},
+ HC:{n:"Dave Canales",r:72,st:"2024 HC 5-12 developing"}},
 {abbr:"NO",city:"New Orleans",name:"Saints",
  QB:[{n:"Tyler Shough",r:75,st:"11 GP 2,384 yds 2025 NO starter efficient"},{n:"Spencer Rattler",r:70,st:"9 GP 2025 backup"},{n:"Zach Wilson",r:67,st:"Veteran depth backup"}],
  RB:[{n:"Alvin Kamara",r:83,st:"3x Pro Bowl veteran workhorse 2025 NO"},{n:"Kendre Miller",r:74,st:"Explosive 2023 3rd-round pick"},{n:"Jordan Mims",r:67,st:"Depth back"}],
  WR:[{n:"Chris Olave",r:87,st:"1,014 yds 2023 elite speed WR1"},{n:"Jordyn Tyson",r:74,st:"2025 high-upside Arizona State pick"},{n:"Trey Palmer",r:70,st:"Deep threat speed WR"}],
  TE:[{n:"Juwan Johnson",r:75,st:"553 yds 5 TD 2023 receiver TE"},{n:"Noah Fant",r:72,st:"Signed 2025 receiving specialist"}],
  OL:[{n:"Erik McCoy",r:78,st:"Solid center"},{n:"David Edwards",r:77,st:"21M/yr veteran guard"},{n:"Taliese Fuaga",r:75,st:"2024 1st-round RT developing"}],
- DEF:{n:"Saints Defense",r:75,st:"Chase Young Cameron Jordan veteran leaders Kaden Elliss"}},
+ DEF:{n:"Saints Defense",r:75,st:"Chase Young Cameron Jordan veteran leaders Kaden Elliss"},
+ HC:{n:"Kellen Moore",r:74,st:"2025 HC creative offensive mind"}},
 {abbr:"TB",city:"Tampa Bay",name:"Buccaneers",
  QB:[{n:"Baker Mayfield",r:84,st:"4,044 yds 28 TD best season 2023 27M/yr"},{n:"Jake Browning",r:70,st:"5-2 as starter 2023 solid backup"}],
  RB:[{n:"Bucky Irving",r:79,st:"2024 4th-round Oregon explosive starter 2025"},{n:"Rachaad White",r:77,st:"572 yds 2025 TB versatile receiving back"},{n:"Sean Tucker",r:67,st:"Speed depth"}],
  WR:[{n:"Chris Godwin",r:83,st:"1,024 yds 2023 22M/yr veteran"},{n:"Emeka Egbuka",r:76,st:"2025 1st-round Ohio State elite"},{n:"Tez Johnson",r:70,st:"Explosive slot WR"}],
  TE:[{n:"Cade Otton",r:74,st:"507 yds 2023 ascending TE"},{n:"Ko Kieft",r:65,st:"Blocker"}],
  OL:[{n:"Tristan Wirfs",r:93,st:"2x Pro Bowl RT best in NFL"},{n:"Luke Goedeke",r:75,st:"Improving guard"},{n:"Graham Barton",r:74,st:"2024 1st-round center"}],
- DEF:{n:"Buccaneers Defense",r:79,st:"Vita Vea Antoine Winfield Jr Yaya Diaby"}},
+ DEF:{n:"Buccaneers Defense",r:79,st:"Vita Vea Antoine Winfield Jr Yaya Diaby"},
+ HC:{n:"Todd Bowles",r:76,st:"2022 NFC South winner defense-first"}},
 {abbr:"ARI",city:"Arizona",name:"Cardinals",
  QB:[{n:"Jacoby Brissett",r:74,st:"Veteran starter 11 years exp"},{n:"Kyler Murray",r:80,st:"Returns from injury 9 GP 2025 ARI elite dual threat"},{n:"Carson Beck",r:68,st:"2025 rookie Miami pick"}],
  RB:[{n:"James Conner",r:79,st:"820 yds reliable 2023 veteran"},{n:"Trey Benson",r:76,st:"2025 ARI starter 4.4 YPC promising"}],
  WR:[{n:"Marvin Harrison Jr",r:91,st:"2024 #4 overall generational receiver 2025 year 2"},{n:"Michael Wilson",r:73,st:"2023 3rd-rounder"},{n:"Kendrick Bourne",r:70,st:"Veteran WR3"}],
  TE:[{n:"Trey McBride",r:84,st:"825 yds breakout 2023 11M/yr elite TE"},{n:"Elijah Higgins",r:67,st:"Stanford developing"}],
  OL:[{n:"Paris Johnson Jr",r:78,st:"1st-round LT 2023 developing"},{n:"Isaac Seumalo",r:76,st:"Veteran guard signed 2025"},{n:"Hjalte Froholdt",r:71,st:"Experienced center"}],
- DEF:{n:"Cardinals Defense",r:71,st:"BJ Ojulari 2024 pick Josh Sweat 18M ascending 2025"}},
+ DEF:{n:"Cardinals Defense",r:71,st:"BJ Ojulari 2024 pick Josh Sweat 18M ascending 2025"},
+ HC:{n:"Jonathan Gannon",r:73,st:"2023 HC developing stint"}},
 {abbr:"LAR",city:"Los Angeles",name:"Rams",
  QB:[{n:"Matthew Stafford",r:87,st:"3,965 yds 24 TD SB LVI champion 40M/yr"},{n:"Stetson Bennett",r:64,st:"Backup returned from leave"}],
  RB:[{n:"Kyren Williams",r:84,st:"1,144 yds 12 TD breakout 2023 11M/yr"},{n:"Blake Corum",r:71,st:"2024 3rd-round Michigan compact runner"}],
  WR:[{n:"Davante Adams",r:88,st:"Signed from NYJ 2025 elite route runner 1,144 yds 2024"},{n:"Puka Nacua",r:86,st:"105 rec 1,486 yds rookie 2023"},{n:"Tyler Scott",r:70,st:"Speed WR depth"}],
  TE:[{n:"Tyler Higbee",r:75,st:"Pre-injury ACL return 2025"},{n:"Colby Parkinson",r:70,st:"7M/yr reliable blocker receiver"},{n:"Davis Allen",r:65,st:"2023 3rd-rounder"}],
  OL:[{n:"Alaric Jackson",r:80,st:"Elite LT 19M/yr"},{n:"Kevin Dotson",r:78,st:"Solid guard"},{n:"Coleman Shelton",r:73,st:"8M/yr veteran center"}],
- DEF:{n:"Rams Defense",r:85,st:"Myles Garrett signed 2025 31M/yr elite DE dominant unit"}},
+ DEF:{n:"Rams Defense",r:85,st:"Myles Garrett signed 2025 31M/yr elite DE dominant unit"},
+ HC:{n:"Sean McVay",r:93,st:"SB LVI champion youngest HC genius"}},
 {abbr:"SEA",city:"Seattle",name:"Seahawks",
  QB:[{n:"Sam Darnold",r:80,st:"Signed 2025 27M/yr breakout 2024 season"},{n:"Drew Lock",r:68,st:"Veteran backup"},{n:"Jalen Milroe",r:65,st:"2025 pick athletic backup"}],
  RB:[{n:"Kenneth Walker III",r:84,st:"1,027 yds 2025 SEA starter efficient dual threat"},{n:"Zach Charbonnet",r:74,st:"Backup promising young runner"},{n:"Jadarian Price",r:67,st:"2025 pick Notre Dame"}],
  WR:[{n:"Jaxon Smith-Njigba",r:87,st:"1,130 yds 2024 breakout Pro Bowl WR1"},{n:"Cooper Kupp",r:82,st:"Signed 2025 13M/yr legendary 2021 season veteran"},{n:"Rashid Shaheed",r:78,st:"Signed from NO 2025 741 yds 5 TD breakout"}],
  TE:[{n:"Elijah Arroyo",r:72,st:"2024 2nd-round Miami receiving TE"},{n:"AJ Barner",r:67,st:"2024 pick Michigan developing"}],
  OL:[{n:"Charles Cross",r:82,st:"Pro Bowl LT 43M/yr"},{n:"Grey Zabel",r:76,st:"2025 pick developing guard"},{n:"Anthony Bradford",r:74,st:"Starting guard"}],
- DEF:{n:"Seahawks Defense",r:78,st:"Devon Witherspoon Leonard Williams Ernest Jones rebuilt"}},
+ DEF:{n:"Seahawks Defense",r:78,st:"Devon Witherspoon Leonard Williams Ernest Jones rebuilt"},
+ HC:{n:"Mike Macdonald",r:81,st:"Ex-Ravens elite DC innovative 2025 HC"}},
 {abbr:"SF",city:"San Francisco",name:"49ers",
  QB:[{n:"Brock Purdy",r:91,st:"4,374 yds 33 TD 2024 47M/yr franchise cornerstone"},{n:"Mac Jones",r:70,st:"Signed 2025 veteran backup"},{n:"Kurtis Rourke",r:63,st:"Developmental backup"}],
  RB:[{n:"Christian McCaffrey",r:97,st:"SB LIX champion 1,800 scrimmage yds all-world back"},{n:"Isaac Guerendo",r:73,st:"Efficient young back 4.8 YPC"}],
  WR:[{n:"Brandon Aiyuk",r:90,st:"1,342 yds 7 TD 2023 27M/yr elite WR1"},{n:"Mike Evans",r:88,st:"Signed from TB 2025 14M/yr 10 straight 1000-yd seasons"},{n:"Ricky Pearsall",r:76,st:"2024 31st overall 348 yds after shooting"}],
  TE:[{n:"George Kittle",r:93,st:"1,020 yds best blocking TE in NFL elite"},{n:"Jake Tonges",r:67,st:"Depth TE"}],
  OL:[{n:"Trent Williams",r:97,st:"6x Pro Bowl consensus best OL in NFL 33M/yr"},{n:"Dominick Puni",r:76,st:"2024 3rd-round guard"},{n:"Jake Brendel",r:74,st:"Veteran center"}],
- DEF:{n:"49ers Defense",r:87,st:"Nick Bosa 23M Fred Warner elite LB Dre Greenlaw returns"}}
+ DEF:{n:"49ers Defense",r:87,st:"Nick Bosa 23M Fred Warner elite LB Dre Greenlaw returns"},
+ HC:{n:"Kyle Shanahan",r:92,st:"2 SB appearances offensive genius 79-50"}}
 ];
 
 const ALLTIME_ERAS=[
@@ -608,70 +665,80 @@ const ALLTIME_ERAS=[
  WR:[{n:"Lynn Swann",r:88,st:"SB MVP 4x SB champion HOF"},{n:"John Stallworth",r:87,st:"SB XIV MVP performance HOF"},{n:"Frank Lewis",r:72,st:"Starter 1971-77"}],
  TE:[{n:"Randy Grossman",r:76,st:"4x SB champion blocker"},{n:"Larry Brown",r:72,st:"Starting TE blocker"},{n:"Bennie Cunningham",r:74,st:"Receiving TE late 70s"}],
  OL:[{n:"Mike Webster",r:94,st:"9x Pro Bowl center consensus GOAT"},{n:"Jon Kolb",r:80,st:"4x SB LT"},{n:"Larry Brown",r:78,st:"LG 4x SB champion"}],
- DEF:{n:"Steel Curtain",r:97,st:"Mean Joe Greene Jack Ham Jack Lambert greatest D ever"}},
+ DEF:{n:"Steel Curtain",r:97,st:"Mean Joe Greene Jack Ham Jack Lambert greatest D ever"},
+ HC:{n:"Chuck Noll",r:96,st:"4x SB champion HOF greatest dynasty coach ever"}},
 {abbr:"80sSF",name:"80s 49ers",
  QB:[{n:"Joe Montana",r:98,st:"4x SB champion 3x SB MVP consensus #1 QB ever"},{n:"Steve Young",r:88,st:"Backup future HOFer"},{n:"Matt Cavanaugh",r:68,st:"Backup"}],
  RB:[{n:"Roger Craig",r:91,st:"First 1,000-1,000 season HOF 3x SB champ"},{n:"Ricky Watters",r:82,st:"1,013 yds SB XXIX 5 TD"},{n:"Tom Rathman",r:78,st:"FB/RB SB champion"}],
  WR:[{n:"Jerry Rice",r:99,st:"GOAT WR 22,895 career yds SB MVP"},{n:"John Taylor",r:84,st:"SB XXIII game winner"},{n:"Dwight Clark",r:82,st:"The Catch NFC champ 1982"}],
  TE:[{n:"Russ Francis",r:82,st:"3x Pro Bowl receiving TE"},{n:"Charle Young",r:72,st:"Blocking TE"},{n:"Jamie Williams",r:70,st:"Late 80s starter"}],
  OL:[{n:"Randy Cross",r:85,st:"3x SB champion 3x Pro Bowl"},{n:"Keith Fahnhorst",r:80,st:"3x SB champion LT"},{n:"Fred Quillan",r:78,st:"Starting center 2x SB champ"}],
- DEF:{n:"49ers Defense 80s",r:88,st:"Ronnie Lott Charles Haley greatest secondary"}},
+ DEF:{n:"49ers Defense 80s",r:88,st:"Ronnie Lott Charles Haley greatest secondary"},
+ HC:{n:"Bill Walsh",r:97,st:"3x SB champion HOF West Coast Offense inventor"}},
 {abbr:"85CHI",name:"85 Bears",
  QB:[{n:"Jim McMahon",r:82,st:"SB XX champion punk QB leader"},{n:"Steve Fuller",r:68,st:"Backup starter SB XX"},{n:"Mike Tomczak",r:66,st:"Developmental"}],
  RB:[{n:"Walter Payton",r:99,st:"Sweetness 16,726 career yds NFL record HOF SB champion"},{n:"Matt Suhey",r:78,st:"FB and Payton blocker"},{n:"Calvin Thomas",r:68,st:"Backup RB"}],
  WR:[{n:"Willie Gault",r:84,st:"Deep threat SB XX"},{n:"Dennis McKinnon",r:78,st:"Reliable WR2"},{n:"Ken Margerum",r:70,st:"Slot WR depth"}],
  TE:[{n:"Emery Moorehead",r:78,st:"Reliable TE SB champion"},{n:"Tim Wrightman",r:70,st:"Blocker"},{n:"Pat Dunsmore",r:65,st:"Depth"}],
  OL:[{n:"Jay Hilgenberg",r:87,st:"7x Pro Bowl center SB champion"},{n:"Jimbo Covert",r:86,st:"Pro Bowl LT 1980s HOF"},{n:"Mark Bortz",r:80,st:"2x Pro Bowl guard"}],
- DEF:{n:"46 Defense",r:99,st:"Buddy Ryan 46 defense Mike Singletary Refrigerator Perry held SB opponents to 10 pts"}},
+ DEF:{n:"46 Defense",r:99,st:"Buddy Ryan 46 defense Mike Singletary Refrigerator Perry held SB opponents to 10 pts"},
+ HC:{n:"Mike Ditka",r:92,st:"SB XX 46-0 historic blowout HOF passionate"}},
 {abbr:"90sCOW",name:"90s Cowboys",
  QB:[{n:"Troy Aikman",r:93,st:"3x SB champion SB XXVII MVP HOF"},{n:"Jason Garrett",r:68,st:"Backup future HC"},{n:"Wade Wilson",r:70,st:"Veteran backup"}],
  RB:[{n:"Emmitt Smith",r:97,st:"All-time rushing leader 18,355 yds 3x SB champion HOF"},{n:"Daryl Johnston",r:82,st:"Moose FB 2x Pro Bowl"},{n:"Sherman Williams",r:70,st:"Backup RB"}],
  WR:[{n:"Michael Irvin",r:95,st:"3x SB champion 5x Pro Bowl HOF The Playmaker"},{n:"Alvin Harper",r:78,st:"Big-play receiver SB champion"},{n:"Kevin Williams",r:70,st:"WR depth"}],
  TE:[{n:"Jay Novacek",r:88,st:"5x Pro Bowl SB champion reliable hands"},{n:"Derek Tennell",r:68,st:"Backup"},{n:"Alfredo Roberts",r:66,st:"Blocking TE"}],
  OL:[{n:"Larry Allen",r:97,st:"11x Pro Bowl best guard in NFL history HOF"},{n:"Mark Stepnoski",r:84,st:"5x Pro Bowl center"},{n:"Erik Williams",r:86,st:"4x Pro Bowl RT SB champion"}],
- DEF:{n:"Cowboys Defense 90s",r:90,st:"Charles Haley 5 SB rings Leon Lett Ken Norton Jr"}},
+ DEF:{n:"Cowboys Defense 90s",r:90,st:"Charles Haley 5 SB rings Leon Lett Ken Norton Jr"},
+ HC:{n:"Jimmy Johnson",r:92,st:"Back-to-back SB rings dynasty architect HOF"}},
 {abbr:"00sPAT",name:"2000s Patriots",
  QB:[{n:"Tom Brady",r:99,st:"GOAT 6x SB champion 3x SB MVP 2000s dynasty"},{n:"Matt Cassel",r:74,st:"11-5 without Brady 2008"},{n:"Doug Flutie",r:70,st:"Veteran backup"}],
  RB:[{n:"Corey Dillon",r:87,st:"SB XXXIX 13 TD 1,635 yds 2004"},{n:"Kevin Faulk",r:80,st:"3rd-down back SB champion"},{n:"Antowain Smith",r:76,st:"1,157 yds SB XXXVI year"}],
  WR:[{n:"Randy Moss",r:97,st:"23 TD single-season record 2007"},{n:"Wes Welker",r:90,st:"112 rec elite slot"},{n:"Deion Branch",r:82,st:"SB XXXIX MVP"}],
  TE:[{n:"Rob Gronkowski",r:98,st:"3x SB champion greatest TE ever"},{n:"Ben Watson",r:76,st:"Reliable backup"},{n:"Daniel Graham",r:75,st:"Blocking TE SB"}],
  OL:[{n:"Matt Light",r:84,st:"3x Pro Bowl LT SB champion"},{n:"Logan Mankins",r:86,st:"7x Pro Bowl guard"},{n:"Dan Koppen",r:80,st:"5x SB center starter"}],
- DEF:{n:"Patriots Defense 2000s",r:90,st:"Tedy Bruschi Ty Law Richard Seymour dynasty defense"}},
+ DEF:{n:"Patriots Defense 2000s",r:90,st:"Tedy Bruschi Ty Law Richard Seymour dynasty defense"},
+ HC:{n:"Bill Belichick",r:99,st:"6x SB rings greatest HC in NFL history"}},
 {abbr:"00sCOL",name:"2000s Colts",
  QB:[{n:"Peyton Manning",r:98,st:"2x SB champion 4x MVP greatest regular season QB"},{n:"Jim Sorgi",r:65,st:"Backup holder"},{n:"Charlie Whitehurst",r:63,st:"Practice squad"}],
  RB:[{n:"Edgerrin James",r:93,st:"4x Pro Bowl 2x rushing title HOF"},{n:"Dominic Rhodes",r:78,st:"SB XLI MVP"},{n:"Joseph Addai",r:80,st:"SB XLI 10 rec from Manning"}],
  WR:[{n:"Marvin Harrison",r:96,st:"HOF 14,580 yds 128 TD record 143 rec 2002"},{n:"Reggie Wayne",r:91,st:"6x Pro Bowl Manning's WR1 for decade"},{n:"Brandon Stokley",r:78,st:"SB winner reliable slot"}],
  TE:[{n:"Dallas Clark",r:85,st:"Pro Bowl TE great hands"},{n:"Marcus Pollard",r:72,st:"Veteran blocker"},{n:"Ben Utecht",r:68,st:"SB champion TE"}],
  OL:[{n:"Tarik Glenn",r:86,st:"3x Pro Bowl LT"},{n:"Jake Scott",r:82,st:"Solid RG starter"},{n:"Jeff Saturday",r:88,st:"6x Pro Bowl center Peyton's anchor"}],
- DEF:{n:"Colts Defense 2000s",r:82,st:"Bob Sanders Dwight Freeney Reggie Wayne"}},
+ DEF:{n:"Colts Defense 2000s",r:82,st:"Bob Sanders Dwight Freeney Reggie Wayne"},
+ HC:{n:"Tony Dungy",r:91,st:"SB XLI champion HOF Cover-2 pioneer"}},
 {abbr:"10sSEA",name:"2010s Seahawks",
  QB:[{n:"Russell Wilson",r:94,st:"2x SB champion SB XLVIII MVP franchise icon"},{n:"Tarvaris Jackson",r:70,st:"Backup"},{n:"Charlie Whitehurst",r:64,st:"Clipboard Charlie"}],
  RB:[{n:"Marshawn Lynch",r:96,st:"Beast Mode SB XLVIII hero 1,306 yds 2013"},{n:"Christine Michael",r:72,st:"Developmental RB"},{n:"Robert Turbin",r:70,st:"Backup Lynch complement"}],
  WR:[{n:"Doug Baldwin",r:86,st:"Super Bowl TD clutch Pro Bowl"},{n:"Jermaine Kearse",r:78,st:"SB XLIX catch"},{n:"Percy Harvin",r:82,st:"SB XLVIII 58-yd TD kick return"}],
  TE:[{n:"Zach Miller",r:78,st:"Reliable TE for Wilson"},{n:"Luke Willson",r:68,st:"Backup"},{n:"Anthony McCoy",r:65,st:"Blocking TE"}],
  OL:[{n:"Russell Okung",r:84,st:"LT Pro Bowl SB XLVIII"},{n:"James Carpenter",r:76,st:"LG starter"},{n:"Max Unger",r:82,st:"Pro Bowl center"}],
- DEF:{n:"Legion of Boom",r:99,st:"Richard Sherman Earl Thomas Kam Chancellor greatest secondary ever 2013"}},
+ DEF:{n:"Legion of Boom",r:99,st:"Richard Sherman Earl Thomas Kam Chancellor greatest secondary ever 2013"},
+ HC:{n:"Pete Carroll",r:90,st:"SB XLVIII champion Legion of Boom builder"}},
 {abbr:"90sPAC",name:"90s Packers",
  QB:[{n:"Brett Favre",r:96,st:"3x MVP SB XXXI champion consecutive starts record"},{n:"Doug Pederson",r:68,st:"Backup future SB coach"},{n:"Mark Brunell",r:72,st:"Backup before Jacksonville"}],
  RB:[{n:"Dorsey Levens",r:82,st:"1,435 yds 1997 SB champion"},{n:"Edgar Bennett",r:78,st:"1,067 yds SB year"},{n:"William Henderson",r:76,st:"Elite FB Pro Bowl"}],
  WR:[{n:"Antonio Freeman",r:88,st:"SB XXXI TD SB XXXII MNF miracle"},{n:"Robert Brooks",r:80,st:"1,497 yds 1995 before injury"},{n:"Mark Chmura",r:76,st:"Pro Bowl TE"}],
  TE:[{n:"Mark Chmura",r:76,st:"Pro Bowl TE reliable Favre target"},{n:"Jeff Thomason",r:68,st:"Blocking TE"},{n:"Derrick Mayes",r:66,st:"Depth receiver"}],
  OL:[{n:"Marco Rivera",r:80,st:"2x Pro Bowl guard SB champion"},{n:"Aaron Taylor",r:78,st:"SB champion OT/G"},{n:"Frank Winters",r:82,st:"C Favre's blindside anchor"}],
- DEF:{n:"Packers Defense 90s",r:85,st:"Reggie White 21 sacks 1998 LeRoy Butler Interceptor"}},
+ DEF:{n:"Packers Defense 90s",r:85,st:"Reggie White 21 sacks 1998 LeRoy Butler Interceptor"},
+ HC:{n:"Mike Holmgren",r:88,st:"SB XXXI champion West Coast Offense master"}},
 {abbr:"72MIA",name:"1972 Dolphins",
  QB:[{n:"Bob Griese",r:88,st:"2x SB champion 6x Pro Bowl perfect season"},{n:"Earl Morrall",r:78,st:"11-0 while Griese injured 1972"},{n:"Jim Del Gaizo",r:62,st:"Backup"}],
  RB:[{n:"Larry Csonka",r:94,st:"SB VIII MVP HOF perfect season 1,003 yds"},{n:"Mercury Morris",r:84,st:"1,000 yds perfect season first dual 1K"},{n:"Jim Kiick",r:78,st:"Butch Cassidy complement"}],
  WR:[{n:"Paul Warfield",r:90,st:"HOF WR deadly deep threat"},{n:"Howard Twilley",r:74,st:"SB champion slot receiver"},{n:"Marlin Briscoe",r:72,st:"Reliable WR2"}],
  TE:[{n:"Marv Fleming",r:76,st:"5x SB champion blocker"},{n:"Jim Mandich",r:72,st:"Reliable backup"},{n:"Norm Evans",r:70,st:"5x Pro Bowl OT also plays TE"}],
  OL:[{n:"Larry Little",r:90,st:"HOF guard 5x Pro Bowl perfect season"},{n:"Norm Evans",r:82,st:"5x Pro Bowl OT"},{n:"Jim Langer",r:85,st:"HOF center perfect season"}],
- DEF:{n:"No-Name Defense",r:88,st:"Nick Buoniconti HOF perfect season unit allowed fewest pts in NFL"}},
+ DEF:{n:"No-Name Defense",r:88,st:"Nick Buoniconti HOF perfect season unit allowed fewest pts in NFL"},
+ HC:{n:"Don Shula",r:96,st:"17-0 only perfect season in NFL history HOF"}},
 {abbr:"00sRAV",name:"2000s Ravens",
  QB:[{n:"Trent Dilfer",r:78,st:"SB XXXV champion game manager"},{n:"Elvis Grbac",r:73,st:"Starter 2001"},{n:"Anthony Wright",r:65,st:"Backup"}],
  RB:[{n:"Jamal Lewis",r:92,st:"SB XXXV champion 2,066 yds record 2003"},{n:"Chester Taylor",r:74,st:"912 yds 2005"},{n:"Mike Anderson",r:72,st:"SB year backup"}],
  WR:[{n:"Derrick Mason",r:80,st:"1,168 yds 2003"},{n:"Travis Taylor",r:72,st:"Starter 2000-2003"},{n:"Qadry Ismail",r:71,st:"65 rec 1999"}],
  TE:[{n:"Shannon Sharpe",r:88,st:"HOF SB XXXV champion 96 rec 2000"},{n:"Todd Heap",r:81,st:"2x Pro Bowl"},{n:"Ben Coates",r:74,st:"Veteran TE"}],
  OL:[{n:"Jonathan Ogden",r:95,st:"HOF LT 11x Pro Bowl greatest ever"},{n:"Edwin Mulitalo",r:78,st:"Starting guard"},{n:"Mike Flynn",r:75,st:"Center"}],
- DEF:{n:"Ravens D 2000",r:97,st:"Greatest defense in NFL history Ray Lewis Ed Reed 2000 season"}}
+ DEF:{n:"Ravens D 2000",r:97,st:"Greatest defense in NFL history Ray Lewis Ed Reed 2000 season"},
+ HC:{n:"Brian Billick",r:83,st:"SB XXXV champion defense-first innovator"}}
 ];
 
 // ── RECORDS DATA ──────────────────────────────────────────────────────────────
@@ -698,7 +765,7 @@ const RECORDS=[
 
 
 // ── GAME STATE ─────────────────────────────────────────────────────────────────
-let G={mode:null,record:null,team:null,pick:null,round:0,roster:[],used:[],TOTAL:9,remaining:[],pickedPos:null};
+let G={mode:null,record:null,team:null,pick:null,round:0,roster:[],used:[],TOTAL:9,remaining:[],pickedPos:null,ultimate:false};
 
 // ── UTILITIES ──────────────────────────────────────────────────────────────────
 function avg(arr){return arr.length?Math.round(arr.reduce((a,b)=>a+b,0)/arr.length):0;}
@@ -771,6 +838,12 @@ function showPhase(id){
   });
 })();
 
+function selectVariant(v){
+  G.ultimate=(v==='ultimate');
+  document.getElementById('varRegular').classList.toggle('sel',!G.ultimate);
+  document.getElementById('varUltimate').classList.toggle('sel',G.ultimate);
+}
+
 function startRecord(){
   if(!G.record) return;
   G.mode='record';
@@ -780,7 +853,12 @@ function startRecord(){
 // ── START GAME ─────────────────────────────────────────────────────────────────
 function startGame(){
   G.round=0; G.roster=[]; G.used=[]; G.team=null; G.pick=null;
-  G.remaining=[...DPOS]; G.pickedPos=null;
+  // Ultimate mode adds HC + FLEX to picks
+  const activeDPOS=(G.mode==='record'&&G.ultimate)
+    ?["QB","RB","RB","WR","WR","TE","OL","DEF","HC","FLEX"]
+    :DPOS;
+  G.TOTAL=activeDPOS.length;
+  G.remaining=[...activeDPOS]; G.pickedPos=null;
 
   // Set game title
   const gt=document.getElementById('gameTitle');
@@ -1086,6 +1164,15 @@ function getPlayers(pos){
   if(pos==='DEF'){
     const d=G.team.DEF||G.team.def;
     players=d?[d]:[];
+  } else if(pos==='HC'){
+    const hc=G.team.HC||G.team.hc;
+    players=hc?[hc]:[];
+  } else if(pos==='FLEX'){
+    // Combine RB + WR + TE for flex pick
+    const rbs=G.team.RB||[];
+    const wrs=G.team.WR||[];
+    const tes=G.team.TE||[];
+    players=[...rbs,...wrs,...tes];
   } else if(pos==='OL'){
     const olArr=G.team.OL||G.team.ol||[];
     const arr=Array.isArray(olArr)?olArr:[olArr];
@@ -1207,9 +1294,11 @@ function getBestPossibleOvr(roster){
   const bests=roster.map(({pos,team})=>{
     let players=[];
     if(pos==='DEF'){const d=team.DEF||team.def;players=d?[d]:[];}
+    else if(pos==='HC'){const hc=team.HC||team.hc;players=hc?[hc]:[];}
+    else if(pos==='FLEX'){players=[...(team.RB||[]),...(team.WR||[]),...(team.TE||[])];}
     else if(pos==='OL'){
       const ol=team.OL||team.ol||[];
-      if(ol.length){const avg=Math.round(ol.reduce((a,b)=>a+b.r,0)/ol.length);players=[{r:avg}];}
+      if(ol.length){const avgR=Math.round(ol.reduce((a,b)=>a+b.r,0)/ol.length);players=[{r:avgR}];}
     } else {players=team[pos]||team[pos.toLowerCase()]||[];}
     if(!players.length)return 70;
     return Math.max(...players.map(p=>p.r));
@@ -1227,17 +1316,20 @@ function buildRecordResults(ovrVal){
   const clbl=document.getElementById('rrChallengeLbl');
   if(clbl) clbl.textContent='BUILD A '+rec.w+'-'+rec.l+' TEAM';
 
-  // Big score = target record
-  const bs=document.getElementById('rrBigScore');
-  if(bs){bs.textContent=rec.w+'-'+rec.l;bs.style.color=ab<=3?'#10b981':ab<=8?'#fbbf24':'#f87171';}
+  // Compute achieved record first (needed for big score)
+  const achievedRec=ovrToRecord(ovrVal);
 
-  // Verdict badge
+  // Big score = YOUR achieved record
+  const bs=document.getElementById('rrBigScore');
+  if(bs){bs.textContent=achievedRec.w+'-'+achievedRec.l;bs.style.color=achievedRec.color;}
+
+  // Verdict badge = how close to target
   let verdict,vsub,pct;
-  if(ab<=1){verdict='PERFECT SEASON';vsub='OVR nailed it exactly.';pct='Top 2% of players';}
-  else if(ab<=3){verdict='NEARLY PERFECT';vsub='Only '+ab+' OVR off target.';pct='Top 5% of players';}
+  if(ab<=1){verdict='PERFECT FIT';vsub='Hit the target exactly!';pct='Top 2% of players';}
+  else if(ab<=3){verdict='NEARLY PERFECT';vsub='Only '+ab+' OVR off '+rec.w+'-'+rec.l+'.';pct='Top 5% of players';}
   else if(ab<=6){verdict='VERY CLOSE';vsub=ab+' OVR '+(diff>0?'above':'below')+' target.';pct='Top 15% of players';}
   else if(ab<=10){verdict='CLOSE ENOUGH';vsub=ab+' OVR off — solid attempt.';pct='Top 30% of players';}
-  else if(ab<=15){verdict='OFF THE MARK';vsub=ab+' OVR away from target.';pct='Bottom half';}
+  else if(ab<=15){verdict='OFF TARGET';vsub=ab+' OVR away from '+rec.w+'-'+rec.l+'.';pct='Bottom half';}
   else{verdict='WAY OFF';vsub='Back to the drawing board.';pct='—';}
 
   const vb=document.getElementById('rrVerdictBadge');
@@ -1245,9 +1337,9 @@ function buildRecordResults(ovrVal){
   const vsl=document.getElementById('rrVsubLine');
   if(vsl) vsl.textContent=vsub;
 
-  // Best possible line
+  // Sub line = OVR context
   const bl=document.getElementById('rrBestLine');
-  if(bl) bl.textContent='Target OVR: '+rec.target+' · Your OVR: '+ovrVal+(ab<=3?' · Best possible: '+rec.target:'');
+  if(bl) bl.textContent='Your OVR: '+ovrVal+' · Target: '+rec.target+' OVR ('+rec.w+'-'+rec.l+')';
 
   // Progress bar — one segment per pick, orange if fitting
   const barWrap=document.getElementById('rrBarWrap');
@@ -1265,13 +1357,18 @@ function buildRecordResults(ovrVal){
   const pt=document.getElementById('rrPctText');
   if(pt) pt.textContent=pct;
 
-  // ── Stat strip: RECORD / BEST POSSIBLE / GRADE ────────────────────────────
-  // RECORD: what record does the player's OVR correspond to?
-  const achievedRec=ovrToRecord(ovrVal);
+  // ── Stat strip: YOUR RECORD / TARGET / BEST POSSIBLE ────────────────────
+  // YOUR RECORD: already computed above
   const srEl=document.getElementById('rrStatRecord');
   if(srEl){srEl.textContent=achievedRec.w+'-'+achievedRec.l;srEl.style.color=achievedRec.color;}
   const srSub=document.getElementById('rrStatRecordSub');
   if(srSub) srSub.textContent=achievedRec.label;
+
+  // TARGET: the record they were building for
+  const stEl=document.getElementById('rrStatTarget');
+  if(stEl){stEl.textContent=rec.w+'-'+rec.l;stEl.style.color=rec.color;}
+  const stSub=document.getElementById('rrStatTargetSub');
+  if(stSub) stSub.textContent=rec.label;
 
   // BEST POSSIBLE: best OVR from drawn teams → record
   const bestOvr=getBestPossibleOvr(G.roster);
@@ -1280,21 +1377,6 @@ function buildRecordResults(ovrVal){
   if(sbEl){sbEl.textContent=bestRec.w+'-'+bestRec.l;sbEl.style.color=bestRec.color;}
   const sbSub=document.getElementById('rrStatBestSub');
   if(sbSub) sbSub.textContent='OVR '+bestOvr+' ceiling';
-
-  // GRADE: based on proximity to target
-  let grade,gradeColor;
-  if(ab===0){grade='S';gradeColor='#FFD700';}
-  else if(ab<=1){grade='A+';gradeColor='#10b981';}
-  else if(ab<=3){grade='A';gradeColor='#10b981';}
-  else if(ab<=5){grade='A-';gradeColor='#69F0AE';}
-  else if(ab<=7){grade='B+';gradeColor='#40C4FF';}
-  else if(ab<=10){grade='B';gradeColor='#40C4FF';}
-  else if(ab<=14){grade='C';gradeColor='#fbbf24';}
-  else{grade='D';gradeColor='#f87171';}
-  const sgEl=document.getElementById('rrStatGrade');
-  if(sgEl){sgEl.textContent=grade;sgEl.style.color=gradeColor;}
-  const sgSub=document.getElementById('rrStatGradeSub');
-  if(sgSub) sgSub.textContent=ab+' OVR from target';
 
   // Player picks rows
   const pl=document.getElementById('rrPicksList');
