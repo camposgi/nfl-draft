@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NFL Draft Challenge</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d0f14;--surf:#161b24;--surf2:#1e2533;--brd:#2d3748;--txt:#f0f4ff;--muted:#6b7280;--acc:#7c3aed;--acc2:#4f46e5;--grn:#10b981;--yel:#fbbf24;--red:#ef4444;--tp:#7c3aed;--ts:#4f46e5}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;line-height:1.5}
+.scr{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 20px}
+.scr.on{display:flex}
+#gameScr{display:none;min-height:100vh;flex-direction:column}
+#gameScr.on{display:flex}
+.btn-p{padding:14px 52px;font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:2px;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;border:none;border-radius:12px;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 6px 28px rgba(124,58,237,.35)}
+.btn-p:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(124,58,237,.5)}
+.btn-s{padding:11px 26px;font-size:.88rem;font-weight:700;background:var(--surf);color:var(--txt);border:1px solid var(--brd);border-radius:10px;cursor:pointer;transition:all .2s}
+.btn-s:hover{border-color:var(--acc);background:rgba(124,58,237,.08)}
+.badge{display:inline-block;padding:6px 18px;border-radius:999px;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);color:#a78bfa;font-size:.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:24px}
+.hl{background:linear-gradient(135deg,#7c3aed,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.mm-title{font-size:clamp(2.2rem,8vw,5rem);font-weight:900;line-height:1.05;letter-spacing:-2px;margin-bottom:14px}
+.mm-sub{color:var(--muted);font-size:1rem;margin-bottom:40px;max-width:480px}
+.mode-cards{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.mode-card{background:var(--surf);border:2px solid var(--brd);border-radius:18px;padding:28px 22px;max-width:255px;flex:1;min-width:205px;cursor:pointer;transition:all .2s;text-align:left}
+.mode-card:hover{border-color:var(--acc);transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.5)}
+.mc-ico{font-size:2.1rem;margin-bottom:12px}.mc-ttl{font-size:1.05rem;font-weight:800;margin-bottom:6px}
+.mc-dsc{font-size:.78rem;color:var(--muted);line-height:1.6}
+.mc-tag{display:inline-block;margin-top:12px;padding:4px 12px;border-radius:999px;font-size:.67rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;background:rgba(124,58,237,.18);color:#a78bfa}
+.steps{display:flex;gap:13px;flex-wrap:wrap;justify-content:center;margin-bottom:34px;max-width:620px}
+.step{background:var(--surf);border:1px solid var(--brd);border-radius:14px;padding:18px;flex:1;min-width:125px;max-width:180px}
+.step-ico{font-size:1.7rem;margin-bottom:8px}.step-lbl{font-size:.76rem;color:var(--muted);line-height:1.5}
+.rec-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;max-width:660px;margin-bottom:22px}
+.rec-btn{padding:10px 7px;min-width:68px;border-radius:10px;border:2px solid var(--brd);background:var(--surf);cursor:pointer;transition:all .18s;text-align:center;flex:0 0 auto}
+.rec-btn:hover{transform:scale(1.07)}
+.rec-btn.sel{box-shadow:0 0 0 3px rgba(124,58,237,.3)}
+.rec-wl{font-size:.92rem;font-weight:900;display:block;margin-bottom:2px}
+.rec-lbl{font-size:.56rem;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;line-height:1.3}
+.rec-info{background:var(--surf);border:1px solid var(--brd);border-radius:12px;padding:16px 22px;margin-bottom:22px;max-width:380px;width:100%;text-align:left}
+.ril{font-size:.67rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.rin{font-size:1.05rem;font-weight:800;margin-bottom:3px}
+.rio{font-size:.82rem;color:var(--muted)}.rio span{color:var(--acc);font-weight:700}
+.ghdr{background:var(--surf);border-bottom:1px solid var(--brd);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;flex-shrink:0}
+.glogo{font-size:1rem;font-weight:800}
+.rpills{display:flex;gap:5px;flex-wrap:wrap}
+.rpill{min-width:30px;height:26px;padding:0 7px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:700;background:var(--surf2);border:1px solid var(--brd);color:var(--muted);transition:all .3s}
+.rpill.done{background:var(--grn);border-color:var(--grn);color:#fff}
+.rpill.cur{background:var(--acc);border-color:var(--acc);color:#fff;box-shadow:0 0 8px rgba(124,58,237,.5)}
+.tgtbar{display:flex;align-items:center;gap:8px;font-size:.76rem;background:rgba(124,58,237,.1);padding:6px 12px;border-radius:8px;border:1px solid rgba(124,58,237,.2)}
+.tgtbar .tbl{color:var(--muted)}.tgtbar .tbv{font-weight:800;color:var(--yel)}
+.tbdiff{font-size:.7rem;font-weight:700}.tbdiff.good{color:var(--grn)}.tbdiff.warn{color:var(--yel)}.tbdiff.bad{color:var(--red)}
+.gbody{flex:1;display:flex;gap:18px;padding:20px;max-width:1060px;width:100%;margin:0 auto}
+.apanel{flex:1;min-width:0;display:flex;flex-direction:column;gap:16px}
+.phase{display:none}.phase.on{display:block}
+.spinbox{background:var(--surf);border:1px solid var(--brd);border-radius:16px;padding:30px 26px;text-align:center;position:relative;overflow:hidden;transition:border-color .5s}
+.spinbox::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--tp) 0%,transparent 55%);opacity:.07;pointer-events:none;transition:all .5s}
+.slbl{font-size:.66rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+.postag{display:inline-block;padding:7px 22px;border-radius:999px;font-weight:900;font-size:1rem;margin-bottom:22px;background:var(--tp);color:#fff;transition:background .5s}
+.tdisp{font-size:clamp(1.6rem,3.5vw,2.6rem);font-weight:900;letter-spacing:-1px;min-height:74px;display:flex;align-items:center;justify-content:center;color:var(--txt)}
+.tdisp.spin{animation:slot .09s linear infinite}
+@keyframes slot{0%{opacity:.3;transform:scaleY(.8) translateY(-4px)}50%{opacity:1;transform:scaleY(1)}100%{opacity:.3;transform:scaleY(.8) translateY(4px)}}
+.tdisp.land{animation:bnc .38s cubic-bezier(.34,1.56,.64,1)}
+@keyframes bnc{0%{transform:scale(.7);opacity:0}65%{transform:scale(1.07)}100%{transform:scale(1);opacity:1}}
+.spinbtn{margin-top:20px;padding:12px 44px;font-size:.93rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;border:none;border-radius:12px;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(124,58,237,.3)}
+.spinbtn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px rgba(124,58,237,.5)}
+.spinbtn:disabled{opacity:.42;cursor:not-allowed;transform:none}
+.pickhdr{text-align:center;margin-bottom:13px}
+.pickhdr h3{font-size:1rem;font-weight:700;margin-bottom:3px}
+.pickhdr p{font-size:.81rem;color:var(--muted)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:13px}
+.pcard{background:var(--surf);border:2px solid var(--brd);border-radius:13px;padding:16px;cursor:pointer;transition:all .2s;position:relative;opacity:0;animation:fdup .35s ease forwards}
+@keyframes fdup{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.pcard:hover{border-color:var(--tp);transform:translateY(-3px);box-shadow:0 10px 24px rgba(0,0,0,.5)}
+.pcard.sel{border-color:var(--grn);background:rgba(16,185,129,.07)}
+.pcard.sel .pname{color:var(--grn)}
+.prat{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:6px;font-size:.71rem;font-weight:800;margin-bottom:7px}
+.re{background:rgba(16,185,129,.13);color:#34d399}.rg{background:rgba(59,130,246,.13);color:#60a5fa}
+.ry{background:rgba(251,191,36,.13);color:#fbbf24}.ra{background:rgba(248,113,113,.13);color:#f87171}
+.fitbdg{display:block;font-size:.65rem;font-weight:700;margin-bottom:5px;padding:2px 7px;border-radius:4px;width:fit-content}
+.fp{background:rgba(16,185,129,.14);color:#34d399}
+.fh{background:rgba(251,191,36,.14);color:#fbbf24}
+.fl{background:rgba(148,163,184,.14);color:#94a3b8}
+.pname{font-size:.97rem;font-weight:700;margin-bottom:4px;line-height:1.3}
+.pstat{font-size:.69rem;color:var(--muted);line-height:1.4}
+.pchk{position:absolute;top:10px;right:10px;width:20px;height:20px;border-radius:50%;background:var(--grn);display:flex;align-items:center;justify-content:center;font-size:10px;opacity:0;transition:opacity .2s}
+.pcard.sel .pchk{opacity:1}
+.confbtn{width:100%;padding:12px;font-size:.92rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;background:var(--grn);color:#fff;border:none;border-radius:11px;cursor:pointer;transition:all .2s;opacity:0;pointer-events:none}
+.confbtn.vis{opacity:1;pointer-events:all}
+.confbtn:hover{background:#059669;transform:translateY(-2px)}
+.rpanel{width:252px;flex-shrink:0}
+.rhdr{font-size:.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.rovr{font-size:.84rem;font-weight:700;color:var(--yel)}
+.rslot{display:flex;align-items:center;gap:10px;padding:10px 11px;background:var(--surf);border:1px solid var(--brd);border-radius:9px;margin-bottom:6px;transition:all .3s;min-height:56px}
+.rslot.cur{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc),0 0 12px rgba(124,58,237,.1)}
+.sposbdg{width:33px;height:33px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;flex-shrink:0;background:var(--surf2);color:var(--muted);border:1px solid var(--brd);transition:all .3s}
+.sposbdg.filled{color:#fff;border-color:transparent}
+.scont{flex:1;min-width:0}
+.splyr{font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.smeta{font-size:.64rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.srat{font-size:.8rem;font-weight:800}
+.res-lbl{font-size:.67rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.ovr-big{font-size:clamp(4rem,13vw,7.5rem);font-weight:900;line-height:1;letter-spacing:-3px;background:linear-gradient(135deg,var(--yel),#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
+.vrd-main{font-size:clamp(1.1rem,2.8vw,1.8rem);font-weight:800;margin-bottom:4px}
+.vrd-sub{color:var(--muted);font-size:.88rem;margin-bottom:34px;max-width:400px}
+.fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:620px;width:100%;margin-bottom:30px}
+.fcard{background:var(--surf);border:1px solid var(--brd);border-top-width:3px;border-radius:10px;padding:12px;text-align:left;animation:fdup .4s ease forwards;opacity:0}
+.fpos{font-size:.59rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.fname{font-size:.9rem;font-weight:700;margin-bottom:2px}
+.fteam{font-size:.67rem;color:var(--muted)}
+.frat{float:right;font-size:1.05rem;font-weight:900}
+.res-acts{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.rrbx{background:var(--surf);border:2px solid var(--brd);border-radius:14px;padding:20px 26px;max-width:400px;width:100%;margin-bottom:26px;text-align:center}
+.rrbl{font-size:.66rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.rrbr{font-size:2.3rem;font-weight:900;margin-bottom:3px}
+.rrbsub{font-size:.82rem;color:var(--muted)}
+.rrbcmp{display:flex;justify-content:space-around;margin-top:14px;gap:10px}
+.rrbc{text-align:center}
+.rrbcl{font-size:.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.rrbcv{font-size:1.55rem;font-weight:900}
+@media(max-width:800px){.gbody{flex-direction:column}.rpanel{width:100%}.pgrid{grid-template-columns:1fr 1fr}.fgrid{grid-template-columns:1fr 1fr}}
+@media(max-width:460px){.gbody{padding:14px}.pgrid{grid-template-columns:1fr}.fgrid{grid-template-columns:1fr 1fr}.rec-btn{min-width:58px;padding:8px 4px}}
+</style>
+</head>
+<body>
+
+<!-- MAIN MENU -->
+<div id="mainScr" class="scr on">
+  <div class="badge">🏈 NFL Draft Challenge</div>
+  <h1 class="mm-title">Pick Your<br><span class="hl">Game Mode</span></h1>
+  <p class="mm-sub">Three ways to build the greatest roster in NFL history</p>
+  <div class="mode-cards">
+    <div class="mode-card" onclick="show('introScr','draft')">
+      <div class="mc-ico">🎰</div>
+      <div class="mc-ttl">Build a 17-0 Team</div>
+      <div class="mc-dsc">Spin for random 2024-25 NFL teams, draft one player per position, and see if you can go undefeated.</div>
+      <div class="mc-tag">Current Rosters · 6 Rounds</div>
+    </div>
+    <div class="mode-card" onclick="show('introScr','alltime')">
+      <div class="mc-ico">🏆</div>
+      <div class="mc-ttl">All-Time Draft</div>
+      <div class="mc-dsc">Spin legendary era squads — 70s Steelers, 85 Bears, 90s Cowboys, 2000s Pats and more. Draft the greatest players ever.</div>
+      <div class="mc-tag">All-Time Legends · 6 Rounds</div>
+    </div>
+    <div class="mode-card" onclick="show('recScr',null)">
+      <div class="mc-ico">📊</div>
+      <div class="mc-ttl">Record Builder</div>
+      <div class="mc-dsc">Choose any record from 0-17 to 17-0, then draft a team that fits. Can you nail a perfect 8-9 mediocre squad?</div>
+      <div class="mc-tag">18 Records · Strategy Mode</div>
+    </div>
+  </div>
+</div>
+
+<!-- INTRO (shared for draft + alltime) -->
+<div id="introScr" class="scr">
+  <div class="badge" id="introBadge">🎰 Draft Mode</div>
+  <h1 class="mm-title" style="font-size:clamp(1.9rem,6vw,3.8rem)" id="introTitle">Build Your<br><span class="hl">17-0 Team</span></h1>
+  <p class="mm-sub" id="introDesc" style="margin-bottom:32px">Spin for a random NFL team, pick the best player at each position, and score your roster.</p>
+  <div class="steps">
+    <div class="step"><div class="step-ico">🎰</div><div class="step-lbl" id="step1lbl">Spin for a random NFL team</div></div>
+    <div class="step"><div class="step-ico">🤔</div><div class="step-lbl">Pick the best player at each position</div></div>
+    <div class="step"><div class="step-ico">🏆</div><div class="step-lbl">Score your 6-player roster</div></div>
+  </div>
+  <div style="display:flex;gap:11px;flex-wrap:wrap;justify-content:center">
+    <button class="btn-s" onclick="show('mainScr',null)">← Back</button>
+    <button class="btn-p" id="introStartBtn" onclick="startGame()">Start Draft</button>
+  </div>
+</div>
+
+<!-- RECORD SELECTOR -->
+<div id="recScr" class="scr">
+  <div class="badge">📊 Record Builder</div>
+  <h1 class="mm-title" style="font-size:clamp(1.9rem,6vw,3.8rem)">Choose Your<br><span class="hl">Target Record</span></h1>
+  <p class="mm-sub" style="margin-bottom:28px">Draft a team that matches the quality of your chosen record. Fit matters more than OVR.</p>
+  <div class="rec-grid" id="recGrid"></div>
+  <div class="rec-info" id="recInfo" style="display:none">
+    <div class="ril">Selected Record</div>
+    <div class="rin" id="recInfoName">—</div>
+    <div class="rio">Target OVR: <span id="recInfoOvr">—</span></div>
+  </div>
+  <div style="display:flex;gap:11px;flex-wrap:wrap;justify-content:center">
+    <button class="btn-s" onclick="show('mainScr',null)">← Back</button>
+    <button class="btn-p" id="recStartBtn" onclick="startRecord()" disabled style="opacity:.4;cursor:not-allowed">Draft This Team →</button>
+  </div>
+</div>
+
+<!-- GAME SCREEN (shared all modes) -->
+<div id="gameScr">
+  <div class="ghdr">
+    <div class="glogo" id="gameTitle">🏈 Build a 17-0 Team</div>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div class="tgtbar" id="tgtBar" style="display:none">
+        <span class="tbl">Target OVR:</span><span class="tbv" id="tgtOvr">—</span>
+        <span class="tbdiff" id="tgtDiff"></span>
+      </div>
+      <div class="rpills" id="gamePills"></div>
+    </div>
+  </div>
+  <div class="gbody">
+    <div class="apanel">
+      <div id="spinPhase" class="phase on">
+        <div class="spinbox" id="spinBox">
+          <div class="slbl">Drafting Position</div>
+          <div id="posBadge" class="postag">QB</div>
+          <div class="slbl" style="margin-bottom:12px">Your Team This Round</div>
+          <div id="teamDisp" class="tdisp">?</div>
+          <button id="spinBtn" class="spinbtn" onclick="spinTeam()">🎰 Spin for Team</button>
+        </div>
+      </div>
+      <div id="pickPhase" class="phase">
+        <div class="pickhdr">
+          <h3 id="pickTitle">Pick Your Quarterback</h3>
+          <p id="pickSub">Choose from the <span id="pickTeamSpan" style="font-weight:700">—</span></p>
+        </div>
+        <div class="pgrid" id="playerGrid"></div>
+        <button id="confBtn" class="confbtn" onclick="confirmPick()">Draft This Player →</button>
+      </div>
+    </div>
+    <div class="rpanel">
+      <div class="rhdr"><span>Your Roster</span><span class="rovr" id="rOvr">OVR —</span></div>
+      <div id="rosterSlots"></div>
+    </div>
+  </div>
+</div>
+
+<!-- DRAFT / ALLTIME RESULTS -->
+<div id="resScr" class="scr" style="padding:36px 20px">
+  <div class="res-lbl" id="resLabel">Final Team Rating</div>
+  <div class="ovr-big" id="ovrScore">—</div>
+  <div class="vrd-main" id="vrdMain"></div>
+  <div class="vrd-sub" id="vrdSub"></div>
+  <div class="fgrid" id="finalGrid"></div>
+  <div class="res-acts">
+    <button class="btn-s" onclick="copyResult()">📤 Copy</button>
+    <button class="btn-s" onclick="show('mainScr',null)">🏠 Menu</button>
+    <button class="btn-p" id="playAgainBtn" onclick="playAgain()">🔄 Play Again</button>
+  </div>
+</div>
+
+<!-- RECORD BUILDER RESULTS -->
+<div id="recResScr" class="scr" style="padding:36px 20px">
+  <div class="res-lbl">Record Builder Results</div>
+  <div class="rrbx">
+    <div class="rrbl">Target Record</div>
+    <div class="rrbr" id="rrbRecord">—</div>
+    <div class="rrbsub" id="rrbLabel">—</div>
+    <div class="rrbcmp">
+      <div class="rrbc"><div class="rrbcl">Your OVR</div><div class="rrbcv" id="rrbYours">—</div></div>
+      <div class="rrbc"><div class="rrbcl">Target OVR</div><div class="rrbcv" id="rrbTarget" style="color:var(--acc)">—</div></div>
+      <div class="rrbc"><div class="rrbcl">Diff</div><div class="rrbcv" id="rrbDiff">—</div></div>
+    </div>
+  </div>
+  <div class="vrd-main" id="rrbVerdict"></div>
+  <div class="vrd-sub" id="rrbVsub"></div>
+  <div class="fgrid" id="recFinalGrid"></div>
+  <div class="res-acts">
+    <button class="btn-s" onclick="copyResult()">📤 Copy</button>
+    <button class="btn-s" onclick="show('mainScr',null)">🏠 Menu</button>
+    <button class="btn-p" onclick="show('recScr',null)">🔄 Try Again</button>
+  </div>
+</div>
+
+<script>
+// ── CONSTANTS ─────────────────────────────────────────────────────────────────
+const PNAMES={
+  QB:["Quarterback","QBs"],RB:["Running Back","RBs"],WR:["Wide Receiver","WRs"],
+  TE:["Tight End","TEs"],OL:["Offensive Line","O-Line"],DEF:["Defense","Defense"]
+};
+const DPOS=["QB","RB","RB","WR","WR","WR","TE","OL","DEF"]; // 9 picks
+const CURRENT_TEAMS=[
+{abbr:"BUF",city:"Buffalo",name:"Bills",
+ QB:[{n:"Josh Allen",r:97,st:"MVP-level 4,306 yds 37 TD 2023"},{n:"Mitchell Trubisky",r:72,st:"Backup"}],
+ RB:[{n:"James Cook",r:86,st:"1,122 yds 16 TD 2023"},{n:"Ty Johnson",r:70,st:"Change of pace"},{n:"Damien Harris",r:70,st:"Veteran depth"}],
+ WR:[{n:"Keon Coleman",r:82,st:"612 yds 2024 2nd-round pick breakout"},{n:"Khalil Shakir",r:79,st:"821 yds WR1 role 2024"},{n:"Curtis Samuel",r:70,st:"Veteran slot signed 2024"}],
+ TE:[{n:"Dalton Kincaid",r:79,st:"75 rec as rookie 2023"},{n:"Dawson Knox",r:76,st:"2x Pro Bowl pass catcher"},{n:"Quintin Morris",r:68,st:"Blocking TE"}],
+ OL:[{n:"Dion Dawkins",r:86,st:"Pro Bowl LT"},{n:"David Edwards",r:75,st:"Guard"},{n:"Connor McGovern",r:74,st:"Center"}],
+ DEF:{n:"Bills Defense",r:83,st:"Von Miller-led unit 43 sacks 2022"}},
+{abbr:"MIA",city:"Miami",name:"Dolphins",
+ QB:[{n:"Tua Tagovailoa",r:88,st:"Record efficiency 4,624 yds 2023"},{n:"Skylar Thompson",r:68,st:"Backup"}],
+ RB:[{n:"De'Von Achane",r:86,st:"8.9 YPC in 8 games 2023"},{n:"Raheem Mostert",r:80,st:"21 TD 2023 oldest 1000-yd back"},{n:"Jeff Wilson Jr",r:72,st:"Veteran"}],
+ WR:[{n:"Tyreek Hill",r:97,st:"1,799 yds fastest in NFL 2023"},{n:"Jaylen Waddle",r:89,st:"1,014 yds elite RAC"},{n:"Braxton Berrios",r:68,st:"Return specialist"}],
+ TE:[{n:"Durham Smythe",r:70,st:"Run blocker"},{n:"Julian Hill",r:67,st:"Reserve"},{n:"Hunter Long",r:66,st:"Developmental"}],
+ OL:[{n:"Terron Armstead",r:87,st:"Elite LT when healthy"},{n:"Robert Jones",r:76,st:"Guard"},{n:"Connor Williams",r:75,st:"Center"}],
+ DEF:{n:"Dolphins Defense",r:78,st:"Jalen Ramsey-led secondary"}},
+{abbr:"NE",city:"New England",name:"Patriots",
+ QB:[{n:"Drake Maye",r:79,st:"2024 #3 overall promising debut 2,276 yds"},{n:"Bailey Zappe",r:68,st:"Veteran backup"},{n:"Joe Milton III",r:63,st:"Athletic backup"}],
+ RB:[{n:"Rhamondre Stevenson",r:80,st:"1,040 yds 2023"},{n:"Ezekiel Elliott",r:73,st:"Veteran 2-year deal"},{n:"JaMycal Hasty",r:65,st:"ST back"}],
+ WR:[{n:"JuJu Smith-Schuster",r:76,st:"Slot WR"},{n:"Kendrick Bourne",r:73,st:"Talent"},{n:"DeMario Douglas",r:72,st:"Rookie 561 yds"}],
+ TE:[{n:"Hunter Henry",r:76,st:"508 yds 2023"},{n:"Mike Gesicki",r:74,st:"Pass catcher"},{n:"Scotty Washington",r:62,st:"Blocker"}],
+ OL:[{n:"David Andrews",r:82,st:"Pro Bowl center"},{n:"Trent Brown",r:78,st:"Elite RT when healthy"},{n:"Michael Onwenu",r:76,st:"Versatile"}],
+ DEF:{n:"Patriots Defense",r:78,st:"Transitioning from Belichick era"}},
+{abbr:"NYJ",city:"New York",name:"Jets",
+ QB:[{n:"Aaron Rodgers",r:90,st:"Returns 2024 from Achilles"},{n:"Zach Wilson",r:68,st:"Disappointing starter"},{n:"Tim Boyle",r:61,st:"Emergency 2023"}],
+ RB:[{n:"Breece Hall",r:87,st:"994 yds explosive"},{n:"Braelon Allen",r:76,st:"2024 2nd-round pick versatile"},{n:"Isaiah Davis",r:68,st:"Depth back"}],
+ WR:[{n:"Garrett Wilson",r:89,st:"1,100 yds 2024"},{n:"Davante Adams",r:90,st:"Acquired from LV 2024 elite route runner"},{n:"Allen Lazard",r:72,st:"Rodgers connection"}],
+ TE:[{n:"Tyler Conklin",r:74,st:"390 yds 2023"},{n:"C.J. Uzomah",r:70,st:"Blocking TE"},{n:"Kenny Yeboah",r:62,st:"Developmental"}],
+ OL:[{n:"Duane Brown",r:76,st:"Veteran LT"},{n:"Alijah Vera-Tucker",r:78,st:"Bounced back 2023"},{n:"Laken Tomlinson",r:76,st:"Solid guard"}],
+ DEF:{n:"Jets Defense",r:86,st:"Sauce Gardner Quinnen Williams Haason Reddick"}},
+{abbr:"BAL",city:"Baltimore",name:"Ravens",
+ QB:[{n:"Lamar Jackson",r:97,st:"2x MVP 3,678 yds 821 rush yds 2023"},{n:"Josh Johnson",r:65,st:"Backup"}],
+ RB:[{n:"Derrick Henry",r:88,st:"Signed 2024 4x Pro Bowl"},{n:"Justice Hill",r:74,st:"Speed back"},{n:"Keaton Mitchell",r:78,st:"6.4 YPC before injury 2023"}],
+ WR:[{n:"Zay Flowers",r:83,st:"858 yds rookie 2023"},{n:"Odell Beckham Jr",r:76,st:"1-year deal"},{n:"Nelson Agholor",r:70,st:"Deep threat"}],
+ TE:[{n:"Mark Andrews",r:90,st:"3x Pro Bowl 544 yds 2023"},{n:"Isaiah Likely",r:77,st:"Near top-draft talent"},{n:"Charlie Kolar",r:68,st:"Blocking"}],
+ OL:[{n:"Ronnie Stanley",r:83,st:"Elite LT when healthy"},{n:"Kevin Zeitler",r:79,st:"Veteran guard"},{n:"Tyler Linderbaum",r:84,st:"Top-5 center"}],
+ DEF:{n:"Ravens Defense",r:85,st:"Roquan Smith-led LB corps 2023"}},
+{abbr:"CIN",city:"Cincinnati",name:"Bengals",
+ QB:[{n:"Joe Burrow",r:93,st:"Back-to-back AFCCG 4,475 yds 2022"},{n:"Jake Browning",r:75,st:"5-2 as starter 2023"},{n:"Drew White",r:60,st:"Practice squad"}],
+ RB:[{n:"Joe Mixon",r:82,st:"1,034 yds 2023"},{n:"Zack Moss",r:76,st:"795 yds after trade 2023"},{n:"Chris Evans",r:67,st:"ST/backup"}],
+ WR:[{n:"Ja'Marr Chase",r:97,st:"1,216 yds 7 TD 2023"},{n:"Tee Higgins",r:89,st:"656 yds in 12 games 2023"},{n:"Tyler Boyd",r:78,st:"796 yds slot 2023"}],
+ TE:[{n:"Irv Smith Jr",r:73,st:"483 yds 2023"},{n:"Drew Sample",r:70,st:"Run blocker"},{n:"Tanner Hudson",r:62,st:"Backup"}],
+ OL:[{n:"Orlando Brown Jr",r:82,st:"Elite LT"},{n:"Alex Cappa",r:78,st:"Solid RG"},{n:"Ted Karras",r:76,st:"Team captain center"}],
+ DEF:{n:"Bengals Defense",r:78,st:"Trey Hendrickson 17.5 sacks 2023"}},
+{abbr:"CLE",city:"Cleveland",name:"Browns",
+ QB:[{n:"Dorian Thompson-Robinson",r:72,st:"Starter most of 2024 after Watson injury"},{n:"Deshaun Watson",r:75,st:"Torn Achilles 2024 returning 2025"},{n:"Jameis Winston",r:70,st:"Signed midseason 2024"}],
+ RB:[{n:"Nick Chubb",r:92,st:"4x Pro Bowl torn ACL Week 2 2023"},{n:"Jerome Ford",r:78,st:"801 yds as starter"},{n:"Kareem Hunt",r:74,st:"Veteran"}],
+ WR:[{n:"Jerry Jeudy",r:82,st:"Acquired from DEN 2024 1,229 yds"},{n:"Cedric Tillman",r:74,st:"2023 3rd-rounder improving 2024"},{n:"Elijah Moore",r:72,st:"Depth WR"}],
+ TE:[{n:"David Njoku",r:84,st:"882 yds 5 TD Pro Bowl 2023"},{n:"Harrison Bryant",r:68,st:"Backup"},{n:"Pharaoh Brown",r:65,st:"Veteran"}],
+ OL:[{n:"Jack Conklin",r:81,st:"Elite when healthy torn ACL 2023"},{n:"Joel Bitonio",r:85,st:"5x Pro Bowl guard"},{n:"Ethan Pocic",r:76,st:"Solid center"}],
+ DEF:{n:"Browns Defense",r:84,st:"Myles Garrett 14 sacks top-5 unit 2023"}},
+{abbr:"PIT",city:"Pittsburgh",name:"Steelers",
+ QB:[{n:"Russell Wilson",r:78,st:"Signed 2024 reclamation project"},{n:"Mason Rudolph",r:71,st:"2-1 late 2023"},{n:"Kenny Pickett",r:76,st:"Traded to Eagles 2024"}],
+ RB:[{n:"Najee Harris",r:78,st:"1,035 yds 2023"},{n:"Jaylen Warren",r:76,st:"4.9 YPC versatile"},{n:"Anthony McFarland Jr",r:65,st:"Speed back"}],
+ WR:[{n:"George Pickens",r:86,st:"1,140 yds 2023 elite talent"},{n:"Diontae Johnson",r:82,st:"717 yds 2023 traded"},{n:"Allen Robinson",r:70,st:"Declining veteran"}],
+ TE:[{n:"Pat Freiermuth",r:78,st:"585 yds 2023"},{n:"Darnell Washington",r:73,st:"Elite blocker 2023 rookie"},{n:"Connor Heyward",r:70,st:"F-back hybrid"}],
+ OL:[{n:"Dan Moore Jr",r:76,st:"LT starter"},{n:"Isaac Seumalo",r:78,st:"Solid LG"},{n:"Zach Robinson",r:66,st:"Center"}],
+ DEF:{n:"Steelers Defense",r:84,st:"T.J. Watt 19 sacks led NFL 2023"}},
+{abbr:"HOU",city:"Houston",name:"Texans",
+ QB:[{n:"C.J. Stroud",r:91,st:"OROY 4,108 yds 23 TD playoff win 2023"},{n:"Case Keenum",r:68,st:"Backup"}],
+ RB:[{n:"Joe Mixon",r:84,st:"Acquired from CIN 2024 939 yds"},{n:"Dameon Pierce",r:72,st:"Depth"},{n:"Dare Ogunbowale",r:66,st:"Receiving/ST back"}],
+ WR:[{n:"Nico Collins",r:87,st:"1,297 yds 8 TD breakout 2023"},{n:"Tank Dell",r:82,st:"709 yds 7 TD before injury"},{n:"Robert Woods",r:70,st:"Veteran slot"}],
+ TE:[{n:"Dalton Schultz",r:79,st:"726 yds 2023"},{n:"Brevin Jordan",r:72,st:"Speed receiving TE"},{n:"Teagan Quitoriano",r:65,st:"Blocking"}],
+ OL:[{n:"Laremy Tunsil",r:91,st:"2x Pro Bowl elite LT"},{n:"Shaq Mason",r:79,st:"Veteran RG"},{n:"Juice Scruggs",r:72,st:"Rookie center 2023"}],
+ DEF:{n:"Texans Defense",r:78,st:"Will Anderson 6 sacks rookie 2023"}},
+{abbr:"IND",city:"Indianapolis",name:"Colts",
+ QB:[{n:"Anthony Richardson",r:83,st:"10 rush TD shoulder surgery 2023"},{n:"Gardner Minshew",r:74,st:"3,305 yds solid fill-in"},{n:"Sam Ehlinger",r:62,st:"Backup"}],
+ RB:[{n:"Jonathan Taylor",r:91,st:"741 yds 10 games before injury 2023"},{n:"Zack Moss",r:74,st:"Stepped in admirably"},{n:"Evan Hull",r:66,st:"Speed back"}],
+ WR:[{n:"Michael Pittman Jr",r:86,st:"1,152 yds 2023"},{n:"Josh Downs",r:77,st:"Promising slot 2023 rookie"},{n:"Ashton Dulin",r:66,st:"Depth"}],
+ TE:[{n:"Mo Alie-Cox",r:71,st:"Blocking TE"},{n:"Kylen Granson",r:68,st:"Receiving backup"},{n:"Will Mallory",r:65,st:"Developmental"}],
+ OL:[{n:"Quenton Nelson",r:95,st:"4x Pro Bowl best guard in NFL"},{n:"Ryan Kelly",r:80,st:"Pro Bowl center"},{n:"Bernhard Raimann",r:75,st:"LT improving"}],
+ DEF:{n:"Colts Defense",r:76,st:"DeForest Buckner anchors DL"}},
+{abbr:"JAX",city:"Jacksonville",name:"Jaguars",
+ QB:[{n:"Trevor Lawrence",r:86,st:"Injured shoulder 2024 inconsistent"},{n:"Mac Jones",r:73,st:"Acquired from NE 2024 spot starter"},{n:"C.J. Beathard",r:64,st:"Career backup"}],
+ RB:[{n:"Travis Etienne Jr",r:87,st:"1,582 yds 11 TD Pro Bowl 2023"},{n:"Tank Bigsby",r:74,st:"Promising rookie"},{n:"D'Ernest Johnson",r:68,st:"Veteran backup"}],
+ WR:[{n:"Calvin Ridley",r:84,st:"1,016 yds 8 TD return year 2023"},{n:"Christian Kirk",r:80,st:"787 yds"},{n:"Zay Jones",r:74,st:"Veteran slot"}],
+ TE:[{n:"Evan Engram",r:87,st:"114 rec 1,114 yds Pro Bowl 2023"},{n:"Brenton Strange",r:68,st:"Blocker"},{n:"Luke Farrell",r:65,st:"ST"}],
+ OL:[{n:"Cam Robinson",r:80,st:"Elite LT when healthy"},{n:"Brandon Scherff",r:78,st:"Veteran OG"},{n:"Mitch Morse",r:76,st:"Veteran center"}],
+ DEF:{n:"Jaguars Defense",r:80,st:"Josh Allen 17.5 sacks 2023"}},
+{abbr:"TEN",city:"Tennessee",name:"Titans",
+ QB:[{n:"Will Levis",r:76,st:"Full year starter 2024"},{n:"Mason Rudolph",r:69,st:"Backup signed 2024"},{n:"Malik Willis",r:65,st:"Athletic backup"}],
+ RB:[{n:"Tony Pollard",r:80,st:"Signed from DAL 2024 899 yds"},{n:"Tyjae Spears",r:77,st:"Healthy 2024 efficient"},{n:"Julius Chestnut",r:64,st:"Depth"}],
+ WR:[{n:"DeAndre Hopkins",r:85,st:"625 yds in 9 games 2023"},{n:"Treylon Burks",r:74,st:"2022 1st-rounder injury prone"},{n:"Nick Westbrook-Ikhine",r:68,st:"Reliable depth"}],
+ TE:[{n:"Chig Okonkwo",r:76,st:"Fast receiving TE"},{n:"Josh Whyle",r:66,st:"Blocker"},{n:"Tommy Hudson",r:62,st:"Rookie"}],
+ OL:[{n:"Peter Skoronski",r:79,st:"1st-round LT 2023"},{n:"Dillon Radunz",r:74,st:"Developing RG"},{n:"Ben Jones",r:72,st:"Veteran center"}],
+ DEF:{n:"Titans Defense",r:74,st:"Harold Landry returns from ACL"}},
+{abbr:"KC",city:"Kansas City",name:"Chiefs",
+ QB:[{n:"Patrick Mahomes",r:99,st:"3x SB MVP 4,183 yds 27 TD 2023"},{n:"Blaine Gabbert",r:66,st:"Backup"}],
+ RB:[{n:"Isiah Pacheco",r:83,st:"935 yds 7 TD bruising style 2023"},{n:"Clyde Edwards-Helaire",r:74,st:"Former 1st-rounder"},{n:"Jerick McKinnon",r:72,st:"3rd-down back"}],
+ WR:[{n:"Rashee Rice",r:84,st:"938 yds 7 TD rookie 2023"},{n:"Mecole Hardman",r:76,st:"SB LVII game winner returned"},{n:"Kadarius Toney",r:74,st:"Injury-prone talent"}],
+ TE:[{n:"Travis Kelce",r:97,st:"Pro Bowl x9 93 rec 984 yds 2023"},{n:"Blake Bell",r:68,st:"Blocker"},{n:"Noah Gray",r:70,st:"Receiving depth"}],
+ OL:[{n:"Creed Humphrey",r:88,st:"2x Pro Bowl center top-3 NFL"},{n:"Joe Thuney",r:85,st:"3x SB champ guard"},{n:"Donovan Smith",r:78,st:"Veteran LT"}],
+ DEF:{n:"Chiefs Defense",r:83,st:"Chris Jones 10.5 sacks Spagnuolo system"}},
+{abbr:"LV",city:"Las Vegas",name:"Raiders",
+ QB:[{n:"Aidan O'Connell",r:73,st:"Starting QB 2024"},{n:"Gardner Minshew",r:70,st:"Signed 2024"},{n:"Desmond Ridder",r:66,st:"Backup"}],
+ RB:[{n:"Josh Jacobs",r:87,st:"2022 rushing title 805 yds 2023"},{n:"Zamir White",r:74,st:"1,100 yds limited role 2023"},{n:"Ameer Abdullah",r:65,st:"Veteran ST"}],
+ WR:[{n:"Jakobi Meyers",r:78,st:"WR1 role 2024"},{n:"Tre Tucker",r:73,st:"Explosive slot 642 yds 2024"},{n:"DJ Turner",r:68,st:"WR depth"}],
+ TE:[{n:"Michael Mayer",r:73,st:"2023 2nd-round developing"},{n:"Austin Hooper",r:70,st:"Veteran"},{n:"Harrison Bryant",r:66,st:"Blocker"}],
+ OL:[{n:"Kolton Miller",r:84,st:"Pro Bowl LT 2023"},{n:"Dylan Parham",r:73,st:"RG starter"},{n:"Andre James",r:74,st:"Center"}],
+ DEF:{n:"Raiders Defense",r:73,st:"Maxx Crosby 13.5 sacks team strength"}},
+{abbr:"LAC",city:"Los Angeles",name:"Chargers",
+ QB:[{n:"Justin Herbert",r:93,st:"4,739 yds elite arm 2023"},{n:"Easton Stick",r:67,st:"Athletic backup"}],
+ RB:[{n:"J.K. Dobbins",r:80,st:"Signed from BAL 2024 explosive RB"},{n:"Gus Edwards",r:74,st:"Power back veteran"},{n:"Hassan Haskins",r:65,st:"ST/depth"}],
+ WR:[{n:"Ladd McConkey",r:83,st:"873 yds rookie 2024 Pro Bowl"},{n:"Quentin Johnston",r:76,st:"Improved 2024"},{n:"Joshua Palmer",r:70,st:"Veteran slot"}],
+ TE:[{n:"Gerald Everett",r:74,st:"461 yds 2023"},{n:"Donald Parham Jr",r:68,st:"Injury prone tall TE"},{n:"Tre McKitty",r:63,st:"Blocker"}],
+ OL:[{n:"Rashawn Slater",r:89,st:"Elite LT torn bicep 2022"},{n:"Corey Linsley",r:80,st:"Pro Bowl center"},{n:"Zion Johnson",r:77,st:"2022 1st-round guard"}],
+ DEF:{n:"Chargers Defense",r:80,st:"Bosa/Mack combined 17.5 sacks 2023"}},
+{abbr:"DEN",city:"Denver",name:"Broncos",
+ QB:[{n:"Russell Wilson",r:80,st:"Released after 2023 26-7 TD-INT"},{n:"Bo Nix",r:78,st:"2024 12th overall pick Oregon"},{n:"Jarrett Stidham",r:68,st:"Backup"}],
+ RB:[{n:"Javonte Williams",r:79,st:"Returned from ACL 774 yds 2023"},{n:"Samaje Perine",r:72,st:"678 yds 2023"},{n:"Mike Boone",r:64,st:"Depth"}],
+ WR:[{n:"Courtland Sutton",r:82,st:"772 yds 2023"},{n:"Jerry Jeudy",r:78,st:"758 yds 2023 traded to Browns"},{n:"Marvin Mims Jr",r:74,st:"Explosive return/WR rookie"}],
+ TE:[{n:"Greg Dulcich",r:72,st:"Injury-plagued talent"},{n:"Adam Trautman",r:68,st:"Veteran"},{n:"Chris Manhertz",r:67,st:"Blocker"}],
+ OL:[{n:"Garett Bolles",r:80,st:"LT improving consistency"},{n:"Quinn Meinerz",r:77,st:"Strong guard"},{n:"Lloyd Cushenberry III",r:73,st:"Starting center"}],
+ DEF:{n:"Broncos Defense",r:79,st:"Patrick Surtain II best CB in NFL"}},
+{abbr:"DAL",city:"Dallas",name:"Cowboys",
+ QB:[{n:"Dak Prescott",r:90,st:"Torn Achilles Week 1 2024 returning 2025"},{n:"Cooper Rush",r:74,st:"Starter most of 2024 3,483 yds"},{n:"Trey Lance",r:68,st:"Backup option"}],
+ RB:[{n:"Tony Pollard",r:84,st:"1,005 yds 2023"},{n:"Rico Dowdle",r:73,st:"Efficient 200+ yds"},{n:"Deuce Vaughn",r:65,st:"Explosive but small"}],
+ WR:[{n:"CeeDee Lamb",r:97,st:"135 rec 1,749 yds 17 TD All-Pro 2023"},{n:"Brandin Cooks",r:74,st:"Released after 2023"},{n:"Michael Gallup",r:72,st:"Deep threat injury history"}],
+ TE:[{n:"Jake Ferguson",r:82,st:"761 yds 5 TD breakout 2023"},{n:"Luke Schoonmaker",r:70,st:"2023 2nd-rounder"},{n:"Sean McKeon",r:62,st:"Blocker"}],
+ OL:[{n:"Zack Martin",r:92,st:"7x Pro Bowl best guard ever"},{n:"Tyron Smith",r:83,st:"8x Pro Bowl LT injury history"},{n:"Tyler Biadasz",r:76,st:"Consistent center"}],
+ DEF:{n:"Cowboys Defense",r:87,st:"Micah Parsons 13.5 sacks Daron Bland 9 INT"}},
+{abbr:"NYG",city:"New York",name:"Giants",
+ QB:[{n:"Tommy DeVito",r:73,st:"Starting QB 2024 after Jones released"},{n:"Drew Lock",r:70,st:"Signed 2024 backup"},{n:"Tim Boyle",r:61,st:"Emergency option"}],
+ RB:[{n:"Tyrone Tracy Jr",r:76,st:"719 yds undrafted rookie 2024"},{n:"Devin Singletary",r:73,st:"Signed FA 2024"},{n:"Eric Gray",r:67,st:"Depth"}],
+ WR:[{n:"Malik Nabers",r:89,st:"1,204 yds 7 TD 2024 6th overall pick elite rookie"},{n:"Darius Slayton",r:75,st:"Veteran WR2"},{n:"Wan'Dale Robinson",r:72,st:"Slot receiver"}],
+ TE:[{n:"Darren Waller",r:83,st:"Retired 2024 522 yds 2023"},{n:"Daniel Bellinger",r:68,st:"Blocker"},{n:"Lawrence Cager",r:62,st:"Reserve"}],
+ OL:[{n:"Andrew Thomas",r:87,st:"Pro Bowl LT elite"},{n:"John Michael Schmitz",r:74,st:"2023 1st-round center"},{n:"Jon Runyan",r:72,st:"Guard"}],
+ DEF:{n:"Giants Defense",r:77,st:"Dexter Lawrence best DT in NFL"}},
+{abbr:"PHI",city:"Philadelphia",name:"Eagles",
+ QB:[{n:"Jalen Hurts",r:93,st:"3,858 yds 23 TD 15 rush TD 2023"},{n:"Kenny Pickett",r:76,st:"Acquired from Steelers 2024"},{n:"Marcus Mariota",r:70,st:"Backup"}],
+ RB:[{n:"Saquon Barkley",r:96,st:"2,005 rush yds 2024 NFL record MVP candidate"},{n:"Kenneth Gainwell",r:68,st:"3rd-down back"},{n:"Boston Scott",r:63,st:"Veteran ST/backup"}],
+ WR:[{n:"A.J. Brown",r:95,st:"1,456 yds 7 TD 2023"},{n:"DeVonta Smith",r:88,st:"1,066 yds 7 TD 2023"},{n:"Olamide Zaccheaus",r:70,st:"Depth slot"}],
+ TE:[{n:"Dallas Goedert",r:88,st:"737 yds in 12 games top-3 TE"},{n:"Grant Calcaterra",r:68,st:"Backup"},{n:"C.J. Uzomah",r:66,st:"Veteran blocker"}],
+ OL:[{n:"Lane Johnson",r:94,st:"4x Pro Bowl RT best in NFL"},{n:"Landon Dickerson",r:85,st:"Pro Bowl guard"},{n:"Jason Kelce",r:92,st:"7x Pro Bowl center retired"}],
+ DEF:{n:"Eagles Defense",r:83,st:"Haason Reddick 11 sacks Jalen Carter DROY candidate"}},
+{abbr:"WAS",city:"Washington",name:"Commanders",
+ QB:[{n:"Jayden Daniels",r:82,st:"2024 #2 overall Heisman winner"},{n:"Sam Howell",r:76,st:"3,946 yds 2023"},{n:"Jacoby Brissett",r:69,st:"Backup"}],
+ RB:[{n:"Brian Robinson Jr",r:78,st:"797 yds 2023"},{n:"Antonio Gibson",r:74,st:"549 yds dual threat"},{n:"Chris Rodriguez Jr",r:66,st:"2023 6th-rounder"}],
+ WR:[{n:"Terry McLaurin",r:86,st:"1,033 yds 2023"},{n:"Jahan Dotson",r:76,st:"Inconsistent 2nd-year"},{n:"Curtis Samuel",r:72,st:"Versatile slot"}],
+ TE:[{n:"Logan Thomas",r:71,st:"Veteran injury issues"},{n:"Cole Turner",r:67,st:"2022 5th-rounder"},{n:"John Bates",r:63,st:"Blocker"}],
+ OL:[{n:"Charles Leno Jr",r:75,st:"Veteran LT"},{n:"Andrew Norwell",r:72,st:"Veteran guard"},{n:"Nick Martin",r:68,st:"Center"}],
+ DEF:{n:"Commanders Defense",r:75,st:"Daron Payne 11.5 sacks Chase Young traded"}},
+{abbr:"CHI",city:"Chicago",name:"Bears",
+ QB:[{n:"Caleb Williams",r:85,st:"2024 #1 overall Heisman winner"},{n:"Justin Fields",r:82,st:"Traded to Steelers 21 rush TD 2022"},{n:"Tyson Bagent",r:68,st:"Backup 2023"}],
+ RB:[{n:"D'Andre Swift",r:83,st:"Acquired 2024 1,049 yds 2023"},{n:"Khalil Herbert",r:76,st:"4.9 YPC efficient"},{n:"Travis Homer",r:65,st:"ST/backup"}],
+ WR:[{n:"DJ Moore",r:88,st:"1,364 yds 8 TD 2023"},{n:"Keenan Allen",r:87,st:"Acquired 2024 108 rec 1,243 yds"},{n:"Tyler Scott",r:70,st:"4th-rounder 2023"}],
+ TE:[{n:"Cole Kmet",r:79,st:"719 yds steady improvement"},{n:"Robert Tonyan",r:69,st:"Former Packer veteran"},{n:"Marcedes Lewis",r:65,st:"Veteran blocker"}],
+ OL:[{n:"Darnell Wright",r:77,st:"1st-round RT 2023"},{n:"Teven Jenkins",r:74,st:"Improving guard"},{n:"Cody Whitehair",r:74,st:"Veteran center"}],
+ DEF:{n:"Bears Defense",r:76,st:"Montez Sweat 9.5 sacks partial season 2023"}},
+{abbr:"DET",city:"Detroit",name:"Lions",
+ QB:[{n:"Jared Goff",r:88,st:"4,575 yds 30 TD resurgent 2023"},{n:"Hendon Hooker",r:73,st:"3rd-rounder 2023"},{n:"Nate Sudfeld",r:62,st:"Backup"}],
+ RB:[{n:"Jahmyr Gibbs",r:86,st:"945 yds 10 TD rookie 2023"},{n:"David Montgomery",r:84,st:"1,015 yds 13 TD 2023"},{n:"Craig Reynolds",r:65,st:"Depth"}],
+ WR:[{n:"Amon-Ra St. Brown",r:92,st:"119 rec 1,515 yds 10 TD 2023"},{n:"Jameson Williams",r:80,st:"Explosive after suspension"},{n:"Josh Reynolds",r:71,st:"Veteran slot"}],
+ TE:[{n:"Sam LaPorta",r:83,st:"889 yds ROTY candidate 2023"},{n:"Brock Wright",r:67,st:"Blocker"},{n:"Shane Zylstra",r:63,st:"Depth"}],
+ OL:[{n:"Penei Sewell",r:91,st:"Pro Bowl RT best young OL in NFL"},{n:"Frank Ragnow",r:87,st:"Pro Bowl center"},{n:"Taylor Decker",r:80,st:"LT"}],
+ DEF:{n:"Lions Defense",r:80,st:"Aidan Hutchinson 11.5 sacks NFC finalist"}},
+{abbr:"GB",city:"Green Bay",name:"Packers",
+ QB:[{n:"Jordan Love",r:87,st:"3,955 yds 32 TD playoff run 2023"},{n:"Sean Clifford",r:64,st:"Backup"},{n:"Jake Dolegala",r:60,st:"Practice squad"}],
+ RB:[{n:"Aaron Jones",r:83,st:"699 yds 2023"},{n:"AJ Dillon",r:76,st:"Power back"},{n:"Emanuel Wilson",r:68,st:"Depth"}],
+ WR:[{n:"Jayden Reed",r:80,st:"793 yds 7 TD rookie 2023"},{n:"Christian Watson",r:78,st:"Deep threat injury prone"},{n:"Romeo Doubs",r:75,st:"728 yds 2023"}],
+ TE:[{n:"Luke Musgrave",r:76,st:"Promising before injury 2023"},{n:"Tucker Kraft",r:72,st:"Reliable rookie"},{n:"Josiah Deguara",r:65,st:"F-back hybrid"}],
+ OL:[{n:"Elgton Jenkins",r:81,st:"Pro Bowl versatile OG/OT"},{n:"David Bakhtiari",r:86,st:"Best LT when healthy"},{n:"Josh Myers",r:74,st:"Center"}],
+ DEF:{n:"Packers Defense",r:80,st:"Jaire Alexander return Rashan Gary 2023"}},
+{abbr:"MIN",city:"Minnesota",name:"Vikings",
+ QB:[{n:"Sam Darnold",r:85,st:"4,319 yds 35 TD 12 INT 2024 Pro Bowl 14-2"},{n:"Nick Mullens",r:65,st:"Backup"},{n:"Brett Rypien",r:60,st:"Practice squad"}],
+ RB:[{n:"Alexander Mattison",r:79,st:"1,015 yds as starter 2023"},{n:"DeWayne McBride",r:70,st:"Explosive undrafted rookie"},{n:"Ty Chandler",r:68,st:"Speed back"}],
+ WR:[{n:"Justin Jefferson",r:97,st:"Elite talent missed 8 games 2023"},{n:"Jordan Addison",r:82,st:"911 yds 9 TD rookie 2023"},{n:"K.J. Osborn",r:72,st:"Slot depth"}],
+ TE:[{n:"T.J. Hockenson",r:86,st:"95 rec 960 yds torn ACL 8 games 2023"},{n:"Josh Oliver",r:68,st:"Blocker"},{n:"Nick Muse",r:63,st:"Depth"}],
+ OL:[{n:"Christian Darrisaw",r:86,st:"Pro Bowl LT elite"},{n:"Garrett Bradbury",r:74,st:"Center"},{n:"Ed Ingram",r:73,st:"Developing guard"}],
+ DEF:{n:"Vikings Defense",r:77,st:"Flores scheme Harrison Phillips"}},
+{abbr:"ATL",city:"Atlanta",name:"Falcons",
+ QB:[{n:"Michael Penix Jr",r:78,st:"2024 8th overall took over Week 5 1,997 yds"},{n:"Kirk Cousins",r:80,st:"Torn Achilles Week 5 2024"},{n:"Taylor Heinicke",r:69,st:"Backup"}],
+ RB:[{n:"Bijan Robinson",r:89,st:"976 yds 7 TD rookie 2023"},{n:"Tyler Allgeier",r:74,st:"570 yds 2023"},{n:"Cordarrelle Patterson",r:70,st:"Veteran versatile"}],
+ WR:[{n:"Drake London",r:82,st:"905 yds improving 2023"},{n:"Mack Hollins",r:69,st:"Veteran depth"},{n:"Ray-Ray McCloud",r:66,st:"Return/slot"}],
+ TE:[{n:"Kyle Pitts",r:84,st:"Overall #4 pick 667 yds 2023"},{n:"MyCole Pruitt",r:64,st:"Blocker"},{n:"Tucker Fisk",r:62,st:"Practice squad"}],
+ OL:[{n:"Chris Lindstrom",r:87,st:"2x Pro Bowl guard"},{n:"Jake Matthews",r:79,st:"Veteran LT"},{n:"Drew Dalman",r:74,st:"Young center"}],
+ DEF:{n:"Falcons Defense",r:74,st:"Grady Jarrett elite DT Jessie Bates III"}},
+{abbr:"CAR",city:"Carolina",name:"Panthers",
+ QB:[{n:"Bryce Young",r:73,st:"#1 pick 2,877 yds rough rookie year"},{n:"Andy Dalton",r:70,st:"Backup"},{n:"Jake Luton",r:62,st:"Backup"}],
+ RB:[{n:"Chuba Hubbard",r:74,st:"742 yds 13 starts 2023"},{n:"Miles Sanders",r:74,st:"Released 2024 1,000 yds"},{n:"Raheem Blackshear",r:63,st:"ST back"}],
+ WR:[{n:"Adam Thielen",r:76,st:"Released 2024 548 yds"},{n:"DJ Chark",r:70,st:"Deep threat"},{n:"Jonathan Mingo",r:73,st:"2023 2nd-rounder"}],
+ TE:[{n:"Hayden Hurst",r:72,st:"413 yds 2023"},{n:"Ian Thomas",r:65,st:"Blocker"},{n:"Tommy Tremble",r:64,st:"FB/TE hybrid"}],
+ OL:[{n:"Ickey Ekwonu",r:76,st:"2022 6th overall developing"},{n:"Bradley Bozeman",r:72,st:"Center"},{n:"Austin Corbett",r:72,st:"Veteran guard retired"}],
+ DEF:{n:"Panthers Defense",r:72,st:"Brian Burns 11.5 sacks 2023 traded"}},
+{abbr:"NO",city:"New Orleans",name:"Saints",
+ QB:[{n:"Derek Carr",r:80,st:"3,878 yds 2023"},{n:"Jameis Winston",r:75,st:"5 TD vs KC 2023"},{n:"Jake Haener",r:66,st:"4th-rounder 2023"}],
+ RB:[{n:"Alvin Kamara",r:86,st:"3x Pro Bowl 564 yds 2023"},{n:"Kendre Miller",r:73,st:"Explosive 3rd-rounder 2023"},{n:"Jamaal Williams",r:74,st:"Veteran signed 2023"}],
+ WR:[{n:"Chris Olave",r:87,st:"1,014 yds 2023"},{n:"Rashid Shaheed",r:78,st:"741 yds 5 TD breakout"},{n:"Michael Thomas",r:78,st:"445 yds return from injury"}],
+ TE:[{n:"Juwan Johnson",r:76,st:"553 yds 5 TD 2023"},{n:"Taysom Hill",r:72,st:"Swiss Army knife 7 TD"},{n:"Foster Moreau",r:72,st:"Reliable backup"}],
+ OL:[{n:"Erik McCoy",r:78,st:"Solid center"},{n:"Trevor Penning",r:74,st:"2022 1st-round LT"},{n:"Lucas Patrick",r:71,st:"Guard"}],
+ DEF:{n:"Saints Defense",r:78,st:"Cameron Jordan leader strong LB corps"}},
+{abbr:"TB",city:"Tampa Bay",name:"Buccaneers",
+ QB:[{n:"Baker Mayfield",r:84,st:"4,044 yds 28 TD best season 2023"},{n:"Kyle Trask",r:68,st:"2021 2nd-rounder"},{n:"John Wolford",r:63,st:"Career backup"}],
+ RB:[{n:"Rachaad White",r:79,st:"990 yds 8 TD 2023"},{n:"Sean Tucker",r:68,st:"Speed back"},{n:"Patrick Laird",r:61,st:"ST/backup"}],
+ WR:[{n:"Mike Evans",r:92,st:"1,255 yds 10th straight 1000-yd season"},{n:"Chris Godwin",r:85,st:"1,024 yds 2023"},{n:"Russell Gage",r:67,st:"Returning from injury"}],
+ TE:[{n:"Cade Otton",r:73,st:"507 yds 2023"},{n:"Ko Kieft",r:64,st:"Blocker"},{n:"Payne Durham",r:63,st:"Depth"}],
+ OL:[{n:"Tristan Wirfs",r:93,st:"2x Pro Bowl RT best in NFL"},{n:"Luke Goedeke",r:74,st:"Improving guard"},{n:"Robert Hainsey",r:72,st:"Center"}],
+ DEF:{n:"Buccaneers Defense",r:79,st:"Vita Vea Antoine Winfield Jr Pro Bowl"}},
+{abbr:"ARI",city:"Arizona",name:"Cardinals",
+ QB:[{n:"Kyler Murray",r:85,st:"Returned from ACL 2,526 yds 8 games"},{n:"Joshua Dobbs",r:70,st:"Traded mid-season 2023"},{n:"Clayton Tune",r:65,st:"Developmental 5th-rounder"}],
+ RB:[{n:"James Conner",r:80,st:"820 yds reliable 2023"},{n:"Emari Demercado",r:68,st:"Depth"},{n:"Corey Clement",r:62,st:"Veteran"}],
+ WR:[{n:"Marvin Harrison Jr",r:90,st:"2024 #4 overall generational receiver"},{n:"Michael Wilson",r:73,st:"2023 3rd-rounder"},{n:"Greg Dortch",r:70,st:"Slot depth"}],
+ TE:[{n:"Trey McBride",r:82,st:"825 yds breakout 2023"},{n:"Zach Ertz",r:76,st:"Veteran reliable"},{n:"Stephen Anderson",r:62,st:"Backup"}],
+ OL:[{n:"Paris Johnson Jr",r:77,st:"1st-round LT 2023"},{n:"Hjalte Froholdt",r:70,st:"Guard"},{n:"Trystan Colon",r:68,st:"Center depth"}],
+ DEF:{n:"Cardinals Defense",r:70,st:"Rebuilding Jonathan Gannon first year 2023"}},
+{abbr:"LAR",city:"Los Angeles",name:"Rams",
+ QB:[{n:"Matthew Stafford",r:88,st:"3,965 yds 24 TD SB LVI 2023"},{n:"Jimmy Garoppolo",r:74,st:"Signed 2024"},{n:"Stetson Bennett",r:65,st:"4th-rounder mental health leave"}],
+ RB:[{n:"Kyren Williams",r:83,st:"1,144 yds 12 TD breakout 2023"},{n:"Zach Evans",r:69,st:"6th-rounder 2023"},{n:"Royce Freeman",r:67,st:"Depth"}],
+ WR:[{n:"Puka Nacua",r:87,st:"105 rec 1,486 yds rookie 2023"},{n:"Cooper Kupp",r:89,st:"SB MVP limited by hamstring 2023"},{n:"Van Jefferson",r:72,st:"Deep threat depth"}],
+ TE:[{n:"Tyler Higbee",r:77,st:"Pre-injury 2023 ACL torn Wild Card"},{n:"Davis Allen",r:65,st:"3rd-rounder 2023"},{n:"Hunter Long",r:64,st:"Blocker"}],
+ OL:[{n:"Rob Havenstein",r:79,st:"Veteran RT solid run blocker"},{n:"Kevin Dotson",r:78,st:"Solid guard"},{n:"Brian Allen",r:75,st:"Center"}],
+ DEF:{n:"Rams Defense",r:80,st:"Aaron Donald retired Kobie Turner Young 2023"}},
+{abbr:"SEA",city:"Seattle",name:"Seahawks",
+ QB:[{n:"Geno Smith",r:83,st:"3,624 yds 2023"},{n:"Sam Howell",r:76,st:"Acquired 2024 from WAS"},{n:"Drew Lock",r:69,st:"Backup"}],
+ RB:[{n:"Kenneth Walker III",r:85,st:"905 yds 2023"},{n:"Zach Charbonnet",r:77,st:"585 yds promising rookie"},{n:"DeeJay Dallas",r:65,st:"ST depth"}],
+ WR:[{n:"DK Metcalf",r:92,st:"1,114 yds 2023"},{n:"Tyler Lockett",r:84,st:"894 yds 2023"},{n:"Jaxon Smith-Njigba",r:78,st:"628 yds 1st-rounder 2023"}],
+ TE:[{n:"Noah Fant",r:76,st:"460 yds 2023"},{n:"Will Dissly",r:70,st:"Blocker"},{n:"Colby Parkinson",r:67,st:"Depth"}],
+ OL:[{n:"Charles Cross",r:80,st:"Pro Bowl LT 2022"},{n:"Damien Lewis",r:74,st:"Guard"},{n:"Evan Brown",r:73,st:"Center"}],
+ DEF:{n:"Seahawks Defense",r:79,st:"Jordyn Brooks Quandre Diggs"}},
+{abbr:"SF",city:"San Francisco",name:"49ers",
+ QB:[{n:"Brock Purdy",r:89,st:"4,280 yds 31 TD SB LIX 2023"},{n:"Sam Darnold",r:72,st:"Backup"},{n:"Josh Johnson",r:63,st:"Emergency"}],
+ RB:[{n:"Christian McCaffrey",r:98,st:"2,023 scrimmage yds 21 TD MVP candidate"},{n:"Jordan Mason",r:75,st:"Efficient 4.8 YPC"},{n:"Elijah Mitchell",r:73,st:"Injury-prone depth"}],
+ WR:[{n:"Brandon Aiyuk",r:90,st:"1,342 yds 7 TD 2023"},{n:"Deebo Samuel",r:88,st:"892 yds 7 TD 2023"},{n:"Jauan Jennings",r:75,st:"Versatile 12 career TD"}],
+ TE:[{n:"George Kittle",r:94,st:"1,020 yds best blocking TE in NFL"},{n:"Charlie Woerner",r:66,st:"Blocker"},{n:"Ross Dwelley",r:63,st:"Veteran depth"}],
+ OL:[{n:"Trent Williams",r:98,st:"6x Pro Bowl consensus best OL in NFL"},{n:"Aaron Banks",r:80,st:"Improving guard"},{n:"Jake Brendel",r:74,st:"Versatile center"}],
+ DEF:{n:"49ers Defense",r:88,st:"Nick Bosa 10 sacks Fred Warner Dre Greenlaw"}}
+];
+
+const ALLTIME_ERAS=[
+{abbr:"70sPIT",name:"70s Steelers",
+ QB:[{n:"Terry Bradshaw",r:92,st:"4x SB champion 2x SB MVP"},{n:"Joe Gilliam",r:72,st:"Backup challenger"},{n:"Mike Kruczek",r:68,st:"Backup"}],
+ RB:[{n:"Franco Harris",r:93,st:"SB MVP Immaculate Reception 1,000+ yds x8"},{n:"Rocky Bleier",r:78,st:"Vietnam vet 1,000 yds 1976"},{n:"Frenchy Fuqua",r:72,st:"Starter 1970-73"}],
+ WR:[{n:"Lynn Swann",r:88,st:"SB MVP 4x SB champion HOF"},{n:"John Stallworth",r:87,st:"SB XIV MVP performance HOF"},{n:"Frank Lewis",r:72,st:"Starter 1971-77"}],
+ TE:[{n:"Randy Grossman",r:76,st:"4x SB champion blocker"},{n:"Larry Brown",r:72,st:"Starting TE blocker"},{n:"Bennie Cunningham",r:74,st:"Receiving TE late 70s"}],
+ OL:[{n:"Mike Webster",r:94,st:"9x Pro Bowl center consensus GOAT"},{n:"Jon Kolb",r:80,st:"4x SB LT"},{n:"Larry Brown",r:78,st:"LG 4x SB champion"}],
+ DEF:{n:"Steel Curtain",r:97,st:"Mean Joe Greene Jack Ham Jack Lambert greatest D ever"}},
+{abbr:"80sSF",name:"80s 49ers",
+ QB:[{n:"Joe Montana",r:98,st:"4x SB champion 3x SB MVP consensus #1 QB ever"},{n:"Steve Young",r:88,st:"Backup future HOFer"},{n:"Matt Cavanaugh",r:68,st:"Backup"}],
+ RB:[{n:"Roger Craig",r:91,st:"First 1,000-1,000 season HOF 3x SB champ"},{n:"Ricky Watters",r:82,st:"1,013 yds SB XXIX 5 TD"},{n:"Tom Rathman",r:78,st:"FB/RB SB champion"}],
+ WR:[{n:"Jerry Rice",r:99,st:"GOAT WR 22,895 career yds SB MVP"},{n:"John Taylor",r:84,st:"SB XXIII game winner"},{n:"Dwight Clark",r:82,st:"The Catch NFC champ 1982"}],
+ TE:[{n:"Russ Francis",r:82,st:"3x Pro Bowl receiving TE"},{n:"Charle Young",r:72,st:"Blocking TE"},{n:"Jamie Williams",r:70,st:"Late 80s starter"}],
+ OL:[{n:"Randy Cross",r:85,st:"3x SB champion 3x Pro Bowl"},{n:"Keith Fahnhorst",r:80,st:"3x SB champion LT"},{n:"Fred Quillan",r:78,st:"Starting center 2x SB champ"}],
+ DEF:{n:"49ers Defense 80s",r:88,st:"Ronnie Lott Charles Haley greatest secondary"}},
+{abbr:"85CHI",name:"85 Bears",
+ QB:[{n:"Jim McMahon",r:82,st:"SB XX champion punk QB leader"},{n:"Steve Fuller",r:68,st:"Backup starter SB XX"},{n:"Mike Tomczak",r:66,st:"Developmental"}],
+ RB:[{n:"Walter Payton",r:99,st:"Sweetness 16,726 career yds NFL record HOF SB champion"},{n:"Matt Suhey",r:78,st:"FB and Payton blocker"},{n:"Calvin Thomas",r:68,st:"Backup RB"}],
+ WR:[{n:"Willie Gault",r:84,st:"Deep threat SB XX"},{n:"Dennis McKinnon",r:78,st:"Reliable WR2"},{n:"Ken Margerum",r:70,st:"Slot WR depth"}],
+ TE:[{n:"Emery Moorehead",r:78,st:"Reliable TE SB champion"},{n:"Tim Wrightman",r:70,st:"Blocker"},{n:"Pat Dunsmore",r:65,st:"Depth"}],
+ OL:[{n:"Jay Hilgenberg",r:87,st:"7x Pro Bowl center SB champion"},{n:"Jimbo Covert",r:86,st:"Pro Bowl LT 1980s HOF"},{n:"Mark Bortz",r:80,st:"2x Pro Bowl guard"}],
+ DEF:{n:"46 Defense",r:99,st:"Buddy Ryan 46 defense Mike Singletary Refrigerator Perry held SB opponents to 10 pts"}},
+{abbr:"90sCOW",name:"90s Cowboys",
+ QB:[{n:"Troy Aikman",r:93,st:"3x SB champion SB XXVII MVP HOF"},{n:"Jason Garrett",r:68,st:"Backup future HC"},{n:"Wade Wilson",r:70,st:"Veteran backup"}],
+ RB:[{n:"Emmitt Smith",r:97,st:"All-time rushing leader 18,355 yds 3x SB champion HOF"},{n:"Daryl Johnston",r:82,st:"Moose FB 2x Pro Bowl"},{n:"Sherman Williams",r:70,st:"Backup RB"}],
+ WR:[{n:"Michael Irvin",r:95,st:"3x SB champion 5x Pro Bowl HOF The Playmaker"},{n:"Alvin Harper",r:78,st:"Big-play receiver SB champion"},{n:"Kevin Williams",r:70,st:"WR depth"}],
+ TE:[{n:"Jay Novacek",r:88,st:"5x Pro Bowl SB champion reliable hands"},{n:"Derek Tennell",r:68,st:"Backup"},{n:"Alfredo Roberts",r:66,st:"Blocking TE"}],
+ OL:[{n:"Larry Allen",r:97,st:"11x Pro Bowl best guard in NFL history HOF"},{n:"Mark Stepnoski",r:84,st:"5x Pro Bowl center"},{n:"Erik Williams",r:86,st:"4x Pro Bowl RT SB champion"}],
+ DEF:{n:"Cowboys Defense 90s",r:90,st:"Charles Haley 5 SB rings Leon Lett Ken Norton Jr"}},
+{abbr:"00sPAT",name:"2000s Patriots",
+ QB:[{n:"Tom Brady",r:99,st:"GOAT 6x SB champion 3x SB MVP 2000s dynasty"},{n:"Matt Cassel",r:74,st:"11-5 without Brady 2008"},{n:"Doug Flutie",r:70,st:"Veteran backup"}],
+ RB:[{n:"Corey Dillon",r:87,st:"SB XXXIX 13 TD 1,635 yds 2004"},{n:"Kevin Faulk",r:80,st:"3rd-down back SB champion"},{n:"Antowain Smith",r:76,st:"1,157 yds SB XXXVI year"}],
+ WR:[{n:"Randy Moss",r:97,st:"23 TD single-season record 2007"},{n:"Wes Welker",r:90,st:"112 rec elite slot"},{n:"Deion Branch",r:82,st:"SB XXXIX MVP"}],
+ TE:[{n:"Rob Gronkowski",r:98,st:"3x SB champion greatest TE ever"},{n:"Ben Watson",r:76,st:"Reliable backup"},{n:"Daniel Graham",r:75,st:"Blocking TE SB"}],
+ OL:[{n:"Matt Light",r:84,st:"3x Pro Bowl LT SB champion"},{n:"Logan Mankins",r:86,st:"7x Pro Bowl guard"},{n:"Dan Koppen",r:80,st:"5x SB center starter"}],
+ DEF:{n:"Patriots Defense 2000s",r:90,st:"Tedy Bruschi Ty Law Richard Seymour dynasty defense"}},
+{abbr:"00sCOL",name:"2000s Colts",
+ QB:[{n:"Peyton Manning",r:98,st:"2x SB champion 4x MVP greatest regular season QB"},{n:"Jim Sorgi",r:65,st:"Backup holder"},{n:"Charlie Whitehurst",r:63,st:"Practice squad"}],
+ RB:[{n:"Edgerrin James",r:93,st:"4x Pro Bowl 2x rushing title HOF"},{n:"Dominic Rhodes",r:78,st:"SB XLI MVP"},{n:"Joseph Addai",r:80,st:"SB XLI 10 rec from Manning"}],
+ WR:[{n:"Marvin Harrison",r:96,st:"HOF 14,580 yds 128 TD record 143 rec 2002"},{n:"Reggie Wayne",r:91,st:"6x Pro Bowl Manning's WR1 for decade"},{n:"Brandon Stokley",r:78,st:"SB winner reliable slot"}],
+ TE:[{n:"Dallas Clark",r:85,st:"Pro Bowl TE great hands"},{n:"Marcus Pollard",r:72,st:"Veteran blocker"},{n:"Ben Utecht",r:68,st:"SB champion TE"}],
+ OL:[{n:"Tarik Glenn",r:86,st:"3x Pro Bowl LT"},{n:"Jake Scott",r:82,st:"Solid RG starter"},{n:"Jeff Saturday",r:88,st:"6x Pro Bowl center Peyton's anchor"}],
+ DEF:{n:"Colts Defense 2000s",r:82,st:"Bob Sanders Dwight Freeney Reggie Wayne"}},
+{abbr:"10sSEA",name:"2010s Seahawks",
+ QB:[{n:"Russell Wilson",r:94,st:"2x SB champion SB XLVIII MVP franchise icon"},{n:"Tarvaris Jackson",r:70,st:"Backup"},{n:"Charlie Whitehurst",r:64,st:"Clipboard Charlie"}],
+ RB:[{n:"Marshawn Lynch",r:96,st:"Beast Mode SB XLVIII hero 1,306 yds 2013"},{n:"Christine Michael",r:72,st:"Developmental RB"},{n:"Robert Turbin",r:70,st:"Backup Lynch complement"}],
+ WR:[{n:"Doug Baldwin",r:86,st:"Super Bowl TD clutch Pro Bowl"},{n:"Jermaine Kearse",r:78,st:"SB XLIX catch"},{n:"Percy Harvin",r:82,st:"SB XLVIII 58-yd TD kick return"}],
+ TE:[{n:"Zach Miller",r:78,st:"Reliable TE for Wilson"},{n:"Luke Willson",r:68,st:"Backup"},{n:"Anthony McCoy",r:65,st:"Blocking TE"}],
+ OL:[{n:"Russell Okung",r:84,st:"LT Pro Bowl SB XLVIII"},{n:"James Carpenter",r:76,st:"LG starter"},{n:"Max Unger",r:82,st:"Pro Bowl center"}],
+ DEF:{n:"Legion of Boom",r:99,st:"Richard Sherman Earl Thomas Kam Chancellor greatest secondary ever 2013"}},
+{abbr:"90sPAC",name:"90s Packers",
+ QB:[{n:"Brett Favre",r:96,st:"3x MVP SB XXXI champion consecutive starts record"},{n:"Doug Pederson",r:68,st:"Backup future SB coach"},{n:"Mark Brunell",r:72,st:"Backup before Jacksonville"}],
+ RB:[{n:"Dorsey Levens",r:82,st:"1,435 yds 1997 SB champion"},{n:"Edgar Bennett",r:78,st:"1,067 yds SB year"},{n:"William Henderson",r:76,st:"Elite FB Pro Bowl"}],
+ WR:[{n:"Antonio Freeman",r:88,st:"SB XXXI TD SB XXXII MNF miracle"},{n:"Robert Brooks",r:80,st:"1,497 yds 1995 before injury"},{n:"Mark Chmura",r:76,st:"Pro Bowl TE"}],
+ TE:[{n:"Mark Chmura",r:76,st:"Pro Bowl TE reliable Favre target"},{n:"Jeff Thomason",r:68,st:"Blocking TE"},{n:"Derrick Mayes",r:66,st:"Depth receiver"}],
+ OL:[{n:"Marco Rivera",r:80,st:"2x Pro Bowl guard SB champion"},{n:"Aaron Taylor",r:78,st:"SB champion OT/G"},{n:"Frank Winters",r:82,st:"C Favre's blindside anchor"}],
+ DEF:{n:"Packers Defense 90s",r:85,st:"Reggie White 21 sacks 1998 LeRoy Butler Interceptor"}},
+{abbr:"72MIA",name:"1972 Dolphins",
+ QB:[{n:"Bob Griese",r:88,st:"2x SB champion 6x Pro Bowl perfect season"},{n:"Earl Morrall",r:78,st:"11-0 while Griese injured 1972"},{n:"Jim Del Gaizo",r:62,st:"Backup"}],
+ RB:[{n:"Larry Csonka",r:94,st:"SB VIII MVP HOF perfect season 1,003 yds"},{n:"Mercury Morris",r:84,st:"1,000 yds perfect season first dual 1K"},{n:"Jim Kiick",r:78,st:"Butch Cassidy complement"}],
+ WR:[{n:"Paul Warfield",r:90,st:"HOF WR deadly deep threat"},{n:"Howard Twilley",r:74,st:"SB champion slot receiver"},{n:"Marlin Briscoe",r:72,st:"Reliable WR2"}],
+ TE:[{n:"Marv Fleming",r:76,st:"5x SB champion blocker"},{n:"Jim Mandich",r:72,st:"Reliable backup"},{n:"Norm Evans",r:70,st:"5x Pro Bowl OT also plays TE"}],
+ OL:[{n:"Larry Little",r:90,st:"HOF guard 5x Pro Bowl perfect season"},{n:"Norm Evans",r:82,st:"5x Pro Bowl OT"},{n:"Jim Langer",r:85,st:"HOF center perfect season"}],
+ DEF:{n:"No-Name Defense",r:88,st:"Nick Buoniconti HOF perfect season unit allowed fewest pts in NFL"}},
+{abbr:"00sRAV",name:"2000s Ravens",
+ QB:[{n:"Trent Dilfer",r:78,st:"SB XXXV champion game manager"},{n:"Elvis Grbac",r:73,st:"Starter 2001"},{n:"Anthony Wright",r:65,st:"Backup"}],
+ RB:[{n:"Jamal Lewis",r:92,st:"SB XXXV champion 2,066 yds record 2003"},{n:"Chester Taylor",r:74,st:"912 yds 2005"},{n:"Mike Anderson",r:72,st:"SB year backup"}],
+ WR:[{n:"Derrick Mason",r:80,st:"1,168 yds 2003"},{n:"Travis Taylor",r:72,st:"Starter 2000-2003"},{n:"Qadry Ismail",r:71,st:"65 rec 1999"}],
+ TE:[{n:"Shannon Sharpe",r:88,st:"HOF SB XXXV champion 96 rec 2000"},{n:"Todd Heap",r:81,st:"2x Pro Bowl"},{n:"Ben Coates",r:74,st:"Veteran TE"}],
+ OL:[{n:"Jonathan Ogden",r:95,st:"HOF LT 11x Pro Bowl greatest ever"},{n:"Edwin Mulitalo",r:78,st:"Starting guard"},{n:"Mike Flynn",r:75,st:"Center"}],
+ DEF:{n:"Ravens D 2000",r:97,st:"Greatest defense in NFL history Ray Lewis Ed Reed 2000 season"}}
+];
+
+// ── RECORDS DATA ──────────────────────────────────────────────────────────────
+const RECORDS=[
+  {w:17,l:0,label:"Undefeated Dynasty",target:93,color:"#FFD700"},
+  {w:16,l:1,label:"Elite Contender",target:90,color:"#C0C0C0"},
+  {w:15,l:2,label:"Championship Caliber",target:87,color:"#CD7F32"},
+  {w:14,l:3,label:"Playoff Powerhouse",target:84,color:"#4CAF50"},
+  {w:13,l:4,label:"Division Winner",target:81,color:"#2196F3"},
+  {w:12,l:5,label:"Solid Contender",target:79,color:"#2196F3"},
+  {w:11,l:6,label:"Playoff Team",target:77,color:"#03A9F4"},
+  {w:10,l:7,label:"Wild Card Hopeful",target:75,color:"#9E9E9E"},
+  {w:9,l:8,label:"On the Bubble",target:73,color:"#9E9E9E"},
+  {w:8,l:9,label:"Mediocre Squad",target:71,color:"#FF9800"},
+  {w:7,l:10,label:"Struggling Team",target:69,color:"#FF9800"},
+  {w:6,l:11,label:"Bottom Feeder",target:68,color:"#FF5722"},
+  {w:5,l:12,label:"Rebuilding Mode",target:67,color:"#FF5722"},
+  {w:4,l:13,label:"Development Year",target:66,color:"#F44336"},
+  {w:3,l:14,label:"Draft Lottery Bound",target:65,color:"#F44336"},
+  {w:2,l:15,label:"Total Rebuild",target:64,color:"#9C27B0"},
+  {w:1,l:16,label:"Historic Futility",target:63,color:"#9C27B0"},
+  {w:0,l:17,label:"Perfect Futility",target:62,color:"#607D8B"}
+];
+
+
+// ── GAME STATE ─────────────────────────────────────────────────────────────────
+let G={mode:null,record:null,team:null,pick:null,round:0,roster:[],used:[],TOTAL:9,remaining:[],pickedPos:null};
+
+// ── UTILITIES ──────────────────────────────────────────────────────────────────
+function avg(arr){return arr.length?Math.round(arr.reduce((a,b)=>a+b,0)/arr.length):0;}
+
+function fitClass(r,t){
+  if(!t)return '';
+  if(Math.abs(r-t)<=4)return 'fp';
+  if(r>t+4)return 'fh';
+  return 'fl';
+}
+function fitLabel(r,t){
+  if(!t)return '';
+  if(Math.abs(r-t)<=4)return '✅ Perfect Fit';
+  if(r>t+4)return '⚠️ Too Good';
+  return '📉 Below Target';
+}
+
+function posColor(r){
+  if(r>=90)return '#FFD700';
+  if(r>=80)return '#10b981';
+  if(r>=70)return '#3b82f6';
+  return '#9ca3af';
+}
+
+// show() - hides all .scr and #gameScr, shows target
+// Also accepts mode param from main menu cards
+function show(id, mode){
+  if(mode!==undefined && mode!==null) G.mode=mode;
+  document.querySelectorAll('.scr').forEach(s=>{s.classList.remove('on');});
+  document.getElementById('gameScr').classList.remove('on');
+  const el=document.getElementById(id);
+  if(el) el.classList.add('on');
+}
+
+// Phase toggle within gameScr
+function showPhase(id){
+  ['spinPhase','pickPhase'].forEach(p=>{
+    const el=document.getElementById(p);
+    if(el) el.classList.toggle('on', el.id===id);
+  });
+}
+
+// ── RECORD GRID BUILD ──────────────────────────────────────────────────────────
+(function buildRecordGrid(){
+  const grid=document.getElementById('recGrid');
+  if(!grid) return;
+  RECORDS.forEach((rec,idx)=>{
+    const btn=document.createElement('div');
+    btn.className='rec-btn';
+    btn.style.borderColor=rec.color;
+    btn.innerHTML=`<span class="rec-wl" style="color:${rec.color}">${rec.w}-${rec.l}</span><span class="rec-lbl">${rec.label}</span>`;
+    btn.onclick=()=>{
+      document.querySelectorAll('.rec-btn').forEach(b=>b.classList.remove('sel'));
+      btn.classList.add('sel');
+      btn.style.boxShadow=`0 0 0 3px ${rec.color}44`;
+      G.record=rec;
+      G.mode='record';
+      // Show info panel
+      const info=document.getElementById('recInfo');
+      if(info) info.style.display='block';
+      const rn=document.getElementById('recInfoName');
+      const ro=document.getElementById('recInfoOvr');
+      if(rn) rn.textContent=rec.w+'-'+rec.l+' — '+rec.label;
+      if(ro) ro.textContent=rec.target;
+      // Enable start button
+      const sb=document.getElementById('recStartBtn');
+      if(sb){sb.disabled=false;sb.style.opacity='1';sb.style.cursor='pointer';}
+    };
+    grid.appendChild(btn);
+  });
+})();
+
+function startRecord(){
+  if(!G.record) return;
+  G.mode='record';
+  startGame();
+}
+
+// ── START GAME ─────────────────────────────────────────────────────────────────
+function startGame(){
+  G.round=0; G.roster=[]; G.used=[]; G.team=null; G.pick=null;
+  G.remaining=[...DPOS]; G.pickedPos=null;
+
+  // Set game title
+  const gt=document.getElementById('gameTitle');
+  if(gt){
+    if(G.mode==='alltime') gt.textContent='🏆 All-Time Draft';
+    else if(G.mode==='record') gt.textContent='📊 '+G.record.w+'-'+G.record.l+' Record Builder';
+    else gt.textContent='🏈 NFL Team Spin Draft';
+  }
+
+  // Show/hide target bar
+  const bar=document.getElementById('tgtBar');
+  if(bar) bar.style.display=G.mode==='record'?'flex':'none';
+  if(G.mode==='record'){
+    const to=document.getElementById('tgtOvr');
+    if(to) to.textContent=G.record.target;
+    const td=document.getElementById('tgtDiff');
+    if(td) td.textContent='';
+  }
+
+  buildRosterSlots();
+  updatePills();
+
+  // Show gameScr
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  document.getElementById('gameScr').classList.add('on');
+
+  // Start with spin phase
+  showPhase('spinPhase');
+  setupSpinPhase();
+}
+
+// ── ROSTER SLOTS ───────────────────────────────────────────────────────────────
+function buildRosterSlots(){
+  const container=document.getElementById('rosterSlots');
+  if(!container) return;
+  container.innerHTML='';
+  DPOS.forEach((pos,i)=>{
+    const slot=document.createElement('div');
+    slot.className='rslot'+(i===0?' cur':'');
+    slot.id='slot'+i;
+    const color=posColor(0);
+    slot.innerHTML=`
+      <div class="sposbdg" id="sposbdg${i}">${pos}</div>
+      <div class="scont">
+        <div class="splyr" id="splyr${i}">—</div>
+        <div class="smeta" id="smeta${i}">Waiting...</div>
+      </div>`;
+    container.appendChild(slot);
+  });
+}
+
+function fillSlot(idx,pos,player){
+  const slot=document.getElementById('slot'+idx);
+  if(!slot) return;
+  slot.className='rslot';
+  const badg=document.getElementById('sposbdg'+idx);
+  const plyr=document.getElementById('splyr'+idx);
+  const meta=document.getElementById('smeta'+idx);
+  const col=posColor(player.r);
+  if(badg){badg.style.background=col;badg.style.borderColor=col;}
+  if(plyr) plyr.textContent=player.n;
+  if(meta){
+    meta.textContent=`${player.r} OVR`;
+  }
+  // Update live OVR
+  const ovrEl=document.getElementById('rOvr');
+  if(ovrEl){
+    const all=G.roster.map(p=>p.player.r);
+    all.push(player.r);
+    ovrEl.textContent='OVR '+avg(all);
+  }
+  // Mark next slot current
+  const next=document.getElementById('slot'+(idx+1));
+  if(next) next.classList.add('cur');
+}
+
+// ── PILLS ──────────────────────────────────────────────────────────────────────
+function updatePills(){
+  const container=document.getElementById('gamePills');
+  if(!container) return;
+  container.innerHTML='';
+  // Build filled count per position type
+  const filledByPos={};
+  G.roster.forEach(r=>{filledByPos[r.pos]=(filledByPos[r.pos]||0)+1;});
+  const remainByPos={};
+  DPOS.forEach(p=>{remainByPos[p]=(remainByPos[p]||0)+1;});
+  // Show each roster entry as a pill
+  G.roster.forEach(({pos,player})=>{
+    const pill=document.createElement('div');
+    pill.className='rpill done';
+    pill.title=player.n+' ('+player.r+' OVR)';
+    pill.textContent=pos;
+    container.appendChild(pill);
+  });
+  // Show remaining slots
+  const remCopy=[...G.remaining];
+  const seen={};
+  remCopy.forEach(pos=>{
+    const key=pos+(seen[pos]||0);
+    seen[pos]=(seen[pos]||0)+1;
+    const pill=document.createElement('div');
+    pill.className='rpill';
+    pill.textContent=pos;
+    container.appendChild(pill);
+  });
+}
+
+// ── SPIN PHASE SETUP ───────────────────────────────────────────────────────────
+function setupSpinPhase(){
+  const posEl=document.getElementById('posBadge');
+  const doneCount=G.TOTAL-G.remaining.length;
+  if(posEl) posEl.textContent='Pick '+(doneCount+1)+' of '+G.TOTAL+' — Choose any position';
+
+  const teamEl=document.getElementById('teamDisp');
+  if(teamEl){teamEl.textContent='?';teamEl.className='tdisp';}
+
+  const spinBtn=document.getElementById('spinBtn');
+  if(spinBtn) spinBtn.disabled=false;
+
+  // Update record diff
+  if(G.mode==='record' && G.roster.length>0){
+    const cur=avg(G.roster.map(p=>p.player.r));
+    const diff=cur-G.record.target;
+    const diffEl=document.getElementById('tgtDiff');
+    if(diffEl){
+      diffEl.textContent='Current: '+cur+(diff>0?' (+'+diff+')':' ('+diff+')');
+      diffEl.className='tbdiff'+(Math.abs(diff)<=4?' good':Math.abs(diff)<=10?' warn':' bad');
+    }
+  }
+}
+
+function spinTeam(){
+  const spinBtn=document.getElementById('spinBtn');
+  if(spinBtn) spinBtn.disabled=true;
+
+  const pool=G.mode==='alltime'?ALLTIME_ERAS:CURRENT_TEAMS;
+  const avail=pool.filter(t=>!G.used.includes(t.abbr));
+  const spinPool=avail.length>0?avail:pool; // fallback if somehow exhausted
+
+  const teamEl=document.getElementById('teamDisp');
+  if(teamEl) teamEl.className='tdisp spin';
+
+  let spins=0;
+  const maxSpins=16+Math.floor(Math.random()*14);
+  const spinInterval=setInterval(()=>{
+    const rnd=pool[Math.floor(Math.random()*pool.length)];
+    if(teamEl) teamEl.textContent=rnd.abbr||rnd.name||'?';
+    spins++;
+    if(spins>=maxSpins){
+      clearInterval(spinInterval);
+      G.team=spinPool[Math.floor(Math.random()*spinPool.length)];
+      G.used.push(G.team.abbr);
+      if(teamEl){
+        teamEl.className='tdisp land';
+        teamEl.textContent=G.mode==='alltime'?G.team.name:(G.team.city+' '+G.team.name);
+      }
+      // Transition to position picker after brief pause
+      setTimeout(showPositionPicker, 700);
+    }
+  },75);
+}
+
+// ── POSITION PICKER ────────────────────────────────────────────────────────────
+function showPositionPicker(){
+  const teamName=G.mode==='alltime'?G.team.name:(G.team.city+' '+G.team.name);
+  const titleEl=document.getElementById('pickTitle');
+  if(titleEl) titleEl.textContent='You got the '+teamName+' — Pick a position';
+  const subEl=document.getElementById('pickSub');
+  const spanEl=document.getElementById('pickTeamSpan');
+  if(subEl) subEl.style.display='none';
+  if(spanEl) spanEl.textContent=teamName;
+
+  // Render position choice buttons in playerGrid
+  const grid=document.getElementById('playerGrid');
+  if(!grid) return;
+  grid.innerHTML='';
+  grid.style.gridTemplateColumns='repeat(auto-fit,minmax(120px,1fr))';
+
+  // Get unique remaining positions preserving duplicates
+  const posLabels={QB:'Quarterback',RB:'Running Back',WR:'Wide Receiver',TE:'Tight End',OL:'Offensive Line',DEF:'Defense'};
+  // Show each remaining slot (including dupes like RB/WR)
+  const shown={};
+  G.remaining.forEach(pos=>{
+    const key=pos;
+    if(shown[key]) return; // show each position type once
+    shown[key]=true;
+    const count=G.remaining.filter(p=>p===pos).length;
+    const players=getPlayers(pos);
+    const best=players.reduce((a,b)=>a.r>b.r?a:b,players[0]);
+
+    const btn=document.createElement('div');
+    btn.className='pcard';
+    btn.style.textAlign='center';
+    btn.style.cursor='pointer';
+
+    // No fit hints shown during draft
+    const countBadge=count>1?`<span style="font-size:.65rem;color:var(--muted)">${count} slots left</span>`:'';
+
+    btn.innerHTML=`
+      <div style="font-size:1.6rem;margin-bottom:6px">${posEmoji(pos)}</div>
+      <div class="pname">${pos}</div>
+      <div style="font-size:.74rem;color:var(--muted);margin-bottom:4px">${posLabels[pos]||pos}</div>
+      ${best?`<div class="prat ${ratingClass(best.r)}">${best.r} OVR best</div>`:''}
+      ${countBadge}`;
+    btn.onclick=()=>choosePosition(pos);
+    grid.appendChild(btn);
+  });
+
+  const confBtn=document.getElementById('confBtn');
+  if(confBtn) confBtn.classList.remove('vis');
+
+  showPhase('pickPhase');
+}
+
+function posEmoji(pos){
+  return {QB:'🎯',RB:'🏃',WR:'⚡',TE:'🤜',OL:'🛡️',DEF:'🔒'}[pos]||'🏈';
+}
+function ratingClass(r){
+  if(r>=90)return 're'; if(r>=80)return 'rg'; if(r>=70)return 'ry'; return 'ra';
+}
+
+function choosePosition(pos){
+  G.pickedPos=pos;
+  showPickPhase(pos);
+}
+
+
+// ── PICK PHASE ─────────────────────────────────────────────────────────────────
+function showPickPhase(pos){
+  if(!pos) pos=G.pickedPos||DPOS[G.round];
+  const teamName=G.mode==='alltime'?G.team.name:(G.team.city+' '+G.team.name);
+
+  const titleEl=document.getElementById('pickTitle');
+  if(titleEl) titleEl.textContent='Pick your '+teamName+' '+(pos==='DEF'?'Defense':pos==='OL'?'O-Line':' '+pos);
+
+  const subEl=document.getElementById('pickSub');
+  const spanEl=document.getElementById('pickTeamSpan');
+  if(subEl) subEl.style.display='block';
+  if(spanEl) spanEl.textContent=teamName;
+  // Reset grid columns for player cards
+  const pgrid=document.getElementById('playerGrid');
+  if(pgrid) pgrid.style.gridTemplateColumns='';
+
+  // Get players for chosen position
+  let players=getPlayers(pos);
+
+  // Render cards
+  const grid=document.getElementById('playerGrid');
+  if(grid){
+    grid.innerHTML='';
+    players.forEach((player,i)=>{
+      const card=document.createElement('div');
+      card.className='pcard';
+      card.style.animationDelay=(i*0.07)+'s';
+
+      // Rating tier class
+      let ratClass='ra';
+      if(player.r>=90)ratClass='re';
+      else if(player.r>=80)ratClass='rg';
+      else if(player.r>=70)ratClass='ry';
+
+      // No fit hints on player cards
+
+      card.innerHTML=`
+        <div class="pchk">✓</div>
+          <div class="pname">${player.n}</div>
+        <div class="prat ${ratClass}">${player.r} OVR</div>
+        <div class="pstat">${player.st||''}</div>`;
+      card.onclick=()=>selectCard(card,player);
+      grid.appendChild(card);
+    });
+  }
+
+  // Hide confirm button until selection
+  const confBtn=document.getElementById('confBtn');
+  if(confBtn) confBtn.classList.remove('vis');
+
+  G.pick=null;
+  showPhase('pickPhase');
+}
+
+function getPlayers(pos){
+  if(!G.team) return [{n:'Generic '+pos,r:70,st:'Starter'}];
+  let players=[];
+  if(pos==='DEF'){
+    const d=G.team.DEF||G.team.def;
+    players=d?[d]:[];
+  } else if(pos==='OL'){
+    const olArr=G.team.OL||G.team.ol||[];
+    const arr=Array.isArray(olArr)?olArr:[olArr];
+    if(arr.length>0){
+      const avgR=Math.round(arr.reduce((a,b)=>a+b.r,0)/arr.length);
+      const names=arr.map(p=>p.n).join(', ');
+      const teamLabel=G.mode==='alltime'?G.team.name:(G.team.city+' '+G.team.name);
+      players=[{n:teamLabel+' O-Line',r:avgR,st:names}];
+    }
+  } else {
+    players=G.team[pos]||G.team[pos.toLowerCase()]||[];
+  }
+  return players.length>0?players:[{n:'Generic '+pos,r:70,st:'Starter'}];
+}
+
+function selectCard(card, player){
+  document.querySelectorAll('.pcard').forEach(c=>c.classList.remove('sel'));
+  card.classList.add('sel');
+  G.pick=player;
+  const confBtn=document.getElementById('confBtn');
+  if(confBtn) confBtn.classList.add('vis');
+}
+
+function confirmPick(){
+  if(!G.pick) return;
+  const pos=G.pickedPos||DPOS[G.round];
+  // Find the correct slot index for this position
+  const filledSlots=new Set(G.roster.map(r=>r.slotIdx));
+  const slotIdx=DPOS.findIndex((p,i)=>p===pos&&!filledSlots.has(i));
+  if(slotIdx===-1) return; // safety check
+  G.roster.push({pos,player:G.pick,team:G.team,slotIdx});
+  // Remove one instance of this pos from remaining
+  const ri=G.remaining.indexOf(pos);
+  if(ri>-1) G.remaining.splice(ri,1);
+  G.round++;
+  fillSlot(slotIdx,pos,G.pick);
+  updatePills();
+
+  if(G.round>=G.TOTAL){
+    setTimeout(showResults,400);
+  } else {
+    showPhase('spinPhase');
+    setupSpinPhase();
+  }
+}
+
+// ── RESULTS ────────────────────────────────────────────────────────────────────
+function showResults(){
+  const ovrVal=avg(G.roster.map(p=>p.player.r));
+
+  if(G.mode==='record'){
+    buildRecordResults(ovrVal);
+    show('recResScr',null);
+  } else {
+    buildDraftResults(ovrVal);
+    show('resScr',null);
+  }
+}
+
+function buildDraftResults(ovrVal){
+  const el=document.getElementById('ovrScore');
+  if(el) el.textContent=ovrVal;
+
+  let grade,color,sub;
+  if(ovrVal>=92){grade='S';color='#FFD700';sub='Legendary. A dynasty is born.';}
+  else if(ovrVal>=87){grade='A+';color='#00E676';sub='Elite squad. Clear Super Bowl contender.';}
+  else if(ovrVal>=82){grade='A';color='#69F0AE';sub='Strong roster. Serious playoff threat.';}
+  else if(ovrVal>=77){grade='B+';color='#40C4FF';sub='Solid team. Deep playoff run possible.';}
+  else if(ovrVal>=72){grade='B';color='#80D8FF';sub='Above average. Wild card material.';}
+  else if(ovrVal>=67){grade='C';color='#FFD740';sub='Middle of the pack. Work to do.';}
+  else{grade='D';color='#FF6D00';sub='Rebuilding year. Better luck next draft.';}
+
+  const vm=document.getElementById('vrdMain');
+  const vs=document.getElementById('vrdSub');
+  const rl=document.getElementById('resLabel');
+  if(vm){vm.textContent=grade+' Grade';vm.style.color=color;}
+  if(vs) vs.textContent=sub;
+  if(rl) rl.textContent=G.mode==='alltime'?'All-Time Team Rating':'Final Team Rating';
+
+  const fg=document.getElementById('finalGrid');
+  if(fg){
+    fg.innerHTML='';
+    G.roster.forEach(({pos,player,team},i)=>{
+      const teamName=G.mode==='alltime'?team.name:(team.city+' '+team.name);
+      let rc='ra';
+      if(player.r>=90)rc='re';
+      else if(player.r>=80)rc='rg';
+      else if(player.r>=70)rc='ry';
+      const card=document.createElement('div');
+      card.className='fcard';
+      card.style.borderTopColor=posColor(player.r);
+      card.style.animationDelay=(i*0.06)+'s';
+      card.innerHTML=`<div class="fpos">${pos}</div>
+        <div class="fname">${player.n}<span class="frat ${rc}">${player.r}</span></div>
+        <div class="fteam">${teamName}</div>`;
+      fg.appendChild(card);
+    });
+  }
+}
+
+function buildRecordResults(ovrVal){
+  const rec=G.record;
+  const diff=ovrVal-rec.target;
+  const ab=Math.abs(diff);
+
+  document.getElementById('rrbRecord').textContent=rec.w+'-'+rec.l;
+  document.getElementById('rrbRecord').style.color=rec.color;
+  document.getElementById('rrbLabel').textContent=rec.label;
+  document.getElementById('rrbYours').textContent=ovrVal;
+  document.getElementById('rrbTarget').textContent=rec.target;
+
+  const diffEl=document.getElementById('rrbDiff');
+  diffEl.textContent=(diff>0?'+':'')+diff;
+  diffEl.style.color=ab<=3?'#00E676':ab<=10?'#FFD740':'#FF5722';
+
+  let verdict,vsub;
+  if(ab<=3){verdict='Perfect Season!';vsub='OVR nailed it. This team wins exactly '+rec.w+'-'+rec.l+'.';}
+  else if(ab<=6){verdict='Very Close!';vsub='Only '+ab+' OVR '+(diff>0?'above':'below')+' target. Nearly perfect.';}
+  else if(ab<=10){verdict='Close Enough';vsub=ab+' OVR off target. Solid attempt.';}
+  else if(ab<=15){verdict='Off the Mark';vsub=ab+' OVR off. This team might not hit '+rec.w+' wins.';}
+  else{verdict='Way Off';vsub='Your roster is '+ab+' OVR from the target. Back to the drawing board.';}
+
+  const vv=document.getElementById('rrbVerdict');
+  if(vv){vv.textContent=verdict;vv.style.color=ab<=3?'#00E676':ab<=10?'#FFD740':'#FF5722';}
+  const vsel=document.getElementById('rrbVsub');
+  if(vsel) vsel.textContent=vsub;
+
+  const fg=document.getElementById('recFinalGrid');
+  if(fg){
+    fg.innerHTML='';
+    G.roster.forEach(({pos,player,team},i)=>{
+      const fc=fitClass(player.r,rec.target);
+      const teamName=G.mode==='alltime'?team.name:(team.city+' '+team.name);
+      const card=document.createElement('div');
+      card.className='fcard';
+      card.style.borderTopColor=fc==='fp'?'#10b981':fc==='fh'?'#fbbf24':'#6b7280';
+      card.style.animationDelay=(i*0.06)+'s';
+      card.innerHTML=`<div class="fpos">${pos}</div>
+        <div class="fname">${player.n} <span class="fitbdg ${fc}" style="font-size:.58rem">${fitLabel(player.r,rec.target)}</span></div>
+        <div class="fteam">${player.r} OVR · ${teamName}</div>`;
+      fg.appendChild(card);
+    });
+  }
+}
+
+// ── PLAY AGAIN / COPY ──────────────────────────────────────────────────────────
+function playAgain(){startGame();}
+
+function copyResult(){
+  const ovrVal=avg(G.roster.map(p=>p.player.r));
+  let txt=G.mode==='record'
+    ?`NFL Record Builder — Target: ${G.record.w}-${G.record.l} (OVR ${G.record.target})\nMy Team OVR: ${ovrVal}\n\n`
+    :`NFL ${G.mode==='alltime'?'All-Time ':''}Draft — Team OVR: ${ovrVal}\n\n`;
+  G.roster.forEach(({pos,player})=>{
+    txt+=`${pos}: ${player.n} (${player.r} OVR)\n`;
+  });
+  navigator.clipboard.writeText(txt).then(()=>alert('Copied to clipboard!')).catch(()=>alert(txt));
+}
+
+// ── INTRO SCREEN WIRING ────────────────────────────────────────────────────────
+// Main menu cards call show('introScr','draft') etc — mode gets set in show()
+// introStartBtn calls startGame() which uses G.mode
+const introStart=document.getElementById('introStartBtn');
+if(introStart) introStart.onclick=startGame;
+
+// Dynamic intro content based on mode
+document.getElementById('mainScr').addEventListener('click',function(e){
+  const card=e.target.closest('.mode-card');
+  if(!card)return;
+  const onclick=card.getAttribute('onclick')||'';
+  if(onclick.includes("'draft'")){
+    document.getElementById('introBadge').textContent='🎰 Current Rosters Mode';
+    document.getElementById('introTitle').innerHTML='Spin for<br><span class="hl">Current Teams</span>';
+    document.getElementById('introDesc').textContent='Spin for a random 2024-25 NFL team each round. Draft the best player at each position and build a 9-man roster. How high can your OVR go?';
+  } else if(onclick.includes("'alltime'")){
+    document.getElementById('introBadge').textContent='🏆 All-Time Legends Mode';
+    document.getElementById('introTitle').innerHTML='Draft the<br><span class="hl">All-Time Greats</span>';
+    document.getElementById('introDesc').textContent='Spin legendary era squads — 70s Steelers, 85 Bears, 90s Cowboys, 2000s Pats and more. Draft the best players from history!';
+  }
+});
+
+</script>
+</body>
+</html>
