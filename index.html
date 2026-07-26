@@ -278,7 +278,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <!-- GAME SCREEN (shared all modes) -->
 <div id="gameScr">
   <div class="ghdr">
-    <div class="glogo" id="gameTitle">🏈 Build a 17-0 Team</div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="btn-s" onclick="if(confirm('Exit to main menu? Your current draft will be lost.'))show('mainScr',null)" style="padding:5px 12px;font-size:.72rem">← Menu</button>
+      <div class="glogo" id="gameTitle">🏈 Build a 17-0 Team</div>
+    </div>
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
       <div class="tgtbar" id="tgtBar" style="display:none">
         <span class="tbl">Target OVR:</span><span class="tbv" id="tgtOvr">—</span>
