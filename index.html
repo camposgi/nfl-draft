@@ -6402,7 +6402,7 @@ document.getElementById('mainScr').addEventListener('click',function(e){
 
 
 
-#mpResScr{max-width:540px;margin:0 auto;padding:20px 16px}
+#mpResScr{max-width:540px;margin:0 auto;padding:20px 16px;width:100%}
 
 
 
@@ -9566,7 +9566,9 @@ const MP = {
 
   opponents: [],      // [{role, name}]
 
-  challPicks: []      // per-slot pick log
+  challPicks: [],     // per-slot pick log
+
+  myDone: false       // true only when I have fully finished
 
 };
 
@@ -9791,7 +9793,7 @@ function mpWriteMyScore(score, done) {
 
   MP.myScore = score;
   MP.allScores[MP.role] = score;
-  if (done) MP.allDone[MP.role] = true;
+  if (done) { MP.allDone[MP.role] = true; MP.myDone = true; }
   MP.ref.child(MP.role).update({ score, done: done || false });
   if ((MP.maxPlayers || 2) <= 2) mpUpdateBar(); else mpUpdateMultiBar();
 
@@ -10600,25 +10602,11 @@ confirmPick = function() {
 
 
   G.roster.push({ pos, player: G.pick, team: G.team, slotIdx });
-
-
-
   const ri = G.remaining.indexOf(pos);
-
-
-
   if (ri > -1) G.remaining.splice(ri, 1);
-
-
-
+  G.pickedPos = null;  // clear so next round starts fresh
   G.round++;
-
-
-
   fillSlot(slotIdx, pos, G.pick);
-
-
-
   updatePills();
 
 
@@ -10983,14 +10971,14 @@ function mpCheckBothDone() {
 
   var _max = MP.maxPlayers || 2;
   if (_max <= 2) {
-    if (MP.myScore !== null && MP.oppDone) {
+    if (MP.myDone && MP.oppDone) {
       setTimeout(mpShowComparison, 1200);
-    } else if (MP.myScore !== null && !MP.oppDone) {
+    } else if (MP.myDone && !MP.oppDone) {
       mpShowOppToast('Waiting for opponent to finish...');
     }
   } else {
     var _oppDoneCount = Object.keys(MP.allDone).filter(function(k){ return k !== MP.role; }).length;
-    var _totalDone = (MP.myScore !== null ? 1 : 0) + _oppDoneCount;
+    var _totalDone = (MP.myDone ? 1 : 0) + _oppDoneCount;
     if (_totalDone >= _max) {
       setTimeout(mpShowLeaderboard, 1200);
     } else if (MP.myScore !== null) {
@@ -11127,81 +11115,9 @@ function mpShowComparison() {
 
 
 
-  // Details row
-
-
-
+  // Picks comparison is the primary content — load placeholder, Firebase fills it
   const detEl = document.getElementById('mpResDetails');
-
-
-
-  if (detEl && isChallenge) {
-
-
-
-    const cfg = CHALL_CFG2[MP.modeOpts.cat || 'WR'];
-
-
-
-    const tgt = cfg.targets[MP.modeOpts.diff || 'normal'];
-
-
-
-    const myPct = myScore ? Math.round((myScore / tgt) * 100) : 0;
-
-
-
-    const oppPct = oppScore ? Math.round((oppScore / tgt) * 100) : 0;
-
-
-
-    detEl.innerHTML = `
-
-
-
-      <div class="mp-detail-row"><span>Category</span><span>${MP.modeOpts.cat || 'WR'} · ${MP.modeOpts.diff || 'Normal'}</span></div>
-
-
-
-      <div class="mp-detail-row"><span>Target</span><span>${tgt.toLocaleString()} yds</span></div>
-
-
-
-      <div class="mp-detail-row"><span>${MP.myName || 'You'} hit</span><span style="color:var(--acc)">${myPct}% of target</span></div>
-
-
-
-      <div class="mp-detail-row"><span>${MP.oppName || 'Opponent'} hit</span><span style="color:#f59e0b">${oppPct}% of target</span></div>`;
-
-
-
-  } else if (detEl) {
-
-
-
-    detEl.innerHTML = `
-
-
-
-      <div class="mp-detail-row"><span>Mode</span><span>${MP.mode === 'alltime' ? 'All-Time Draft' : '17-0 Draft'}</span></div>
-
-
-
-      <div class="mp-detail-row"><span>${MP.myName || 'You'}</span><span style="color:var(--acc)">${myScore} OVR</span></div>
-
-
-
-      <div class="mp-detail-row"><span>${MP.oppName || 'Opponent'}</span><span style="color:#f59e0b">${oppScore !== null ? oppScore : '—'} OVR</span></div>`;
-
-
-
-  }
-
-
-
-
-
-
+  if (detEl) detEl.innerHTML = '<div style="padding:20px 0;text-align:center;color:var(--muted);font-size:.8rem">Loading picks…</div>';
 
   show('mpResScr', null);
 
@@ -11409,13 +11325,14 @@ function mpAppendPicksComparison(room) {
 
 
 
-    var section = '<div style="margin-top:20px">'
-
-      + '<div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;margin-bottom:6px">Picks Comparison</div>'
-
+    var modeLabel = mode === 'alltime' ? 'All-Time Draft' : '17-0 Draft';
+    var section = '<div style="margin-top:12px">'
+      + '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px">'
+      + '<div style="font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--txt)">Picks Comparison</div>'
+      + '<div style="font-size:.65rem;color:var(--muted)">' + modeLabel + '</div></div>'
       + header + rows + '</div>';
 
-    detEl.insertAdjacentHTML('beforeend', section);
+    if (max <= 2) { detEl.innerHTML = section; } else { detEl.insertAdjacentHTML('beforeend', section); }
 
 
 
@@ -11495,13 +11412,15 @@ function mpAppendPicksComparison(room) {
 
 
 
-    var section2 = '<div style="margin-top:20px">'
-
-      + '<div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;margin-bottom:6px">Picks Comparison</div>'
-
+    var challCat = (MP.modeOpts && MP.modeOpts.cat) || 'WR';
+    var challDiff = (MP.modeOpts && MP.modeOpts.diff) || 'Normal';
+    var section2 = '<div style="margin-top:12px">'
+      + '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px">'
+      + '<div style="font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--txt)">Picks Comparison</div>'
+      + '<div style="font-size:.65rem;color:var(--muted)">' + challCat + ' Challenge · ' + challDiff + '</div></div>'
       + header2 + rows2.join('') + '</div>';
 
-    detEl.insertAdjacentHTML('beforeend', section2);
+    if (max <= 2) { detEl.innerHTML = section2; } else { detEl.insertAdjacentHTML('beforeend', section2); }
 
   }
 
@@ -13455,7 +13374,7 @@ function mpReset() {
 
   MP.oppDone = false; MP.oppSlot = null;
   MP.maxPlayers = 2; MP.allScores = {}; MP.allDone = {}; MP.opponents = [];
-  MP.challPicks = [];
+  MP.challPicks = []; MP.myDone = false;
 
 
 
