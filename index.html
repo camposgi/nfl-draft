@@ -2482,42 +2482,7 @@ function mpGenCode() {
   return code;
 }
 
-async function mpCreateRoom() {
-  if (!DB) { mpLobbyErr('Firebase not loaded'); return; }
-  const nameEl = document.getElementById('mpNameInp');
-  const name = (nameEl && nameEl.value.trim()) || 'Player 1';
-  const code = mpGenCode();
-  const seed = (Math.floor(Math.random() * 899999) + 100000);
-  const opts = _mpMode === 'challenge' ? { cat: _mpCat, diff: _mpDiff } : {};
-
-  const roomData = {
-    status: 'waiting',
-    mode: _mpMode,
-    modeOpts: opts,
-    seed,
-    p1: { name, score: null, done: false },
-    p2: null,
-    created: Date.now()
-  };
-
-  try {
-    await DB.ref('rooms/' + code).set(roomData);
-    // Auto-expire: room TTL marker
-    await DB.ref('rooms/' + code + '/ttl').set(Date.now() + 1800000); // 30 min
-
-    MP.role = 'p1'; MP.code = code; MP.myName = name;
-    MP.mode = _mpMode; MP.modeOpts = opts; MP.seed = seed;
-    MP.ref = DB.ref('rooms/' + code);
-    MP.phase = 'waiting';
-
-    const dc = document.getElementById('mpDisplayCode');
-    if (dc) dc.textContent = code;
-    show('mpWaitScr', null);
-    mpListenForOpponent();
-  } catch(e) {
-    mpLobbyErr('Could not create room: ' + (e.message || e));
-  }
-}
+// mpCreateRoom — defined below with full mode support (Challenge/Draft/Fantasy)
 
 async function mpJoinRoom() {
   if (!DB) { mpLobbyErr('Firebase not loaded'); return; }
