@@ -2258,7 +2258,7 @@ function _challStopAndChoose(){
     var lg=document.getElementById('clogo'+i);
     if(lg){lg.classList.remove('spinning');lg.src=challLogoUrl(abbr);}
     var t=document.getElementById('cteam'+i);
-    if(t)t.textContent=(td&&td.name)||abbr;
+    if(t)t.textContent=(CHALL_TEAM_STATS[abbr]&&CHALL_TEAM_STATS[abbr].name)||abbr;
     var p=document.getElementById('cplayer'+i);
     if(p)p.textContent=stat.name;
     var y=document.getElementById('cyds'+i);
