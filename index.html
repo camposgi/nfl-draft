@@ -1797,9 +1797,9 @@ document.getElementById('mainScr').addEventListener('click',function(e){
         <div class="ccat-target">QB · 55K / 75K yds</div>
       </div>
       <div class="copt-cat" id="ccatTD" onclick="setChallCat('TD',this)">
-        <div class="ccat-ico">🏆</div>
-        <div class="ccat-name">TOUCHDOWNS</div>
-        <div class="ccat-target">Team · 300 / 380 TDs</div>
+        <div class="ccat-ico">🎯</div>
+        <div class="ccat-name">PASSING TDs</div>
+        <div class="ccat-target">QB · 200 / 260 TDs</div>
       </div>
       <div class="copt-cat" id="ccatRecTD" onclick="setChallCat('RecTD',this)">
         <div class="ccat-ico">🙌</div>
@@ -2234,7 +2234,7 @@ const CHALL_CFG2={
   WR:{label:'Receiving',mults:[10,8,6,4,2],targets:{normal:40000,hard:50000},unit:'yds',desc:'receiving yards from 10 WRs'},
   RB:{label:'Rushing',mults:[10,8,6,4,2],targets:{normal:20000,hard:26000},unit:'yds',desc:'rushing yards from 10 RBs'},
   QB:{label:'Passing',mults:[5,4,3,2,1.5],targets:{normal:55000,hard:75000},unit:'yds',desc:'passing yards from 10 QBs'},
-  TD:{label:'Total TDs',mults:[5,4,3,2,1.5],targets:{normal:300,hard:380},unit:'TDs',desc:'total offensive TDs from 10 teams',needsApi:true},
+  TD:{label:'Passing TDs',mults:[5,4,3,2,1.5],targets:{normal:200,hard:260},unit:'TDs',desc:'passing TDs from 10 QBs',needsApi:true},
   RecTD:{label:'Receiving TDs',mults:[5,4,3,2,1.5],targets:{normal:100,hard:130},unit:'TDs',desc:'receiving TDs from 10 WR/TE leaders',needsApi:true}
 };
 const CHALL_TEAMS_32=['ARI','ATL','BAL','BUF','CAR','CHI','CIN','CLE','DAL','DEN','DET','GB','HOU','IND','JAX','KC','LAC','LAR','LV','MIA','MIN','NE','NO','NYG','NYJ','PHI','PIT','SEA','SF','TB','TEN','WAS'];
@@ -3446,22 +3446,23 @@ async function loadChallTDStats() {
       if (!p.player || !p.team || !p.stats) return;
       const t = p.team;
       if (!teams[t]) teams[t] = {
-        totalTD: 0, totalTDLeader: '', totalTDLeaderPts: 0,
-        recTD: 0,   recTDLeader: '',   recTDLeaderPts: 0,
-        recTD2: 0,  recTD2Leader: ''
+        passTD: 0, passTDLeader: '', passTDLeaderPts: 0,
+        recTD: 0,  recTDLeader: '',  recTDLeaderPts: 0,
+        recTD2: 0, recTD2Leader: ''
       };
 
-      const s        = p.stats;
-      const passTD   = s.pass_td  || 0;
-      const rushTD   = s.rush_td  || 0;
-      const recTD    = s.rec_td   || 0;
-      const totalTD  = passTD + rushTD + recTD;
-      const name     = p.player.first_name + ' ' + p.player.last_name;
+      const s      = p.stats;
+      const passTD = s.pass_td || 0;
+      const recTD  = s.rec_td  || 0;
+      const name   = p.player.first_name + ' ' + p.player.last_name;
 
-      teams[t].totalTD += totalTD;
-      if (totalTD > teams[t].totalTDLeaderPts) {
-        teams[t].totalTDLeaderPts = totalTD;
-        teams[t].totalTDLeader = name;
+      // Passing TDs — QB only
+      if (p.player.position === 'QB' && passTD > 0) {
+        if (passTD > (teams[t].passTDLeaderPts || 0)) {
+          teams[t].passTDLeaderPts = passTD;
+          teams[t].passTDLeader    = name;
+        }
+        teams[t].passTD = (teams[t].passTD || 0) + passTD;
       }
 
       // Receiving TDs — WR + TE only
@@ -3498,13 +3499,12 @@ function _injectChallTDStats(teams) {
     if (abbr === '_ts') return;
     if (!CHALL_TEAM_STATS[abbr]) return;
     const t = teams[abbr];
-    // Total TD
-    if (t.totalTD > 0) {
-      CHALL_TEAM_STATS[abbr].TD   = t.totalTD;
-      CHALL_TEAM_STATS[abbr].TDn  = t.totalTDLeader || CHALL_TEAM_STATS[abbr].TDn;
-      // Fallback (usedTeams): use half total as secondary
-      CHALL_TEAM_STATS[abbr].TD2  = Math.round(t.totalTD * 0.6);
-      CHALL_TEAM_STATS[abbr].TD2n = t.totalTDLeader ? t.totalTDLeader + ' (alt)' : CHALL_TEAM_STATS[abbr].TD2n;
+    // Passing TD (QB touchdowns thrown)
+    if (t.passTD > 0) {
+      CHALL_TEAM_STATS[abbr].TD   = t.passTD;
+      CHALL_TEAM_STATS[abbr].TDn  = t.passTDLeader || CHALL_TEAM_STATS[abbr].TDn;
+      CHALL_TEAM_STATS[abbr].TD2  = Math.round(t.passTD * 0.6);
+      CHALL_TEAM_STATS[abbr].TD2n = t.passTDLeader ? t.passTDLeader + ' (backup)' : CHALL_TEAM_STATS[abbr].TD2n;
     }
     // Receiving TD
     CHALL_TEAM_STATS[abbr].RecTD  = t.recTD   || 0;
