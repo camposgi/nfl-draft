@@ -5398,7 +5398,7 @@ spinTeam = function() {
 
 const _origConfirmPick = confirmPick;
 
-function confirmPick() {
+confirmPick = function() {
 
   if (MP.phase !== 'active') { return _origConfirmPick(); }
 
@@ -5476,7 +5476,7 @@ function confirmPick() {
 
 const _origLockSlot = lockSlot;
 
-function lockSlot(idx) {
+lockSlot = function(idx) {
 
   if (MP.phase !== 'active' || MP.mode !== 'challenge') { return _origLockSlot(idx); }
 
@@ -5588,7 +5588,7 @@ function lockSlot(idx) {
 
 const _origChallStopAndChoose = _challStopAndChoose;
 
-function _challStopAndChoose() {
+_challStopAndChoose = function() {
 
   if (MP.phase === 'active' && MP.mode === 'challenge') {
 
