@@ -1669,6 +1669,12 @@ document.getElementById('mainScr').addEventListener('click',function(e){
 .mp-detail-row{display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;margin-bottom:4px;font-size:.8rem;background:var(--surf)}
 .mp-detail-row span:first-child{color:var(--muted)}
 
+
+/* Fantasy MP overlays */
+.fpool-disabled{pointer-events:none;opacity:.45}
+.fpool-waiting-overlay{text-align:center;padding:32px 16px;color:var(--muted);font-size:.82rem}
+.fpool-waiting-overlay .mp-pulse{width:8px;height:8px;margin-left:6px}
+
 .cres-yds-val{color:var(--acc);font-weight:900;font-size:.8rem;text-align:right;white-space:nowrap}
 .cslot.spinning-anim{border-color:var(--brd)!important;opacity:.75}
 .cslot.choosing{cursor:pointer;border-color:rgba(251,191,36,.5)!important;transition:border-color .15s,transform .15s,box-shadow .15s;animation:choosePulse 1.4s ease-in-out infinite}
@@ -1732,6 +1738,10 @@ document.getElementById('mainScr').addEventListener('click',function(e){
     <div>
       <div class="fdraft-round" id="fantRoundLbl">Round 1 · Pick 1</div>
       <div class="fdraft-status" id="fantStatusLbl">Loading...</div>
+    </div>
+    <div id="mpFantOppInfo" style="display:none;font-size:.72rem;color:#f59e0b;text-align:right;line-height:1.4">
+      <div id="mpFantOppName" style="font-weight:700">Opponent</div>
+      <div id="mpFantOppStatus" style="color:var(--muted)">waiting...</div>
     </div>
     <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
       <span id="fantTimer" style="display:none;font-size:.85rem;font-weight:700;padding:4px 10px;border-radius:8px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;min-width:52px;text-align:center"></span>
@@ -3013,6 +3023,279 @@ function mpListenForOppPicks() {
   MP.listeners.push(() => picksRef.off('value', unsub));
 }
 
+
+// ════════════════════════════════════════════════════════════════════
+// FANTASY MULTIPLAYER — Snake Draft 1v1 via Firebase
+// ════════════════════════════════════════════════════════════════════
+
+let _mpScoring = 'ppr';
+function mpSetScoring(s, el) {
+  _mpScoring = s;
+  document.querySelectorAll('.mp-mode-pill[id^="mpScoring_"]').forEach(p => p.classList.remove('sel'));
+  if (el) el.classList.add('sel');
+}
+
+// Extend mpSetMode to show/hide fantasy opts
+const _origMpSetMode = mpSetMode;
+function mpSetMode(m, el) {
+  _origMpSetMode(m, el);
+  const fo = document.getElementById('mpFantasyOpts');
+  if (fo) fo.style.display = m === 'fantasy' ? '' : 'none';
+  // Also update challenge opts visibility
+  const co = document.getElementById('mpChallengeOpts');
+  if (co) co.style.display = m === 'challenge' ? '' : 'none';
+}
+
+// mpCreateRoom — full version supporting all modes including fantasy
+async function mpCreateRoom() {
+  if (!DB) { mpLobbyErr('Firebase not loaded'); return; }
+  const nameEl = document.getElementById('mpNameInp');
+  const name = (nameEl && nameEl.value.trim()) || 'Player 1';
+  const code = mpGenCode();
+  const seed = (Math.floor(Math.random() * 899999) + 100000);
+  
+  let opts = {};
+  if (_mpMode === 'challenge') opts = { cat: _mpCat, diff: _mpDiff };
+  else if (_mpMode === 'fantasy') opts = { scoring: _mpScoring };
+
+  const roomData = {
+    status: 'waiting',
+    mode: _mpMode,
+    modeOpts: opts,
+    seed,
+    p1: { name, score: null, done: false },
+    p2: null,
+    created: Date.now()
+  };
+
+  try {
+    await DB.ref('rooms/' + code).set(roomData);
+    await DB.ref('rooms/' + code + '/ttl').set(Date.now() + 1800000);
+
+    MP.role = 'p1'; MP.code = code; MP.myName = name;
+    MP.mode = _mpMode; MP.modeOpts = opts; MP.seed = seed;
+    MP.ref = DB.ref('rooms/' + code);
+    MP.phase = 'waiting';
+
+    const dc = document.getElementById('mpDisplayCode');
+    if (dc) dc.textContent = code;
+    show('mpWaitScr', null);
+    mpListenForOpponent();
+  } catch(e) {
+    mpLobbyErr('Could not create room: ' + (e.message || e));
+  }
+}
+
+// ── Fantasy MP setup ─────────────────────────────────────────────────────────
+const _mpFant = {
+  processedPicks: new Set(),  // pickNums already applied locally
+  listening: false,
+  myPicksDone: false
+};
+
+function mpFantInit() {
+  _mpFant.processedPicks = new Set();
+  _mpFant.listening = false;
+  _mpFant.myPicksDone = false;
+
+  // Force 2-team H2H
+  FOPT.teams = 2;
+  FOPT.slot = MP.role === 'p1' ? 1 : 2;
+  FOPT.scoring = MP.modeOpts.scoring || 'ppr';
+  FOPT.timer = 30;
+
+  // Show opponent info in draft header
+  const oi = document.getElementById('mpFantOppInfo');
+  if (oi) oi.style.display = '';
+  const on = document.getElementById('mpFantOppName');
+  if (on) on.textContent = (MP.oppName || 'Opponent') + ' (Slot ' + (MP.role === 'p1' ? 2 : 1) + ')';
+
+  // Initialize the draft — this loads players from Sleeper and shows fantDraftScr
+  initFantasyDraft().catch(e => console.error('Fantasy load error:', e));
+}
+
+// After initFantasyDraft loads players, hook in the MP listener
+// We detect this by wrapping fantAdvanceToUser (called at end of initFantasyDraft)
+const _origFantAdvanceToUser = fantAdvanceToUser;
+function fantAdvanceToUser() {
+  if (MP.phase === 'active' && MP.mode === 'fantasy') {
+    return mpFantCheckTurn();
+  }
+  return _origFantAdvanceToUser();
+}
+
+// Wrap fantDraft to intercept in MP mode
+const _origFantDraft = fantDraft;
+function fantDraft(playerId) {
+  if (MP.phase === 'active' && MP.mode === 'fantasy') {
+    return mpFantDraft(playerId);
+  }
+  return _origFantDraft(playerId);
+}
+
+function mpFantDraft(playerId) {
+  if (!fantIsUserTurn() || FANT_STATE.round > FANT_ROUNDS) return;
+  const player = FANT_STATE.players.find(p => p.id === playerId);
+  if (!player || FANT_STATE.drafted.has(playerId)) return;
+
+  fantStopTimer();
+  const pickNum = fantOverallPick();
+  const mySlotIdx = FOPT.slot - 1;
+  const entry = { playerId, slotIdx: mySlotIdx, round: FANT_STATE.round, pickNum };
+
+  // Apply locally immediately (mark processed so listener doesn't double-apply)
+  _mpFant.processedPicks.add(pickNum);
+  mpApplyFantPick(entry);
+
+  // Write to Firebase (opponent will see it)
+  if (MP.ref) {
+    const existingPicks = _mpFant._localPicks || [];
+    existingPicks.push(entry);
+    _mpFant._localPicks = existingPicks;
+    MP.ref.child('fantPicks').set(existingPicks);
+  }
+
+  // Now check whose turn it is
+  mpFantCheckTurn();
+}
+
+function mpApplyFantPick(entry) {
+  const player = FANT_STATE.players.find(p => p.id === entry.playerId);
+  if (!player) return;
+  if (FANT_STATE.drafted.has(entry.playerId)) return;
+
+  FANT_STATE.drafted.add(entry.playerId);
+  FANT_STATE.rosters[entry.slotIdx].push(player);
+  addPickLog(entry.slotIdx, player, entry.round, entry.pickNum);
+  fantAdvancePick();
+  renderFantRoster();
+  renderFantDraftHdr();
+  renderFantPool();
+}
+
+function mpFantCheckTurn() {
+  if (FANT_STATE.round > FANT_ROUNDS) {
+    mpFantComplete();
+    return;
+  }
+
+  renderFantDraftHdr();
+
+  // Start Firebase listener on first call
+  if (!_mpFant.listening) {
+    mpListenFantPicks();
+    _mpFant.listening = true;
+  }
+
+  if (fantIsUserTurn()) {
+    // My turn
+    const os = document.getElementById('mpFantOppStatus');
+    if (os) os.textContent = 'waiting for you...';
+    const pl = document.getElementById('fantPoolList');
+    if (pl) pl.classList.remove('fpool-disabled');
+    renderFantPool();
+    fantStartTimer();
+  } else {
+    // Opponent's turn
+    fantStopTimer();
+    const os = document.getElementById('mpFantOppStatus');
+    if (os) os.textContent = '⏳ picking...';
+    const pl = document.getElementById('fantPoolList');
+    if (pl) {
+      pl.classList.add('fpool-disabled');
+      pl.innerHTML = '<div class="fpool-waiting-overlay">Waiting for ' + (MP.oppName || 'opponent') + ' to pick <span class="mp-pulse"></span></div>';
+    }
+    // Also update status bar
+    const sl = document.getElementById('fantStatusLbl');
+    if (sl) { sl.textContent = (MP.oppName || 'Opponent') + ' is picking...'; sl.style.color = '#f59e0b'; }
+  }
+}
+
+function mpListenFantPicks() {
+  if (!MP.ref) return;
+  let lastCount = 0;
+  const picksRef = MP.ref.child('fantPicks');
+  const unsub = picksRef.on('value', snap => {
+    const picks = snap.val();
+    if (!picks || !Array.isArray(picks)) return;
+    _mpFant._localPicks = picks;
+
+    // Apply any picks we haven't processed yet
+    let applied = false;
+    picks.forEach(entry => {
+      if (_mpFant.processedPicks.has(entry.pickNum)) return;
+      _mpFant.processedPicks.add(entry.pickNum);
+      mpApplyFantPick(entry);
+      applied = true;
+
+      // Toast for opponent's picks
+      if (entry.slotIdx !== FOPT.slot - 1) {
+        const player = FANT_STATE.players.find(p => p.id === entry.playerId);
+        if (player) mpShowOppToast((MP.oppName || 'Opp') + ' picked ' + player.name + ' (' + player.pos + ')');
+      }
+    });
+
+    if (applied) {
+      mpFantCheckTurn();
+    }
+  });
+  MP.listeners.push(() => picksRef.off('value', unsub));
+}
+
+function mpFantComplete() {
+  fantStopTimer();
+  _mpFant.myPicksDone = true;
+
+  // Calculate my score (projected points)
+  const myRoster = FANT_STATE.rosters[FOPT.slot - 1] || [];
+  const ptsKey = FOPT.scoring === 'ppr' ? 'pts_ppr' : FOPT.scoring === 'half_ppr' ? 'pts_half_ppr' : 'pts_std';
+  const myPts = myRoster.reduce((sum, p) => sum + (p.pts || 0), 0);
+
+  mpWriteMyScore(myPts, true);
+
+  // Show regular fantasy results first
+  setTimeout(() => {
+    showFantResults();
+    setTimeout(mpCheckBothDone, 800);
+  }, 300);
+}
+
+// ── Extend mpStartGame to handle fantasy ────────────────────────────────────
+const _origMpStartGame = mpStartGame;
+function mpStartGame() {
+  if (MP.mode === 'fantasy') {
+    mpShowBar();
+    mpShowVsFlash(() => mpFantInit());
+    return;
+  }
+  return _origMpStartGame();
+}
+
+// ── Extend mpShowComparison to handle fantasy score label ────────────────────
+const _origMpShowComparison = mpShowComparison;
+function mpShowComparison() {
+  if (MP.mode === 'fantasy') {
+    const lbl = FOPT.scoring === 'ppr' ? 'proj pts (PPR)' :
+                FOPT.scoring === 'half_ppr' ? 'proj pts (Half)' : 'proj pts (Std)';
+    document.getElementById('mpResMyLabel').textContent = lbl;
+    document.getElementById('mpResOppLabel').textContent = lbl;
+  }
+  return _origMpShowComparison();
+}
+
+// ── Extend mpReset to clean up fantasy state ─────────────────────────────────
+const _origMpReset = mpReset;
+function mpReset() {
+  _origMpReset();
+  _mpFant.processedPicks = new Set();
+  _mpFant.listening = false;
+  _mpFant.myPicksDone = false;
+  _mpFant._localPicks = [];
+  // Reset FOPT if it was overridden
+  const oi = document.getElementById('mpFantOppInfo');
+  if (oi) oi.style.display = 'none';
+}
+
 // Init slot grid on load
 (function(){buildFantSlotGrid();})();
 </script>
@@ -3035,6 +3318,7 @@ function mpListenForOppPicks() {
         <div class="mp-mode-pill sel" id="mpMode_challenge" onclick="mpSetMode('challenge',this)">⚡ Challenge</div>
         <div class="mp-mode-pill" id="mpMode_draft" onclick="mpSetMode('draft',this)">🏈 17-0 Draft</div>
         <div class="mp-mode-pill" id="mpMode_alltime" onclick="mpSetMode('alltime',this)">🏆 All-Time</div>
+        <div class="mp-mode-pill" id="mpMode_fantasy" onclick="mpSetMode('fantasy',this)">🏈 Fantasy</div>
       </div>
       <div id="mpChallengeOpts">
         <div class="mp-mode-row" style="margin-bottom:6px">
@@ -3045,6 +3329,13 @@ function mpListenForOppPicks() {
         <div class="mp-mode-row">
           <div class="mp-mode-pill sel" id="mpDiff_normal" onclick="mpSetDiff('normal',this)">Normal</div>
           <div class="mp-mode-pill" id="mpDiff_hard" onclick="mpSetDiff('hard',this)">Hard</div>
+        </div>
+      </div>
+      <div id="mpFantasyOpts" style="display:none">
+        <div class="mp-mode-row">
+          <div class="mp-mode-pill sel" id="mpScoring_ppr" onclick="mpSetScoring('ppr',this)">PPR</div>
+          <div class="mp-mode-pill" id="mpScoring_half_ppr" onclick="mpSetScoring('half_ppr',this)">Half-PPR</div>
+          <div class="mp-mode-pill" id="mpScoring_std" onclick="mpSetScoring('std',this)">Standard</div>
         </div>
       </div>
     </div>
