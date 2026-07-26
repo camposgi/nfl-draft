@@ -2437,16 +2437,7 @@ const MP = {
   precomputed: null   // seeded game data
 };
 
-function mpReset() {
-  // Remove all Firebase listeners
-  MP.listeners.forEach(fn => fn());
-  MP.listeners = [];
-  if (MP.ref) { MP.ref = null; }
-  MP.role = null; MP.code = null; MP.myName = ''; MP.oppName = '';
-  MP.phase = 'idle'; MP.myScore = null; MP.oppScore = null; MP.precomputed = null;
-  MP.draftPicks = []; MP.challSpinIdx = 0; MP.oppDone = false;
-  mpHideBar();
-}
+// mpReset — defined in Fantasy MP v2 section below
 
 // ── Lobby UI helpers ─────────────────────────────────────────────────────────
 let _mpMode = 'challenge', _mpCat = 'WR', _mpDiff = 'normal';
@@ -2484,36 +2475,7 @@ function mpGenCode() {
 
 // mpCreateRoom — defined below with full mode support (Challenge/Draft/Fantasy)
 
-async function mpJoinRoom() {
-  if (!DB) { mpLobbyErr('Firebase not loaded'); return; }
-  const nameEl = document.getElementById('mpNameInp');
-  const name = (nameEl && nameEl.value.trim()) || 'Player 2';
-  const codeEl = document.getElementById('mpJoinCodeInp');
-  const code = (codeEl && codeEl.value.trim().toUpperCase()) || '';
-  if (code.length < 4) { mpLobbyErr('Enter a valid room code'); return; }
-
-  try {
-    const snap = await DB.ref('rooms/' + code).once('value');
-    const room = snap.val();
-    if (!room) { mpLobbyErr('Room not found'); return; }
-    if (room.status !== 'waiting') { mpLobbyErr('Game already started or room full'); return; }
-    if (room.p2) { mpLobbyErr('Room is full'); return; }
-
-    await DB.ref('rooms/' + code + '/p2').set({ name, score: null, done: false });
-    await DB.ref('rooms/' + code + '/status').set('active');
-
-    MP.role = 'p2'; MP.code = code; MP.myName = name;
-    MP.mode = room.mode; MP.modeOpts = room.modeOpts || {};
-    MP.seed = room.seed; MP.oppName = room.p1.name;
-    MP.ref = DB.ref('rooms/' + code);
-    MP.phase = 'active';
-
-    mpListenForOpponent();
-    mpStartGame();
-  } catch(e) {
-    mpLobbyErr('Could not join room: ' + (e.message || e));
-  }
-}
+// mpJoinRoom — defined in Fantasy MP v2 section
 
 function mpCancelRoom() {
   if (MP.ref) { MP.ref.remove(); }
@@ -2521,44 +2483,7 @@ function mpCancelRoom() {
   show('mpLobbyScr', null);
 }
 
-function mpListenForOpponent() {
-  if (!MP.ref) return;
-
-  // P1 waits for P2 to join
-  if (MP.role === 'p1') {
-    const unsub = MP.ref.on('value', snap => {
-      const room = snap.val();
-      if (!room) return;
-      if (room.p2 && room.status === 'active') {
-        MP.oppName = room.p2.name;
-        MP.phase = 'active';
-        mpStartGame();
-      }
-    });
-    MP.listeners.push(() => MP.ref && MP.ref.off('value', unsub));
-  }
-
-  // Both listen for opponent score updates
-  const oppKey = MP.role === 'p1' ? 'p2' : 'p1';
-  const oppRef = MP.ref.child(oppKey);
-  const unsub2 = oppRef.on('value', snap => {
-    const opp = snap.val();
-    if (!opp) return;
-    if (opp.score !== null && opp.score !== undefined) {
-      MP.oppScore = opp.score;
-      mpUpdateBar();
-    }
-    if (opp.done) {
-      MP.oppDone = true;
-      mpCheckBothDone();
-    }
-  });
-  MP.listeners.push(() => oppRef.off('value', unsub2));
-  // For draft modes, also listen for opponent pick toasts
-  if (MP.mode === 'draft' || MP.mode === 'alltime') {
-    mpListenForOppPicks();
-  }
-}
+// mpListenForOpponent — defined in Fantasy MP v2 section below
 
 function mpWriteMyScore(score, done) {
   if (!MP.ref) return;
@@ -2596,16 +2521,7 @@ function mpShowOppToast(msg) {
 }
 
 // ── Start game ───────────────────────────────────────────────────────────────
-function mpStartGame() {
-  mpShowBar();
-  mpShowVsFlash(() => {
-    if (MP.mode === 'challenge') {
-      mpStartChallenge();
-    } else if (MP.mode === 'draft' || MP.mode === 'alltime') {
-      mpStartDraft();
-    }
-  });
-}
+// mpStartGame — defined in Fantasy MP v2 section below
 
 // ── CHALLENGE MP ─────────────────────────────────────────────────────────────
 function mpStartChallenge() {
@@ -2990,38 +2906,75 @@ function mpListenForOppPicks() {
 
 
 // ════════════════════════════════════════════════════════════════════
-// FANTASY MULTIPLAYER — Snake Draft 1v1 via Firebase
+// FANTASY MP v2 — Full league with bots, seeded AI, slot picker
 // ════════════════════════════════════════════════════════════════════
 
-let _mpScoring = 'ppr';
-function mpSetScoring(s, el) {
-  _mpScoring = s;
-  document.querySelectorAll('.mp-mode-pill[id^="mpScoring_"]').forEach(p => p.classList.remove('sel'));
+// ── Lobby helpers ────────────────────────────────────────────────────────────
+let _mpFantTeams = 8;
+let _mpFantSlot  = 0;  // 0 = random
+
+function mpSetFantTeams(n, el) {
+  _mpFantTeams = n;
+  document.querySelectorAll('.mp-mode-pill[id^="mpTeams_"]').forEach(p => p.classList.remove('sel'));
   if (el) el.classList.add('sel');
+  mpBuildSlotPicker('mpSlotRow', n, _mpFantSlot);
 }
 
-// Extend mpSetMode to show/hide fantasy opts
-const _origMpSetMode = mpSetMode;
-function mpSetMode(m, el) {
-  _origMpSetMode(m, el);
-  const fo = document.getElementById('mpFantasyOpts');
-  if (fo) fo.style.display = m === 'fantasy' ? '' : 'none';
-  // Also update challenge opts visibility
-  const co = document.getElementById('mpChallengeOpts');
-  if (co) co.style.display = m === 'challenge' ? '' : 'none';
+function mpBuildSlotPicker(containerId, teamCount, currentSlot) {
+  const row = document.getElementById(containerId);
+  if (!row) return;
+  row.innerHTML = '';
+  for (let i = 1; i <= teamCount; i++) {
+    const btn = document.createElement('div');
+    btn.className = 'mp-mode-pill' + (currentSlot === i ? ' sel' : '');
+    btn.textContent = i;
+    btn.onclick = () => {
+      _mpFantSlot = i;
+      row.querySelectorAll('.mp-mode-pill').forEach(b => b.classList.remove('sel'));
+      btn.classList.add('sel');
+    };
+    row.appendChild(btn);
+  }
+  // Random button
+  const rnd = document.createElement('div');
+  rnd.className = 'mp-mode-pill' + (currentSlot === 0 ? ' sel' : '');
+  rnd.textContent = '🎲 Rnd';
+  rnd.onclick = () => {
+    _mpFantSlot = 0;
+    row.querySelectorAll('.mp-mode-pill').forEach(b => b.classList.remove('sel'));
+    rnd.classList.add('sel');
+  };
+  row.appendChild(rnd);
 }
 
-// mpCreateRoom — full version supporting all modes including fantasy
+// Build slot picker on page load for the default 8-team fantasy
+(function() {
+  // Defer until DOM ready
+  setTimeout(() => {
+    mpBuildSlotPicker('mpSlotRow', 8, 0);
+    // Mark Random as default selected
+    const row = document.getElementById('mpSlotRow');
+    if (row && row.lastChild) row.lastChild.classList.add('sel');
+  }, 0);
+})();
+
+// ── mpCreateRoom v3 — supports fantasy teams + slot ──────────────────────────
 async function mpCreateRoom() {
   if (!DB) { mpLobbyErr('Firebase not loaded'); return; }
   const nameEl = document.getElementById('mpNameInp');
-  const name = (nameEl && nameEl.value.trim()) || 'Player 1';
-  const code = mpGenCode();
-  const seed = (Math.floor(Math.random() * 899999) + 100000);
-  
+  const name   = (nameEl && nameEl.value.trim()) || 'Player 1';
+  const code   = mpGenCode();
+  const seed   = Math.floor(Math.random() * 899999) + 100000;
+
   let opts = {};
-  if (_mpMode === 'challenge') opts = { cat: _mpCat, diff: _mpDiff };
-  else if (_mpMode === 'fantasy') opts = { scoring: _mpScoring };
+  if (_mpMode === 'challenge') {
+    opts = { cat: _mpCat, diff: _mpDiff };
+  } else if (_mpMode === 'fantasy') {
+    const teams = _mpFantTeams || 8;
+    // Resolve P1's slot (0 = random)
+    const p1slot = _mpFantSlot === 0 ? Math.ceil(Math.random() * teams) : _mpFantSlot;
+    opts = { scoring: _mpScoring, teams, p1slot };
+  }
 
   const roomData = {
     status: 'waiting',
@@ -3039,7 +2992,7 @@ async function mpCreateRoom() {
 
     MP.role = 'p1'; MP.code = code; MP.myName = name;
     MP.mode = _mpMode; MP.modeOpts = opts; MP.seed = seed;
-    MP.ref = DB.ref('rooms/' + code);
+    MP.ref  = DB.ref('rooms/' + code);
     MP.phase = 'waiting';
 
     const dc = document.getElementById('mpDisplayCode');
@@ -3051,91 +3004,242 @@ async function mpCreateRoom() {
   }
 }
 
-// ── Fantasy MP setup ─────────────────────────────────────────────────────────
-const _mpFant = {
-  processedPicks: new Set(),  // pickNums already applied locally
-  listening: false,
-  myPicksDone: false
-};
+// ── mpJoinRoom v2 — fantasy shows slot picker; other modes start immediately ─
+async function mpJoinRoom() {
+  if (!DB) { mpLobbyErr('Firebase not loaded'); return; }
+  const nameEl = document.getElementById('mpNameInp');
+  const name   = (nameEl && nameEl.value.trim()) || 'Player 2';
+  const codeEl = document.getElementById('mpJoinCodeInp');
+  const code   = (codeEl && codeEl.value.trim().toUpperCase()) || '';
+  if (code.length < 4) { mpLobbyErr('Enter a valid room code'); return; }
 
+  try {
+    const snap = await DB.ref('rooms/' + code).once('value');
+    const room = snap.val();
+    if (!room)                      { mpLobbyErr('Room not found'); return; }
+    if (room.status !== 'waiting')  { mpLobbyErr('Game already started or room full'); return; }
+    if (room.p2)                    { mpLobbyErr('Room is full'); return; }
+
+    // Write P2 placeholder (no slot yet for fantasy)
+    await DB.ref('rooms/' + code + '/p2').set({ name, score: null, done: false, slot: null });
+
+    MP.role = 'p2'; MP.code = code; MP.myName = name;
+    MP.mode = room.mode; MP.modeOpts = room.modeOpts || {};
+    MP.seed = room.seed; MP.oppName = room.p1.name;
+    MP.ref  = DB.ref('rooms/' + code);
+    MP.phase = 'joining';
+
+    if (room.mode === 'fantasy') {
+      // Show slot picker before starting
+      const opts  = room.modeOpts || {};
+      const teams = opts.teams || 8;
+      const p1slot = opts.p1slot || 1;
+      _mpJoinRoom = room; // save for mpPickJoinSlot
+
+      // Build join slot picker (exclude P1's slot)
+      const btns = document.getElementById('mpJoinSlotBtns');
+      if (btns) {
+        btns.innerHTML = '';
+        for (let i = 1; i <= teams; i++) {
+          if (i === p1slot) continue;
+          const btn = document.createElement('div');
+          btn.className = 'mp-mode-pill';
+          btn.textContent = 'Slot ' + i;
+          btn.onclick = () => {
+            btns.querySelectorAll('.mp-mode-pill').forEach(b => b.classList.remove('sel'));
+            btn.classList.add('sel');
+            btn.dataset.slot = i;
+            _mpJoinSelectedSlot = i;
+          };
+          btns.appendChild(btn);
+        }
+        _mpJoinSelectedSlot = null;
+      }
+      const sub = document.getElementById('mpJoinSlotSub');
+      if (sub) sub.textContent = MP.oppName + ' has slot ' + p1slot + ' · ' + teams + '-team league';
+      show('mpJoinSlotScr', null);
+    } else {
+      // Non-fantasy: start immediately
+      await DB.ref('rooms/' + code + '/status').set('active');
+      MP.phase = 'active';
+      mpListenForOpponent();
+      mpStartGame();
+    }
+  } catch(e) {
+    mpLobbyErr('Could not join room: ' + (e.message || e));
+  }
+}
+
+let _mpJoinRoom = null, _mpJoinSelectedSlot = null;
+
+async function mpPickJoinSlot(slot) {
+  // slot === 0 means random
+  if (!MP.ref || !_mpJoinRoom) return;
+  const opts   = _mpJoinRoom.modeOpts || {};
+  const teams  = opts.teams || 8;
+  const p1slot = opts.p1slot || 1;
+
+  let picked = slot;
+  if (picked === 0) {
+    const avail = Array.from({length: teams}, (_, i) => i + 1).filter(s => s !== p1slot);
+    picked = avail[Math.floor(Math.random() * avail.length)];
+  }
+
+  try {
+    await MP.ref.child('p2/slot').set(picked);
+    await MP.ref.child('status').set('active');
+    MP.phase = 'active';
+    MP.modeOpts = Object.assign({}, opts, { p2slot: picked });
+    mpListenForOpponent();
+    mpStartGame();
+  } catch(e) {
+    console.error('Slot pick error:', e);
+  }
+}
+
+// ── mpListenForOpponent v2 — wait for p2.slot in fantasy ────────────────────
+function mpListenForOpponent() {
+  if (!MP.ref) return;
+
+  if (MP.role === 'p1') {
+    const unsub = MP.ref.on('value', snap => {
+      const room = snap.val();
+      if (!room || !room.p2) return;
+
+      if (MP.mode === 'fantasy') {
+        // Wait until P2 has picked their slot
+        if (room.status === 'active' && room.p2.slot) {
+          MP.oppName = room.p2.name;
+          MP.modeOpts = Object.assign({}, MP.modeOpts, { p2slot: room.p2.slot });
+          MP.phase = 'active';
+          mpStartGame();
+        }
+      } else {
+        if (room.p2 && room.status === 'active') {
+          MP.oppName = room.p2.name;
+          MP.phase = 'active';
+          mpStartGame();
+        }
+      }
+    });
+    MP.listeners.push(() => MP.ref && MP.ref.off('value', unsub));
+  }
+
+  // Both listen for opponent score
+  const oppKey = MP.role === 'p1' ? 'p2' : 'p1';
+  const oppRef = MP.ref.child(oppKey);
+  const unsub2 = oppRef.on('value', snap => {
+    const opp = snap.val();
+    if (!opp) return;
+    if (opp.score !== null && opp.score !== undefined) {
+      MP.oppScore = opp.score;
+      mpUpdateBar();
+    }
+    if (opp.done) {
+      MP.oppDone = true;
+      mpCheckBothDone();
+    }
+  });
+  MP.listeners.push(() => oppRef.off('value', unsub2));
+
+  if (MP.mode === 'draft' || MP.mode === 'alltime') {
+    mpListenForOppPicks();
+  }
+}
+
+// ── mpFantInit v2 — reads both slots, sets up seeded AI ─────────────────────
 function mpFantInit() {
   _mpFant.processedPicks = new Set();
-  _mpFant.listening = false;
-  _mpFant.myPicksDone = false;
+  _mpFant.listening      = false;
+  _mpFant.myPicksDone    = false;
+  _mpFant._localPicks    = [];
 
-  // Force 2-team H2H
-  FOPT.teams = 2;
-  FOPT.slot = MP.role === 'p1' ? 1 : 2;
-  FOPT.scoring = MP.modeOpts.scoring || 'ppr';
-  FOPT.timer = 30;
+  const opts    = MP.modeOpts || {};
+  const teams   = opts.teams   || 8;
+  const scoring = opts.scoring || 'ppr';
+  const p1slot  = opts.p1slot  || 1;
+  const p2slot  = opts.p2slot  || 2;
 
-  // Show opponent info in draft header
+  FOPT.teams   = teams;
+  FOPT.slot    = MP.role === 'p1' ? p1slot : p2slot;
+  FOPT.scoring = scoring;
+  FOPT.timer   = 30;
+
+  // Opponent's slot (for turn detection)
+  MP.oppSlot = MP.role === 'p1' ? p2slot : p1slot;
+
+  // Seeded AI RNG — both clients use identical sequence
+  _mpFant.aiRng = mkRng(MP.seed + 77);
+
+  // Show opponent info in header
   const oi = document.getElementById('mpFantOppInfo');
   if (oi) oi.style.display = '';
   const on = document.getElementById('mpFantOppName');
-  if (on) on.textContent = (MP.oppName || 'Opponent') + ' (Slot ' + (MP.role === 'p1' ? 2 : 1) + ')';
+  if (on) on.textContent = (MP.oppName || 'Opponent') + ' · Slot ' + MP.oppSlot;
 
-  // Initialize the draft — this loads players from Sleeper and shows fantDraftScr
   initFantasyDraft().catch(e => console.error('Fantasy load error:', e));
 }
 
-// After initFantasyDraft loads players, hook in the MP listener
-// We detect this by wrapping fantAdvanceToUser (called at end of initFantasyDraft)
-const _origFantAdvanceToUser = fantAdvanceToUser;
+// ── Seeded AI draft — deterministic, identical on both clients ───────────────
+function mpSeededAIDraft(slotIdx) {
+  const rng    = _mpFant.aiRng;
+  const roster = FANT_STATE.rosters[slotIdx];
+  const need   = fantGetNeed(roster);
+  const avail  = FANT_STATE.players.filter(p => !FANT_STATE.drafted.has(p.id));
+  if (!avail.length) return;
+
+  // Always consume exactly 2 RNG calls per AI pick (keeps both clients in sync)
+  const windowSize = 12 + Math.floor(rng() * 8);
+  const selectRnd  = rng();
+
+  const win = avail.slice(0, windowSize);
+  let pick  = null;
+  if (need.length) {
+    pick = win.find(p => need.includes(p.pos)) ||
+      (need.some(n => ['RB','WR','TE'].includes(n)) ? win.find(p => ['RB','WR','TE'].includes(p.pos)) : null);
+  }
+  if (!pick) {
+    pick = win[Math.floor(selectRnd * Math.min(4, win.length))] || avail[0];
+  }
+
+  if (pick) {
+    FANT_STATE.drafted.add(pick.id);
+    FANT_STATE.rosters[slotIdx].push(pick);
+    addPickLog(slotIdx, pick, FANT_STATE.round, fantOverallPick());
+  }
+}
+
+// ── fantAdvanceToUser v2 — 3-way: my turn / opp turn / AI turn ───────────────
 function fantAdvanceToUser() {
   if (MP.phase === 'active' && MP.mode === 'fantasy') {
     return mpFantCheckTurn();
   }
-  return _origFantAdvanceToUser();
+  // Original solo logic
+  if (FANT_STATE.round > FANT_ROUNDS) { setTimeout(showFantResults, 400); return; }
+  renderFantDraftHdr();
+  if (fantIsUserTurn()) { renderFantPool(); fantStartTimer(); return; }
+  fantAIDraft(fantCurrentSlot() - 1);
+  fantAdvancePick();
+  setTimeout(fantAdvanceToUser, 220);
 }
 
-// Wrap fantDraft to intercept in MP mode
-const _origFantDraft = fantDraft;
+// ── fantDraft v2 — MP intercept ──────────────────────────────────────────────
 function fantDraft(playerId) {
   if (MP.phase === 'active' && MP.mode === 'fantasy') {
     return mpFantDraft(playerId);
   }
-  return _origFantDraft(playerId);
-}
-
-function mpFantDraft(playerId) {
+  // Original
   if (!fantIsUserTurn() || FANT_STATE.round > FANT_ROUNDS) return;
   const player = FANT_STATE.players.find(p => p.id === playerId);
   if (!player || FANT_STATE.drafted.has(playerId)) return;
-
   fantStopTimer();
-  const pickNum = fantOverallPick();
-  const mySlotIdx = FOPT.slot - 1;
-  const entry = { playerId, slotIdx: mySlotIdx, round: FANT_STATE.round, pickNum };
-
-  // Apply locally immediately (mark processed so listener doesn't double-apply)
-  _mpFant.processedPicks.add(pickNum);
-  mpApplyFantPick(entry);
-
-  // Write to Firebase (opponent will see it)
-  if (MP.ref) {
-    const existingPicks = _mpFant._localPicks || [];
-    existingPicks.push(entry);
-    _mpFant._localPicks = existingPicks;
-    MP.ref.child('fantPicks').set(existingPicks);
-  }
-
-  // Now check whose turn it is
-  mpFantCheckTurn();
-}
-
-function mpApplyFantPick(entry) {
-  const player = FANT_STATE.players.find(p => p.id === entry.playerId);
-  if (!player) return;
-  if (FANT_STATE.drafted.has(entry.playerId)) return;
-
-  FANT_STATE.drafted.add(entry.playerId);
-  FANT_STATE.rosters[entry.slotIdx].push(player);
-  addPickLog(entry.slotIdx, player, entry.round, entry.pickNum);
+  const _pickNum = fantOverallPick();
+  FANT_STATE.drafted.add(playerId);
+  FANT_STATE.rosters[FOPT.slot - 1].push(player);
+  addPickLog(FOPT.slot - 1, player, FANT_STATE.round, _pickNum);
   fantAdvancePick();
   renderFantRoster();
-  renderFantDraftHdr();
-  renderFantPool();
+  fantAdvanceToUser();
 }
 
 function mpFantCheckTurn() {
@@ -3145,64 +3249,100 @@ function mpFantCheckTurn() {
   }
 
   renderFantDraftHdr();
-
-  // Start Firebase listener on first call
   if (!_mpFant.listening) {
     mpListenFantPicks();
     _mpFant.listening = true;
   }
 
-  if (fantIsUserTurn()) {
-    // My turn
+  const curSlot = fantCurrentSlot();
+
+  if (curSlot === FOPT.slot) {
+    // ── MY TURN ──────────────────────────────────────────────────────────────
     const os = document.getElementById('mpFantOppStatus');
     if (os) os.textContent = 'waiting for you...';
     const pl = document.getElementById('fantPoolList');
     if (pl) pl.classList.remove('fpool-disabled');
     renderFantPool();
     fantStartTimer();
-  } else {
-    // Opponent's turn
+
+  } else if (curSlot === MP.oppSlot) {
+    // ── OPPONENT'S TURN ───────────────────────────────────────────────────────
     fantStopTimer();
     const os = document.getElementById('mpFantOppStatus');
     if (os) os.textContent = '⏳ picking...';
+    const sl = document.getElementById('fantStatusLbl');
+    if (sl) { sl.textContent = (MP.oppName || 'Opponent') + ' is picking...'; sl.style.color = '#f59e0b'; }
     const pl = document.getElementById('fantPoolList');
     if (pl) {
       pl.classList.add('fpool-disabled');
-      pl.innerHTML = '<div class="fpool-waiting-overlay">Waiting for ' + (MP.oppName || 'opponent') + ' to pick <span class="mp-pulse"></span></div>';
+      pl.innerHTML = '<div class="fpool-waiting-overlay">Waiting for ' +
+        (MP.oppName || 'opponent') + ' to pick <span class="mp-pulse"></span></div>';
     }
-    // Also update status bar
-    const sl = document.getElementById('fantStatusLbl');
-    if (sl) { sl.textContent = (MP.oppName || 'Opponent') + ' is picking...'; sl.style.color = '#f59e0b'; }
+    // Firebase listener will advance when their pick arrives
+
+  } else {
+    // ── AI TURN ───────────────────────────────────────────────────────────────
+    mpSeededAIDraft(curSlot - 1);
+    fantAdvancePick();
+    // Small delay so picks are visible, then loop
+    setTimeout(mpFantCheckTurn, 200);
   }
+}
+
+function mpFantDraft(playerId) {
+  if (!fantIsUserTurn() || FANT_STATE.round > FANT_ROUNDS) return;
+  const player = FANT_STATE.players.find(p => p.id === playerId);
+  if (!player || FANT_STATE.drafted.has(playerId)) return;
+
+  fantStopTimer();
+  const pickNum    = fantOverallPick();
+  const mySlotIdx  = FOPT.slot - 1;
+  const entry      = { playerId, slotIdx: mySlotIdx, round: FANT_STATE.round, pickNum };
+
+  // Apply locally, mark processed
+  _mpFant.processedPicks.add(pickNum);
+  mpApplyFantPick(entry);
+
+  // Write to Firebase
+  const picks = (_mpFant._localPicks || []).concat([entry]);
+  _mpFant._localPicks = picks;
+  if (MP.ref) MP.ref.child('fantPicks').set(picks);
+
+  mpFantCheckTurn();
+}
+
+function mpApplyFantPick(entry) {
+  const player = FANT_STATE.players.find(p => p.id === entry.playerId);
+  if (!player || FANT_STATE.drafted.has(entry.playerId)) return;
+  FANT_STATE.drafted.add(entry.playerId);
+  FANT_STATE.rosters[entry.slotIdx].push(player);
+  addPickLog(entry.slotIdx, player, entry.round, entry.pickNum);
+  fantAdvancePick();
+  renderFantRoster();
+  renderFantDraftHdr();
+  renderFantPool();
 }
 
 function mpListenFantPicks() {
   if (!MP.ref) return;
-  let lastCount = 0;
   const picksRef = MP.ref.child('fantPicks');
   const unsub = picksRef.on('value', snap => {
     const picks = snap.val();
     if (!picks || !Array.isArray(picks)) return;
     _mpFant._localPicks = picks;
-
-    // Apply any picks we haven't processed yet
     let applied = false;
     picks.forEach(entry => {
       if (_mpFant.processedPicks.has(entry.pickNum)) return;
       _mpFant.processedPicks.add(entry.pickNum);
       mpApplyFantPick(entry);
       applied = true;
-
-      // Toast for opponent's picks
+      // Toast for opponent's pick
       if (entry.slotIdx !== FOPT.slot - 1) {
         const player = FANT_STATE.players.find(p => p.id === entry.playerId);
         if (player) mpShowOppToast((MP.oppName || 'Opp') + ' picked ' + player.name + ' (' + player.pos + ')');
       }
     });
-
-    if (applied) {
-      mpFantCheckTurn();
-    }
+    if (applied) mpFantCheckTurn();
   });
   MP.listeners.push(() => picksRef.off('value', unsub));
 }
@@ -3210,55 +3350,40 @@ function mpListenFantPicks() {
 function mpFantComplete() {
   fantStopTimer();
   _mpFant.myPicksDone = true;
-
-  // Calculate my score (projected points)
   const myRoster = FANT_STATE.rosters[FOPT.slot - 1] || [];
-  const ptsKey = FOPT.scoring === 'ppr' ? 'pts_ppr' : FOPT.scoring === 'half_ppr' ? 'pts_half_ppr' : 'pts_std';
-  const myPts = myRoster.reduce((sum, p) => sum + (p.pts || 0), 0);
-
+  const myPts    = myRoster.reduce((sum, p) => sum + (p.pts || 0), 0);
   mpWriteMyScore(myPts, true);
-
-  // Show regular fantasy results first
-  setTimeout(() => {
-    showFantResults();
-    setTimeout(mpCheckBothDone, 800);
-  }, 300);
+  setTimeout(() => { showFantResults(); setTimeout(mpCheckBothDone, 800); }, 300);
 }
 
-// ── Extend mpStartGame to handle fantasy ────────────────────────────────────
-const _origMpStartGame = mpStartGame;
+// ── mpStartGame v2 — handles fantasy ────────────────────────────────────────
 function mpStartGame() {
-  if (MP.mode === 'fantasy') {
-    mpShowBar();
-    mpShowVsFlash(() => mpFantInit());
-    return;
-  }
-  return _origMpStartGame();
+  mpShowBar();
+  mpShowVsFlash(() => {
+    if (MP.mode === 'challenge')                    mpStartChallenge();
+    else if (MP.mode === 'draft' || MP.mode === 'alltime') mpStartDraft();
+    else if (MP.mode === 'fantasy')                 mpFantInit();
+  });
 }
 
-// ── Extend mpShowComparison to handle fantasy score label ────────────────────
-const _origMpShowComparison = mpShowComparison;
-function mpShowComparison() {
-  if (MP.mode === 'fantasy') {
-    const lbl = FOPT.scoring === 'ppr' ? 'proj pts (PPR)' :
-                FOPT.scoring === 'half_ppr' ? 'proj pts (Half)' : 'proj pts (Std)';
-    document.getElementById('mpResMyLabel').textContent = lbl;
-    document.getElementById('mpResOppLabel').textContent = lbl;
-  }
-  return _origMpShowComparison();
-}
-
-// ── Extend mpReset to clean up fantasy state ─────────────────────────────────
-const _origMpReset = mpReset;
+// ── mpReset v2 — clean up fantasy state ─────────────────────────────────────
 function mpReset() {
-  _origMpReset();
+  MP.listeners.forEach(fn => fn());
+  MP.listeners = [];
+  if (MP.ref) { MP.ref = null; }
+  MP.role = null; MP.code = null; MP.myName = ''; MP.oppName = '';
+  MP.phase = 'idle'; MP.myScore = null; MP.oppScore = null;
+  MP.precomputed = null; MP.draftPicks = []; MP.challSpinIdx = 0;
+  MP.oppDone = false; MP.oppSlot = null;
   _mpFant.processedPicks = new Set();
   _mpFant.listening = false;
   _mpFant.myPicksDone = false;
   _mpFant._localPicks = [];
-  // Reset FOPT if it was overridden
+  _mpFant.aiRng = null;
+  _mpJoinRoom = null; _mpJoinSelectedSlot = null;
   const oi = document.getElementById('mpFantOppInfo');
   if (oi) oi.style.display = 'none';
+  mpHideBar();
 }
 
 // Init slot grid on load
@@ -3297,10 +3422,23 @@ function mpReset() {
         </div>
       </div>
       <div id="mpFantasyOpts" style="display:none">
-        <div class="mp-mode-row">
+        <div style="font-size:.7rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Scoring</div>
+        <div class="mp-mode-row" style="margin-bottom:12px">
           <div class="mp-mode-pill sel" id="mpScoring_ppr" onclick="mpSetScoring('ppr',this)">PPR</div>
           <div class="mp-mode-pill" id="mpScoring_half_ppr" onclick="mpSetScoring('half_ppr',this)">Half-PPR</div>
           <div class="mp-mode-pill" id="mpScoring_std" onclick="mpSetScoring('std',this)">Standard</div>
+        </div>
+        <div style="font-size:.7rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">League Size</div>
+        <div class="mp-mode-row" style="margin-bottom:12px">
+          <div class="mp-mode-pill" id="mpTeams_4" onclick="mpSetFantTeams(4,this)">4</div>
+          <div class="mp-mode-pill" id="mpTeams_6" onclick="mpSetFantTeams(6,this)">6</div>
+          <div class="mp-mode-pill sel" id="mpTeams_8" onclick="mpSetFantTeams(8,this)">8</div>
+          <div class="mp-mode-pill" id="mpTeams_10" onclick="mpSetFantTeams(10,this)">10</div>
+          <div class="mp-mode-pill" id="mpTeams_12" onclick="mpSetFantTeams(12,this)">12</div>
+        </div>
+        <div style="font-size:.7rem;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Your Draft Slot</div>
+        <div class="mp-mode-row" id="mpSlotRow" style="flex-wrap:wrap;gap:6px;margin-bottom:4px">
+          <!-- built by mpBuildSlotPicker() -->
         </div>
       </div>
     </div>
@@ -3330,6 +3468,23 @@ function mpReset() {
   <p class="mp-qr-hint">Waiting for opponent <span class="mp-pulse"></span></p>
   <button class="mp-btn mp-btn-sec" style="max-width:220px;margin:0 auto" onclick="mpCancelRoom()">Cancel</button>
 </div>
+
+<!-- MP JOIN SLOT PICKER — shown to P2 when joining a fantasy room -->
+<div id="mpJoinSlotScr" class="scr">
+  <div style="max-width:420px;margin:0 auto;padding:32px 16px;text-align:center">
+    <div class="badge">🏈 Fantasy Draft</div>
+    <h2 style="font-size:1.3rem;font-weight:700;margin:12px 0 6px">Pick Your Draft Slot</h2>
+    <p style="color:var(--muted);font-size:.8rem;margin-bottom:20px" id="mpJoinSlotSub">Choose your slot in the draft</p>
+    <div class="mp-section" style="text-align:left">
+      <h3>Available Slots</h3>
+      <div class="mp-mode-row" id="mpJoinSlotBtns" style="flex-wrap:wrap;gap:8px"></div>
+      <button class="mp-mode-pill" id="mpJoinSlotRnd" onclick="mpPickJoinSlot(0)"
+        style="width:100%;margin-top:10px;padding:10px;font-size:.85rem">🎲 Random</button>
+    </div>
+    <button class="mp-btn mp-btn-sec" style="margin-top:8px" onclick="mpCancelRoom()">← Cancel</button>
+  </div>
+</div>
+
 
 <!-- MULTIPLAYER RESULTS -->
 <div id="mpResScr" class="scr">
