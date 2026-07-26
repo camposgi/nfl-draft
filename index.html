@@ -2274,10 +2274,10 @@ function lockSlot(idx){
   CHALL_STATE.lockedCount++;
   var abbr=CHALL_STATE.currentAbbr[idx];
   CHALL_STATE.teams[idx]=abbr;
-  CHALL_STATE.usedTeams[abbr]=true;
   var m=CHALL_STATE.mults[idx];
   var cat=CHALL_STATE.cat;
   var stat=_getTeamStat(abbr,cat);
+  CHALL_STATE.usedTeams[abbr]=true;
   var yds=stat.yds;
   var player=stat.name;
   var contrib=Math.round(yds*m);
