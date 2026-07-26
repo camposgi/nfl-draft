@@ -3182,7 +3182,9 @@ document.getElementById('mainScr').addEventListener('click',function(e){
 
 .cslot{display:flex;align-items:center;gap:10px;background:var(--surf);border:2px solid var(--brd);border-radius:12px;padding:8px 10px;min-height:72px;transition:all .3s}
 
-.cslot.locked{border-color:var(--acc);background:rgba(124,58,237,.1)}
+.cslot.locked{border-color:#22c55e;background:rgba(34,197,94,.08);opacity:.72}
+.cslot-check{display:none;font-size:.68rem;font-weight:900;color:#22c55e;background:rgba(34,197,94,.18);border-radius:6px;padding:2px 6px;flex-shrink:0;letter-spacing:.5px}
+.cslot.locked .cslot-check{display:block}
 
 .cslot.mult-slot{border-color:#fbbf2460}
 
@@ -4462,11 +4464,11 @@ function challLogoUrl(abbr){
 
 }
 
-const CHALL_CFG2={WR:{label:'Receiving',mults:[10,8,6,4,2],targets:{normal:40000,hard:50000},unit:'yds',desc:'receiving yards from 10 WRs'},RB:{label:'Rushing',mults:[10,8,6,4,2],targets:{normal:20000,hard:26000},unit:'yds',desc:'rushing yards from 10 RBs'},QB:{label:'Passing',mults:[5,4,3,2,1.5],targets:{normal:55000,hard:75000},unit:'yds',desc:'passing yards from 10 QBs'},TD:{label:'Passing TDs',mults:[5,4,3,2,1.5],targets:{normal:200,hard:260},unit:'TDs',desc:'passing TDs from 10 QBs',needsApi:true},RecTD:{label:'Receiving TDs',mults:[5,4,3,2,1.5],targets:{normal:100,hard:130},unit:'TDs',desc:'receiving TDs from 10 WR/TE leaders',needsApi:true}};
+const CHALL_CFG2={WR:{label:'Receiving',mults:[10,8,6,4,2],targets:{normal:40000,hard:50000},unit:'yds',desc:'receiving yards from 10 WRs'},RB:{label:'Rushing',mults:[10,8,6,4,2],targets:{normal:28000,hard:38000},unit:'yds',desc:'rushing yards from 10 RBs'},QB:{label:'Passing',mults:[5,4,3,2,1.5],targets:{normal:55000,hard:75000},unit:'yds',desc:'passing yards from 10 QBs'},TD:{label:'Passing TDs',mults:[5,4,3,2,1.5],targets:{normal:200,hard:260},unit:'TDs',desc:'passing TDs from 10 QBs',needsApi:true},RecTD:{label:'Receiving TDs',mults:[5,4,3,2,1.5],targets:{normal:100,hard:130},unit:'TDs',desc:'receiving TDs from 10 WR/TE leaders',needsApi:true}};
 
 const CHALL_TEAMS_32=['ARI','ATL','BAL','BUF','CAR','CHI','CIN','CLE','DAL','DEN','DET','GB','HOU','IND','JAX','KC','LAC','LAR','LV','MIA','MIN','NE','NO','NYG','NYJ','PHI','PIT','SEA','SF','TB','TEN','WAS'];
 
-const CHALL_MULT_CLS={10:'cmult-10',8:'cmult-8',6:'cmult-6',4:'cmult-4',2:'cmult-2',1.5:'cmult-2',1:'cmult-1'};
+const CHALL_MULT_CLS={10:'cmult-10',8:'cmult-8',6:'cmult-6',5:'cmult-10',4:'cmult-4',3:'cmult-6',2:'cmult-2',1.5:'cmult-2',1:'cmult-1'};
 
 let CHALL_STATE={cat:'WR',diff:'normal',teams:[],mults:[],total:0,spun:false,locked:[],currentAbbr:[],lockedCount:0,spinIv:null,usedTeams:{}};
 
@@ -4549,6 +4551,8 @@ function initChallenge(){
         '<div class="cslot-contrib" id="ccontrib'+i+'"></div>'+
 
       '</div>'+
+
+    '<div class="cslot-check" id="ccheck'+i+'">✓ LOCKED</div>'+
 
     '</div>';
 
