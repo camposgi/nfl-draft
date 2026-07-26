@@ -5312,7 +5312,7 @@ function mpStartDraft() {
 
 const _origSpinTeam = spinTeam;
 
-function spinTeam() {
+spinTeam = function() {
 
   if (MP.phase !== 'active' || !MP.precomputed || !MP.precomputed.teamSeq) {
 
@@ -6903,7 +6903,7 @@ function _injectChallTDStats(teams) {
 
 // Hook setChallCat to trigger load when TD or RecTD is selected
 const _origSetChallCat = setChallCat;
-function setChallCat(cat, el) {
+setChallCat = function(cat, el) {
   _origSetChallCat(cat, el);
   if ((cat === 'TD' || cat === 'RecTD') && !_challTDLoaded) {
     loadChallTDStats();
