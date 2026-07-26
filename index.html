@@ -1607,6 +1607,11 @@ document.getElementById('mainScr').addEventListener('click',function(e){
 .cres-mult{padding:2px 7px;border-radius:6px;font-size:.65rem;font-weight:900;min-width:32px;text-align:center}
 .cres-name{flex:1;font-weight:700;font-size:.72rem;line-height:1.3}
 .cres-yds-val{color:var(--acc);font-weight:900;font-size:.8rem;text-align:right;white-space:nowrap}
+.cslot.spinning-slot{cursor:pointer;border-color:rgba(251,191,36,.35)!important;transition:border-color .15s,transform .15s,box-shadow .15s}
+.cslot.spinning-slot:hover{border-color:var(--yel)!important;transform:scale(1.025);box-shadow:0 0 20px rgba(251,191,36,.3)}
+.cslot-tap{font-size:.5rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(251,191,36,.6);margin-top:2px;text-align:center;animation:tapPulse 1.3s ease-in-out infinite}
+@keyframes tapPulse{0%,100%{opacity:.3}55%{opacity:1}}
+.chalk-picked{font-size:.72rem;color:rgba(255,255,255,.5);letter-spacing:2px;text-transform:uppercase;margin-top:6px}
 </style>
 
 <!-- FANTASY SETUP SCREEN -->
@@ -1738,17 +1743,14 @@ document.getElementById('mainScr').addEventListener('click',function(e){
   <div class="chalkboard" style="width:100%;max-width:720px;margin:0 auto 14px">
     <div class="chalk-title">The Challenge</div>
     <div class="chalk-cat" id="challChalkCat">Receiving · Normal</div>
-    <div class="chalk-total-label">Total</div>
+    <div class="chalk-total-label">TOTAL</div>
     <div class="chalk-total" id="challTotalDisp">0</div>
-    <div class="chalk-target" id="challTargetLbl">Target: 40,000 yds</div>
-    <div class="chalk-progress"><div class="chalk-progress-bar" id="challProgBar"></div></div>
+    <div class="chalk-picked" id="challPickedCount">0 / 10 picked</div>
   </div>
   <!-- Slot grid -->
   <div class="cslots-wrap" id="challSlotGrid"></div>
   <!-- Buttons -->
   <div style="display:flex;gap:12px;justify-content:center;margin-top:16px;flex-wrap:wrap">
-    <button class="btn-p" id="challSpinBtn" onclick="runChallSpin()" style="min-width:160px">🎰 SPIN</button>
-    <button class="btn-p" id="challNextBtn" onclick="showChallResults()" style="display:none;min-width:160px">See Results →</button>
   </div>
   <button class="btn-s" onclick="show('challOptScr',null)" style="margin-top:10px;font-size:.75rem">← Back</button>
 </div>
@@ -2148,14 +2150,109 @@ function challLogoUrl(abbr){
 const CHALL_CFG2={WR:{label:'Receiving',mults:[10,8,6,4,2],targets:{normal:40000,hard:50000}},RB:{label:'Rushing',mults:[10,8,6,4,2],targets:{normal:20000,hard:26000}},QB:{label:'Passing',mults:[5,4,3,2,1.5],targets:{normal:55000,hard:75000}}};
 const CHALL_TEAMS_32=['ARI','ATL','BAL','BUF','CAR','CHI','CIN','CLE','DAL','DEN','DET','GB','HOU','IND','JAX','KC','LAC','LAR','LV','MIA','MIN','NE','NO','NYG','NYJ','PHI','PIT','SEA','SF','TB','TEN','WAS'];
 const CHALL_MULT_CLS={10:'cmult-10',8:'cmult-8',6:'cmult-6',4:'cmult-4',2:'cmult-2',1.5:'cmult-2',1:'cmult-1'};
-let CHALL_STATE={cat:'WR',diff:'normal',teams:[],mults:[],total:0,spun:false};
+let CHALL_STATE={cat:'WR',diff:'normal',teams:[],mults:[],total:0,spun:false,locked:[],currentAbbr:[],lockedCount:0,spinIv:null};
 function setChallCat(cat,el){CHALL_STATE.cat=cat;document.querySelectorAll('.copt-cat').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');_updateChallTarget();}
 function setChallDiff(diff,el){CHALL_STATE.diff=diff;document.querySelectorAll('.cdiff-pill').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');_updateChallTarget();}
 function _updateChallTarget(){var cfg=CHALL_CFG2[CHALL_STATE.cat];var tgt=cfg.targets[CHALL_STATE.diff];var el=document.getElementById('challTargetLine');if(el)el.innerHTML='Target: <strong style="color:var(--txt)">'+tgt.toLocaleString()+'</strong> '+cfg.label.toLowerCase()+' yards from 10 '+CHALL_STATE.cat+'s';}
-function initChallenge(){var cfg=CHALL_CFG2[CHALL_STATE.cat];var tgt=cfg.targets[CHALL_STATE.diff];var shuffled=[].concat(CHALL_TEAMS_32).sort(function(){return Math.random()-.5;}).slice(0,10);CHALL_STATE.teams=shuffled;CHALL_STATE.total=0;CHALL_STATE.spun=false;var slots=[0,1,2,3,4,5,6,7,8,9].sort(function(){return Math.random()-.5;});var multVals=cfg.mults.slice().sort(function(){return Math.random()-.5;});CHALL_STATE.mults=[1,1,1,1,1,1,1,1,1,1];slots.slice(0,5).forEach(function(s,i){CHALL_STATE.mults[s]=multVals[i];});var cc=document.getElementById('challChalkCat');if(cc)cc.textContent=cfg.label+' - '+(CHALL_STATE.diff==='hard'?'Hard':'Normal');var tl=document.getElementById('challTargetLbl');if(tl)tl.textContent='Target: '+tgt.toLocaleString()+' yds';var td=document.getElementById('challTotalDisp');if(td)td.textContent='0';var bar=document.getElementById('challProgBar');if(bar)bar.style.width='0%';var grid=document.getElementById('challSlotGrid');if(!grid)return;var html='';for(var i=0;i<10;i++){var m=CHALL_STATE.mults[i];var hasM=(m!==1);var mcls=CHALL_MULT_CLS[m]||'cmult-1';var mLabel=Number.isInteger(m)?m+'x':m+'x';html+='<div class="cslot'+(hasM?' mult-slot':'')+' " id="cslot'+i+'"><div class="cmult-tag '+mcls+'">'+mLabel+'</div><img class="cslot-logo" id="clogo'+i+'" src="" alt=""><div class="cslot-info"><div class="cslot-team" id="cteam'+i+'">-</div><div class="cslot-player" id="cplayer'+i+'"></div><div class="cslot-yds" id="cyds'+i+'"></div><div class="cslot-contrib" id="ccontrib'+i+'"></div></div></div>';}grid.innerHTML=html;document.getElementById('challSpinBtn').style.display='';document.getElementById('challNextBtn').style.display='none';show('challDraftScr',null);}
-function runChallSpin(){if(CHALL_STATE.spun)return;CHALL_STATE.spun=true;document.getElementById('challSpinBtn').style.display='none';for(var i=0;i<10;i++){var lg=document.getElementById('clogo'+i);if(lg)lg.classList.add('spinning');var t=document.getElementById('cteam'+i);if(t)t.textContent='...';}var tick=0;var iv=setInterval(function(){for(var i=0;i<10;i++){var rand=CHALL_TEAMS_32[Math.floor(Math.random()*CHALL_TEAMS_32.length)];var lg=document.getElementById('clogo'+i);if(lg)lg.src=challLogoUrl(rand);var t=document.getElementById('cteam'+i);if(t)t.textContent=(CHALL_TEAM_STATS[rand]&&CHALL_TEAM_STATS[rand].name)||rand;}tick++;if(tick>32){clearInterval(iv);_stopSlotsSeq(0);}},90);}
-function _stopSlotsSeq(idx){if(idx>=10){document.getElementById('challNextBtn').style.display='';return;}var abbr=CHALL_STATE.teams[idx];var td=CHALL_TEAM_STATS[abbr];var m=CHALL_STATE.mults[idx];var cat=CHALL_STATE.cat;var yds=td?td[cat]:0;var player=td?td[cat+'n']:'';var contrib=Math.round(yds*m);CHALL_STATE.total+=contrib;var slot=document.getElementById('cslot'+idx);if(slot)slot.classList.add('locked');var lg=document.getElementById('clogo'+idx);if(lg){lg.classList.remove('spinning');lg.src=challLogoUrl(abbr);}var tEl=document.getElementById('cteam'+idx);if(tEl)tEl.textContent=(td&&td.name)||abbr;var pEl=document.getElementById('cplayer'+idx);if(pEl)pEl.textContent=player;var yEl=document.getElementById('cyds'+idx);if(yEl)yEl.textContent=yds.toLocaleString()+' yds';var cEl=document.getElementById('ccontrib'+idx);if(cEl)cEl.textContent=(m!==1?m+'x > ':'')+contrib.toLocaleString();var totalEl=document.getElementById('challTotalDisp');if(totalEl)totalEl.textContent=CHALL_STATE.total.toLocaleString();var tgt=CHALL_CFG2[cat].targets[CHALL_STATE.diff];var pct=Math.min(100,(CHALL_STATE.total/tgt)*100);var bar2=document.getElementById('challProgBar');if(bar2)bar2.style.width=pct+'%';setTimeout(function(){_stopSlotsSeq(idx+1);},350);}
-function showChallResults(){var cfg=CHALL_CFG2[CHALL_STATE.cat];var tgt=cfg.targets[CHALL_STATE.diff];var total=CHALL_STATE.total;var hit=total>=tgt;var pct=Math.round((total/tgt)*100);var badge=document.getElementById('challResBadge');var totalEl=document.getElementById('challResTotal');var targetEl=document.getElementById('challResTarget');var verdictEl=document.getElementById('challResVerdict');var breakdown=document.getElementById('challResBreakdown');if(badge)badge.textContent=(hit?'CLEARED - ':'FAILED - ')+'Challenge '+(hit?'Complete!':'Over');if(totalEl){totalEl.textContent=total.toLocaleString()+' yds';totalEl.style.color=hit?'var(--grn)':'var(--red)';}if(targetEl)targetEl.textContent='Target: '+tgt.toLocaleString()+' - You hit '+pct+'%';var verdict;if(pct>=130)verdict='LEGENDARY';else if(pct>=115)verdict='DOMINANT';else if(pct>=100)verdict='CHALLENGE CLEARED';else if(pct>=90)verdict='SO CLOSE';else if(pct>=75)verdict='NOT ENOUGH';else verdict='BUST';if(verdictEl){verdictEl.textContent=verdict;verdictEl.style.color=hit?'var(--grn)':'var(--red)';}if(breakdown){var rows='';CHALL_STATE.teams.forEach(function(abbr,i){var td=CHALL_TEAM_STATS[abbr];var m=CHALL_STATE.mults[i];var yds=td?td[CHALL_STATE.cat]:0;var contrib=Math.round(yds*m);var mcls=CHALL_MULT_CLS[m]||'cmult-1';var mLabel=Number.isInteger(m)?m+'x':m+'x';rows+='<div class="cres-row"><img class="cres-logo" src="'+challLogoUrl(abbr)+'" alt="'+abbr+'"><div class="cres-name">'+((td&&td.name)||abbr)+'<br><span style="color:var(--muted);font-weight:400;font-size:.65rem">'+(td?td[CHALL_STATE.cat+'n']:'')+'</span></div><span class="cres-mult '+mcls+'">'+mLabel+'</span><div class="cres-yds-val">'+contrib.toLocaleString()+'</div></div>';});breakdown.innerHTML=rows;}show('challResScr',null);}
+function initChallenge(){
+  if(CHALL_STATE.spinIv){clearInterval(CHALL_STATE.spinIv);CHALL_STATE.spinIv=null;}
+  var cfg=CHALL_CFG2[CHALL_STATE.cat];
+  var slots=[0,1,2,3,4,5,6,7,8,9].sort(function(){return Math.random()-.5;});
+  var multVals=cfg.mults.slice().sort(function(){return Math.random()-.5;});
+  CHALL_STATE.mults=[1,1,1,1,1,1,1,1,1,1];
+  slots.slice(0,5).forEach(function(s,i){CHALL_STATE.mults[s]=multVals[i];});
+  CHALL_STATE.total=0;CHALL_STATE.spun=false;
+  CHALL_STATE.locked=new Array(10).fill(false);
+  CHALL_STATE.currentAbbr=new Array(10).fill('');
+  CHALL_STATE.lockedCount=0;CHALL_STATE.teams=new Array(10);
+  var cc=document.getElementById('challChalkCat');
+  if(cc)cc.textContent=cfg.label+' · '+(CHALL_STATE.diff==='hard'?'Hard':'Normal');
+  var td2=document.getElementById('challTotalDisp');
+  if(td2)td2.textContent='0';
+  var pc=document.getElementById('challPickedCount');
+  if(pc)pc.textContent='0 / 10 picked';
+  var nb=document.getElementById('challNextBtn');
+  if(nb)nb.style.display='none';
+  var grid=document.getElementById('challSlotGrid');
+  if(!grid)return;
+  var html='';
+  for(var i=0;i<10;i++){
+    var m=CHALL_STATE.mults[i];
+    var hasM=(m!==1);
+    var mcls=CHALL_MULT_CLS[m]||'cmult-1';
+    var mLabel=Number.isInteger(m)?m+'x':m+'x';
+    html+='<div class="cslot'+(hasM?' mult-slot':'')+' spinning-slot" id="cslot'+i+'" onclick="lockSlot('+i+')">'+
+      '<div class="cmult-tag '+mcls+'">'+mLabel+'</div>'+
+      '<img class="cslot-logo spinning" id="clogo'+i+'" src="" alt="">'+
+      '<div class="cslot-info">'+
+        '<div class="cslot-team" id="cteam'+i+'">...</div>'+
+        '<div class="cslot-player" id="cplayer'+i+'"></div>'+
+        '<div class="cslot-yds" id="cyds'+i+'"></div>'+
+        '<div class="cslot-contrib" id="ccontrib'+i+'"></div>'+
+      '</div>'+
+      '<div class="cslot-tap">tap to lock</div>'+
+    '</div>';
+  }
+  grid.innerHTML=html;
+  show('challDraftScr',null);
+  _startChallSpin();
+}
+function _startChallSpin(){
+  for(var i=0;i<10;i++){
+    var r=CHALL_TEAMS_32[Math.floor(Math.random()*CHALL_TEAMS_32.length)];
+    CHALL_STATE.currentAbbr[i]=r;
+  }
+  CHALL_STATE.spinIv=setInterval(function(){
+    for(var i=0;i<10;i++){
+      if(CHALL_STATE.locked[i])continue;
+      var rand=CHALL_TEAMS_32[Math.floor(Math.random()*CHALL_TEAMS_32.length)];
+      CHALL_STATE.currentAbbr[i]=rand;
+      var lg=document.getElementById('clogo'+i);
+      if(lg)lg.src=challLogoUrl(rand);
+      var t=document.getElementById('cteam'+i);
+      if(t)t.textContent=(CHALL_TEAM_STATS[rand]&&CHALL_TEAM_STATS[rand].name)||rand;
+    }
+  },90);
+}
+function lockSlot(idx){
+  if(CHALL_STATE.locked[idx])return;
+  CHALL_STATE.locked[idx]=true;
+  CHALL_STATE.lockedCount++;
+  var abbr=CHALL_STATE.currentAbbr[idx];
+  CHALL_STATE.teams[idx]=abbr;
+  var td=CHALL_TEAM_STATS[abbr];
+  var m=CHALL_STATE.mults[idx];
+  var cat=CHALL_STATE.cat;
+  var yds=td?td[cat]:0;
+  var player=td?td[cat+'n']:'';
+  var contrib=Math.round(yds*m);
+  CHALL_STATE.total+=contrib;
+  var slot=document.getElementById('cslot'+idx);
+  if(slot){slot.classList.remove('spinning-slot');slot.classList.add('locked');slot.onclick=null;}
+  var lg=document.getElementById('clogo'+idx);
+  if(lg){lg.classList.remove('spinning');lg.src=challLogoUrl(abbr);}
+  var tEl=document.getElementById('cteam'+idx);
+  if(tEl)tEl.textContent=(td&&td.name)||abbr;
+  var pEl=document.getElementById('cplayer'+idx);
+  if(pEl)pEl.textContent=player;
+  var yEl=document.getElementById('cyds'+idx);
+  if(yEl)yEl.textContent=yds.toLocaleString()+' yds';
+  var cEl=document.getElementById('ccontrib'+idx);
+  if(cEl)cEl.textContent=(m!==1?m+'x × ':'')+contrib.toLocaleString();
+  var th=document.querySelector('#cslot'+idx+' .cslot-tap');
+  if(th)th.style.display='none';
+  var totalEl=document.getElementById('challTotalDisp');
+  if(totalEl)totalEl.textContent=CHALL_STATE.total.toLocaleString();
+  var pc2=document.getElementById('challPickedCount');
+  if(pc2)pc2.textContent=CHALL_STATE.lockedCount+' / 10 picked';
+  if(CHALL_STATE.lockedCount===10){
+    clearInterval(CHALL_STATE.spinIv);CHALL_STATE.spinIv=null;
+    var nb=document.getElementById('challNextBtn');
+    if(nb)nb.style.display='';
+    setTimeout(showChallResults,700);
+  }
+}
+function showChallResults(){var cfg=CHALL_CFG2[CHALL_STATE.cat];var tgt=cfg.targets[CHALL_STATE.diff];var total=CHALL_STATE.total;var hit=total>=tgt;var pct=Math.round((total/tgt)*100);var badge=document.getElementById('challResBadge');var totalEl=document.getElementById('challResTotal');var targetEl=document.getElementById('challResTarget');var verdictEl=document.getElementById('challResVerdict');var breakdown=document.getElementById('challResBreakdown');if(badge)badge.textContent=hit?'CHALLENGE CLEARED':'CHALLENGE FAILED';if(totalEl){totalEl.textContent=total.toLocaleString()+' yds';totalEl.style.color=hit?'var(--grn)':'var(--red)';}if(targetEl)targetEl.textContent='Target: '+tgt.toLocaleString()+' - You hit '+pct+'%';var verdict;if(pct>=130)verdict='LEGENDARY';else if(pct>=115)verdict='DOMINANT';else if(pct>=100)verdict='CHALLENGE CLEARED';else if(pct>=90)verdict='SO CLOSE';else if(pct>=75)verdict='NOT ENOUGH';else verdict='BUST';if(verdictEl){verdictEl.textContent=verdict;verdictEl.style.color=hit?'var(--grn)':'var(--red)';}if(breakdown){var rows='';CHALL_STATE.teams.forEach(function(abbr,i){var td=CHALL_TEAM_STATS[abbr];var m=CHALL_STATE.mults[i];var yds=td?td[CHALL_STATE.cat]:0;var contrib=Math.round(yds*m);var mcls=CHALL_MULT_CLS[m]||'cmult-1';var mLabel=Number.isInteger(m)?m+'x':m+'x';rows+='<div class="cres-row"><img class="cres-logo" src="'+challLogoUrl(abbr)+'" alt="'+abbr+'"><div class="cres-name">'+((td&&td.name)||abbr)+'<br><span style="color:var(--muted);font-weight:400;font-size:.65rem">'+(td?td[CHALL_STATE.cat+'n']:'')+'</span></div><span class="cres-mult '+mcls+'">'+mLabel+'</span><div class="cres-yds-val">'+contrib.toLocaleString()+'</div></div>';});breakdown.innerHTML=rows;}show('challResScr',null);}
 
 
 // Init slot grid on load
