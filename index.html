@@ -10281,7 +10281,8 @@ function _challStopAndChooseMP() {
 
 
 
-    if (y) y.textContent = yds.toLocaleString() + ' yds';
+    var _unit = (CHALL_CFG2[cat] && CHALL_CFG2[cat].unit) || 'yds';
+    if (y) y.textContent = yds.toLocaleString() + ' ' + _unit;
 
 
 
@@ -10807,7 +10808,8 @@ lockSlot = function(idx) {
 
 
 
-  var yEl = document.getElementById('cyds' + idx); if (yEl) yEl.textContent = yds.toLocaleString() + ' yds';
+  var _unit2 = (CHALL_CFG2[cat] && CHALL_CFG2[cat].unit) || 'yds';
+  var yEl = document.getElementById('cyds' + idx); if (yEl) yEl.textContent = yds.toLocaleString() + ' ' + _unit2;
 
 
 
@@ -11019,11 +11021,9 @@ function mpShowComparison() {
 
 
 
-  const myLabel = isChallenge ? 'yds' : 'OVR';
-
-
-
-  const oppLabel = isChallenge ? 'yds' : 'OVR';
+  var _challUnit = isChallenge ? ((CHALL_CFG2[MP.modeOpts && MP.modeOpts.cat] && CHALL_CFG2[MP.modeOpts.cat].unit) || 'yds') : 'OVR';
+  const myLabel = _challUnit;
+  const oppLabel = _challUnit;
 
 
 
@@ -11376,7 +11376,7 @@ function mpAppendPicksComparison(room) {
 
             + '<div style="color:var(--muted)">' + p.team + '</div>'
 
-            + '<div style="color:var(--acc)">' + multStr + p.yds.toLocaleString() + ' yds = ' + p.contrib.toLocaleString() + '</div>'
+            + '<div style="color:var(--acc)">' + multStr + p.yds.toLocaleString() + ' ' + ((CHALL_CFG2[MP.modeOpts && MP.modeOpts.cat] && CHALL_CFG2[MP.modeOpts.cat].unit) || 'yds') + ' = ' + p.contrib.toLocaleString() + '</div>'
 
             + '</div>';
 
