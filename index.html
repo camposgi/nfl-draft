@@ -1,5 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<htm
+        <div class="mode-card" onclick="show('challOptScr',null)">
+          <div class="mode-icon">🎰</div>
+          <div class="mode-name">The Challenge</div>
+          <div class="mode-desc">Spin 10 players with multipliers — hit your yardage target</div>
+        </div>l lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1550,6 +1555,43 @@ document.getElementById('mainScr').addEventListener('click',function(e){
   .fdraft-pool{border-right:none;border-bottom:1px solid var(--brd);flex:0 0 55vh}
   .fdraft-roster{flex:1;max-width:100%;overflow-y:auto}
 }
+
+/* ── THE CHALLENGE ────────────────────────────────────────────────────────── */
+#challOptScr .copt-cats{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:8px}
+.copt-cat{width:130px;padding:18px 12px;border-radius:14px;background:var(--surf);border:2px solid var(--brd);cursor:pointer;text-align:center;transition:all .2s}
+.copt-cat.sel{border-color:var(--acc);background:rgba(124,58,237,.12)}
+.copt-cat .ccat-ico{font-size:2rem;margin-bottom:6px}
+.copt-cat .ccat-name{font-weight:800;font-size:.9rem;letter-spacing:1px}
+.copt-cat .ccat-target{font-size:.7rem;color:var(--muted);margin-top:4px}
+.copt-diff{display:flex;gap:10px;justify-content:center;margin:8px 0 20px}
+.cdiff-pill{padding:10px 28px;border-radius:999px;background:var(--surf);border:2px solid var(--brd);cursor:pointer;font-weight:700;font-size:.85rem;transition:all .2s}
+.cdiff-pill.sel{border-color:var(--acc);background:rgba(124,58,237,.12);color:#a78bfa}
+#challDraftScr{padding:16px!important;align-items:stretch!important;justify-content:flex-start!important;max-width:100%!important}
+.cdraft-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 0 14px;border-bottom:1px solid var(--brd);margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.cdraft-title{font-size:1rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.cdraft-total{font-size:1.5rem;font-weight:900;color:var(--acc)}
+.cdraft-target{font-size:.75rem;color:var(--muted)}
+.cdraft-progress{width:100%;height:8px;background:var(--surf2);border-radius:4px;margin:8px 0 18px;overflow:hidden}
+.cdraft-progress-bar{height:100%;background:linear-gradient(90deg,var(--acc),#06b6d4);border-radius:4px;transition:width .5s ease;width:0%}
+.cdraft-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;width:100%;max-width:900px;margin:0 auto}
+@media(max-width:600px){.cdraft-grid{grid-template-columns:repeat(2,1fr)}}
+.ccard{border-radius:12px;background:var(--surf);border:2px solid var(--brd);padding:12px 8px;text-align:center;min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;transition:border-color .3s,background .3s}
+.ccard.locked{border-color:var(--acc);background:rgba(124,58,237,.1)}
+.ccard.spinning .ccard-name{animation:cspin .08s linear infinite}
+@keyframes cspin{0%{opacity:1}50%{opacity:.3}100%{opacity:1}}
+.cmult-badge{position:absolute;top:6px;right:6px;padding:2px 7px;border-radius:999px;font-size:.62rem;font-weight:800;background:var(--yel);color:#000;letter-spacing:.5px}
+.ccard-pos{font-size:.6rem;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:4px}
+.ccard-name{font-size:.78rem;font-weight:800;color:var(--txt);line-height:1.2;min-height:32px;display:flex;align-items:center;justify-content:center}
+.ccard-team{font-size:.62rem;color:var(--muted);margin:2px 0}
+.ccard-yds{font-size:.85rem;font-weight:900;color:var(--acc)}
+.ccard-contrib{font-size:.65rem;color:var(--grn);margin-top:2px;min-height:14px}
+.cspin-btn-wrap{display:flex;justify-content:center;margin-top:20px}
+#challResScr .cres-total{font-size:3rem;font-weight:900;margin:12px 0 4px}
+.cres-breakdown{width:100%;max-width:620px;margin:16px auto;display:flex;flex-direction:column;gap:6px}
+.cres-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;background:var(--surf);font-size:.8rem}
+.cres-mult{padding:2px 8px;border-radius:999px;background:var(--yel);color:#000;font-size:.68rem;font-weight:800;min-width:36px;text-align:center}
+.cres-name{flex:1;font-weight:700}
+.cres-yds{color:var(--acc);font-weight:900;min-width:70px;text-align:right}
 </style>
 
 <!-- FANTASY SETUP SCREEN -->
@@ -1633,6 +1675,81 @@ document.getElementById('mainScr').addEventListener('click',function(e){
       <div id="fantRosterSlots"></div>
       <div style="font-size:.7rem;letter-spacing:1px;color:var(--muted);margin-top:16px;padding:0 4px">RECENT PICKS</div>
       <div id="fantPickLog" class="fpick-log"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- THE CHALLENGE — OPTIONS -->
+<div id="challOptScr" class="scr">
+  <div class="badge">🎰 The Challenge</div>
+  <h1 class="mm-title" style="font-size:clamp(1.8rem,6vw,3.5rem)">The<br><span class="hl">Challenge</span></h1>
+  <p class="mm-sub" style="margin-bottom:24px">Spin 10 players — multipliers are pre-set — hit your yardage target</p>
+  <div style="width:100%;max-width:500px">
+    <div class="fopt-lbl" style="margin-bottom:12px">Choose Your Challenge</div>
+    <div class="copt-cats" id="challCatCards">
+      <div class="copt-cat sel" id="ccatWR" onclick="setChallCat('WR',this)">
+        <div class="ccat-ico">🏃</div>
+        <div class="ccat-name">RECEIVING</div>
+        <div class="ccat-target" id="ccatWRtgt">WR · 40K / 50K yds</div>
+      </div>
+      <div class="copt-cat" id="ccatRB" onclick="setChallCat('RB',this)">
+        <div class="ccat-ico">💨</div>
+        <div class="ccat-name">RUSHING</div>
+        <div class="ccat-target" id="ccatRBtgt">RB · 20K / 26K yds</div>
+      </div>
+      <div class="copt-cat" id="ccatQB" onclick="setChallCat('QB',this)">
+        <div class="ccat-ico">🎯</div>
+        <div class="ccat-name">PASSING</div>
+        <div class="ccat-target" id="ccatQBtgt">QB · 55K / 75K yds</div>
+      </div>
+    </div>
+    <div class="fopt-lbl" style="margin:18px 0 10px">Difficulty</div>
+    <div class="copt-diff">
+      <div class="cdiff-pill sel" id="cdiffNorm" onclick="setChallDiff('normal',this)">Normal</div>
+      <div class="cdiff-pill" id="cdiffHard" onclick="setChallDiff('hard',this)">Hard</div>
+    </div>
+    <div style="text-align:center;color:var(--muted);font-size:.8rem;margin-bottom:20px" id="challTargetLine">
+      Target: <strong style="color:var(--txt)">40,000</strong> receiving yards from 10 WRs
+    </div>
+  </div>
+  <button class="btn-p" onclick="initChallenge()">🎰 Spin &amp; Play</button>
+  <button class="btn-s" onclick="show('mainScr',null)" style="margin-top:12px">← Back</button>
+</div>
+
+<!-- THE CHALLENGE — DRAFT SCREEN -->
+<div id="challDraftScr" class="scr">
+  <div class="cdraft-hdr">
+    <div>
+      <div class="cdraft-title" id="challDraftLabel">Receiving Challenge</div>
+      <div class="cdraft-target" id="challTargetLbl">Target: 40,000 yds</div>
+    </div>
+    <div style="text-align:right">
+      <div class="cdraft-total" id="challTotalDisp">0</div>
+      <div class="cdraft-target">yards so far</div>
+    </div>
+  </div>
+  <div class="cdraft-progress"><div class="cdraft-progress-bar" id="challProgBar"></div></div>
+  <div class="cdraft-grid" id="challCardGrid"></div>
+  <div class="cspin-btn-wrap">
+    <button class="btn-p" id="challSpinBtn" onclick="runChallSpin()" style="min-width:180px">🎰 SPIN</button>
+    <button class="btn-s" id="challNextBtn" onclick="showChallResults()" style="display:none;min-width:180px">See Results →</button>
+  </div>
+  <button class="btn-s" onclick="show('challOptScr',null)" style="margin-top:12px;font-size:.75rem">← Back</button>
+</div>
+
+<!-- THE CHALLENGE — RESULTS -->
+<div id="challResScr" class="scr" style="padding:28px 16px;align-items:flex-start">
+  <div style="width:100%;max-width:640px;margin:0 auto;text-align:center">
+    <div class="badge" id="challResBadge">🎰 Challenge Complete</div>
+    <div class="cres-total" id="challResTotal" style="color:var(--acc)">0</div>
+    <div style="color:var(--muted);font-size:.85rem;margin-bottom:4px" id="challResTarget"></div>
+    <div style="font-size:1.4rem;font-weight:900;margin-bottom:16px" id="challResVerdict"></div>
+    <div class="cres-breakdown" id="challResBreakdown"></div>
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap">
+      <button class="btn-p" onclick="initChallenge()">🎰 Spin Again</button>
+      <button class="btn-s" onclick="show('challOptScr',null)">Change Mode</button>
+      <button class="btn-s" onclick="show('mainScr',null)">Main Menu</button>
     </div>
   </div>
 </div>
@@ -1973,6 +2090,196 @@ function showFantResults(){
 
   show('fantResScr',null);
 }
+
+// ── THE CHALLENGE ────────────────────────────────────────────────────────────────
+const CHALL_POOLS={
+  WR:[{n:"Jaxon Smith-Njigba",t:"SEA",y:1793},{n:"Puka Nacua",t:"LAR",y:1715},{n:"George Pickens",t:"DAL",y:1429},{n:"Ja'Marr Chase",t:"CIN",y:1412},{n:"Amon-Ra St. Brown",t:"DET",y:1401},{n:"Zay Flowers",t:"BAL",y:1211},{n:"Chris Olave",t:"NO",y:1163},{n:"Jameson Williams",t:"DET",y:1117},{n:"Nico Collins",t:"HOU",y:1117},{n:"CeeDee Lamb",t:"DAL",y:1077},{n:"Justin Jefferson",t:"MIN",y:1048},{n:"Courtland Sutton",t:"DEN",y:1017},{n:"Wan'Dale Robinson",t:"TEN",y:1014},{n:"Tetairoa McMillan",t:"CAR",y:1014},{n:"Stefon Diggs",t:"NE",y:1013},{n:"DeVonta Smith",t:"PHI",y:1008},{n:"Michael Wilson",t:"ARI",y:1006},{n:"Alec Pierce",t:"IND",y:1003},{n:"A.J. Brown",t:"NE",y:1003},{n:"Emeka Egbuka",t:"TB",y:938},{n:"Drake London",t:"ATL",y:919},{n:"Jaylen Waddle",t:"DEN",y:910},{n:"DK Metcalf",t:"PIT",y:850},{n:"Parker Washington",t:"JAX",y:847},{n:"Tee Higgins",t:"CIN",y:846},{n:"Jakobi Meyers",t:"JAX",y:835},{n:"Davante Adams",t:"LAR",y:789},{n:"Ladd McConkey",t:"LAC",y:789},{n:"Michael Pittman",t:"PIT",y:784},{n:"Keenan Allen",t:"LAC",y:777},{n:"Quentin Johnston",t:"LAC",y:735},{n:"Deebo Samuel",t:"WAS",y:727},{n:"Romeo Doubs",t:"NE",y:724},{n:"Khalil Shakir",t:"BUF",y:719},{n:"Troy Franklin",t:"DEN",y:709},{n:"Brian Thomas",t:"JAX",y:707},{n:"Tre Tucker",t:"LV",y:696},{n:"Rashid Shaheed",t:"SEA",y:687},{n:"DJ Moore",t:"BUF",y:682},{n:"Rome Odunze",t:"CHI",y:661},{n:"Luther Burden",t:"CHI",y:652},{n:"Jauan Jennings",t:"MIN",y:643},{n:"Christian Watson",t:"GB",y:611},{n:"Jordan Addison",t:"MIN",y:610},{n:"Marvin Harrison",t:"ARI",y:608},{n:"Jerry Jeudy",t:"CLE",y:602},{n:"Cooper Kupp",t:"SEA",y:593},{n:"Marquise Brown",t:"PHI",y:587},{n:"Terry McLaurin",t:"WAS",y:582},{n:"Rashee Rice",t:"KC",y:571}],
+  RB:[{n:"James Cook",t:"BUF",y:1621},{n:"Derrick Henry",t:"BAL",y:1595},{n:"Jonathan Taylor",t:"IND",y:1585},{n:"Bijan Robinson",t:"ATL",y:1478},{n:"De'Von Achane",t:"MIA",y:1350},{n:"Kyren Williams",t:"LAR",y:1252},{n:"Jahmyr Gibbs",t:"DET",y:1223},{n:"Christian McCaffrey",t:"SF",y:1202},{n:"Javonte Williams",t:"DAL",y:1201},{n:"Saquon Barkley",t:"PHI",y:1140},{n:"Travis Etienne",t:"NO",y:1107},{n:"D'Andre Swift",t:"CHI",y:1087},{n:"Tony Pollard",t:"TEN",y:1082},{n:"Rico Dowdle",t:"PIT",y:1076},{n:"Breece Hall",t:"NYJ",y:1065},{n:"Kenneth Walker",t:"KC",y:1027},{n:"Chase Brown",t:"CIN",y:1019},{n:"Ashton Jeanty",t:"LV",y:975},{n:"Jaylen Warren",t:"PIT",y:958},{n:"Josh Jacobs",t:"GB",y:929},{n:"TreVeyon Henderson",t:"NE",y:911},{n:"Quinshon Judkins",t:"CLE",y:827},{n:"Jacory Croskey-Merritt",t:"WAS",y:805},{n:"Kyle Monangai",t:"CHI",y:783},{n:"J.K. Dobbins",t:"DEN",y:772},{n:"Jordan Mason",t:"MIN",y:758},{n:"Blake Corum",t:"LAR",y:746},{n:"Tyrone Tracy",t:"NYG",y:740},{n:"Zach Charbonnet",t:"SEA",y:730},{n:"David Montgomery",t:"HOU",y:716},{n:"Woody Marks",t:"HOU",y:703},{n:"Kimani Vidal",t:"LAC",y:643},{n:"Kareem Hunt",t:"KC",y:611},{n:"Rhamondre Stevenson",t:"NE",y:603},{n:"Bucky Irving",t:"TB",y:588},{n:"Rachaad White",t:"WAS",y:572},{n:"Aaron Jones",t:"MIN",y:548},{n:"Omarion Hampton",t:"LAC",y:545},{n:"RJ Harvey",t:"DEN",y:540},{n:"Kenny Gainwell",t:"TB",y:537},{n:"Tyler Allgeier",t:"ARI",y:514},{n:"Chuba Hubbard",t:"CAR",y:511},{n:"Nick Chubb",t:"HOU",y:506},{n:"Chris Rodriguez",t:"JAX",y:500},{n:"Emanuel Wilson",t:"SEA",y:496}],
+  QB:[{n:"Matthew Stafford",t:"LAR",y:4707},{n:"Jared Goff",t:"DET",y:4564},{n:"Dak Prescott",t:"DAL",y:4552},{n:"Drake Maye",t:"NE",y:4394},{n:"Sam Darnold",t:"SEA",y:4048},{n:"Trevor Lawrence",t:"JAX",y:4007},{n:"Caleb Williams",t:"CHI",y:3942},{n:"Bo Nix",t:"DEN",y:3931},{n:"Justin Herbert",t:"LAC",y:3727},{n:"Baker Mayfield",t:"TB",y:3693},{n:"Josh Allen",t:"BUF",y:3668},{n:"Patrick Mahomes",t:"KC",y:3587},{n:"Jordan Love",t:"GB",y:3381},{n:"Jacoby Brissett",t:"ARI",y:3366},{n:"Aaron Rodgers",t:"PIT",y:3322},{n:"Jalen Hurts",t:"PHI",y:3224},{n:"Cam Ward",t:"TEN",y:3169},{n:"Daniel Jones",t:"IND",y:3101},{n:"C.J. Stroud",t:"HOU",y:3041},{n:"Geno Smith",t:"NYJ",y:3025},{n:"Bryce Young",t:"CAR",y:3011},{n:"Tua Tagovailoa",t:"ATL",y:2660},{n:"Lamar Jackson",t:"BAL",y:2549},{n:"Joe Flacco",t:"CIN",y:2479},{n:"Tyler Shough",t:"NO",y:2384},{n:"Jaxson Dart",t:"NYG",y:2272},{n:"Brock Purdy",t:"SF",y:2167},{n:"Mac Jones",t:"SF",y:2151},{n:"Michael Penix",t:"ATL",y:1982},{n:"Joe Burrow",t:"CIN",y:1809}],
+};
+const CHALL_CFG={
+  WR:{label:"Receiving",pos:"WR",mults:[10,8,6,4,2],targets:{normal:40000,hard:50000},unit:"Rec Yds"},
+  RB:{label:"Rushing", pos:"RB",mults:[10,8,6,4,2],targets:{normal:20000,hard:26000},unit:"Rush Yds"},
+  QB:{label:"Passing",  pos:"QB",mults:[5,4,3,2,1.5],targets:{normal:55000,hard:75000},unit:"Pass Yds"},
+};
+let CHALL_STATE={cat:'WR',diff:'normal',players:[],mults:[],total:0,spun:false};
+
+function setChallCat(cat,el){
+  CHALL_STATE.cat=cat;
+  document.querySelectorAll('.copt-cat').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  updateChallTargetLine();
+}
+function setChallDiff(diff,el){
+  CHALL_STATE.diff=diff;
+  document.querySelectorAll('.cdiff-pill').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  updateChallTargetLine();
+}
+function updateChallTargetLine(){
+  const cfg=CHALL_CFG[CHALL_STATE.cat];
+  const tgt=cfg.targets[CHALL_STATE.diff];
+  const el=document.getElementById('challTargetLine');
+  if(el) el.innerHTML='Target: <strong style="color:var(--txt)">'+tgt.toLocaleString()+'</strong> '+cfg.label.toLowerCase()+' yards from 10 '+cfg.pos+'s';
+}
+
+function initChallenge(){
+  const cfg=CHALL_CFG[CHALL_STATE.cat];
+  const diff=CHALL_STATE.diff;
+  const tgt=cfg.targets[diff];
+  CHALL_STATE.total=0;
+  CHALL_STATE.spun=false;
+  CHALL_STATE.players=[];
+
+  // Assign 5 multiplier slots out of 10 (random positions)
+  const slots=Array.from({length:10},(_,i)=>i);
+  const shuffled=[...slots].sort(()=>Math.random()-.5);
+  const multSlots=shuffled.slice(0,5);
+  const multVals=[...cfg.mults].sort(()=>Math.random()-.5); // randomize which mult goes where
+  CHALL_STATE.mults=Array(10).fill(1);
+  multSlots.forEach((s,i)=>{ CHALL_STATE.mults[s]=multVals[i]; });
+
+  // Build card grid
+  const grid=document.getElementById('challCardGrid');
+  if(!grid) return;
+  grid.innerHTML=Array.from({length:10},(_,i)=>`
+    <div class="ccard" id="ccard${i}">
+      ${CHALL_STATE.mults[i]!==1?`<div class="cmult-badge">${CHALL_STATE.mults[i]}x</div>`:''}
+      <div class="ccard-pos">${cfg.pos}</div>
+      <div class="ccard-name" id="cname${i}">—</div>
+      <div class="ccard-team" id="cteam${i}"></div>
+      <div class="ccard-yds" id="cyds${i}"></div>
+      <div class="ccard-contrib" id="ccontrib${i}"></div>
+    </div>`).join('');
+
+  // Update header
+  const lbl=document.getElementById('challDraftLabel');
+  if(lbl) lbl.textContent=cfg.label+' Challenge · '+(diff==='hard'?'Hard':'Normal');
+  const tgtLbl=document.getElementById('challTargetLbl');
+  if(tgtLbl) tgtLbl.textContent='Target: '+tgt.toLocaleString()+' yds';
+  const totalDisp=document.getElementById('challTotalDisp');
+  if(totalDisp) totalDisp.textContent='0';
+  const bar=document.getElementById('challProgBar');
+  if(bar) bar.style.width='0%';
+
+  document.getElementById('challSpinBtn').style.display='';
+  document.getElementById('challNextBtn').style.display='none';
+
+  show('challDraftScr',null);
+}
+
+function runChallSpin(){
+  if(CHALL_STATE.spun) return;
+  CHALL_STATE.spun=true;
+  document.getElementById('challSpinBtn').style.display='none';
+
+  const cfg=CHALL_CFG[CHALL_STATE.cat];
+  const pool=[...CHALL_POOLS[CHALL_STATE.cat]].sort(()=>Math.random()-.5);
+
+  // Pick 10 unique players
+  const chosen=pool.slice(0,10);
+  CHALL_STATE.players=chosen;
+
+  // Start spinning all cards
+  for(let i=0;i<10;i++){
+    const card=document.getElementById('ccard'+i);
+    if(card) card.classList.add('spinning');
+  }
+
+  // Rapid cycling animation — show random names cycling fast
+  let tick=0;
+  const allNames=CHALL_POOLS[cfg.pos].map(p=>p.n);
+  const cycleInterval=setInterval(()=>{
+    for(let i=0;i<10;i++){
+      const el=document.getElementById('cname'+i);
+      if(el && CHALL_STATE.players[i]._locked!==true){
+        const rand=allNames[Math.floor(Math.random()*allNames.length)];
+        el.textContent=rand;
+      }
+    }
+    tick++;
+    if(tick>25){ clearInterval(cycleInterval); stopCardsSequential(0); }
+  },80);
+}
+
+function stopCardsSequential(idx){
+  if(idx>=10){
+    // All stopped — show Next button
+    document.getElementById('challNextBtn').style.display='';
+    return;
+  }
+  const p=CHALL_STATE.players[idx];
+  const m=CHALL_STATE.mults[idx];
+  const contrib=Math.round(p.y*m);
+  CHALL_STATE.total+=contrib;
+  p._locked=true;
+
+  const card=document.getElementById('ccard'+idx);
+  if(card) card.classList.remove('spinning');
+  if(card) card.classList.add('locked');
+
+  const nameEl=document.getElementById('cname'+idx);
+  if(nameEl) nameEl.textContent=p.n;
+  const teamEl=document.getElementById('cteam'+idx);
+  if(teamEl) teamEl.textContent=p.t;
+  const ydsEl=document.getElementById('cyds'+idx);
+  if(ydsEl) ydsEl.textContent=p.y.toLocaleString()+' yds';
+  const contribEl=document.getElementById('ccontrib'+idx);
+  if(contribEl) contribEl.textContent=(m!==1?m+'x = ':'')+contrib.toLocaleString()+' total';
+
+  // Update running total
+  const totalDisp=document.getElementById('challTotalDisp');
+  if(totalDisp) totalDisp.textContent=CHALL_STATE.total.toLocaleString();
+
+  // Progress bar
+  const tgt=CHALL_CFG[CHALL_STATE.cat].targets[CHALL_STATE.diff];
+  const pct=Math.min(100,(CHALL_STATE.total/tgt)*100);
+  const bar=document.getElementById('challProgBar');
+  if(bar) bar.style.width=pct+'%';
+
+  setTimeout(()=>stopCardsSequential(idx+1), 320);
+}
+
+function showChallResults(){
+  const cfg=CHALL_CFG[CHALL_STATE.cat];
+  const tgt=cfg.targets[CHALL_STATE.diff];
+  const total=CHALL_STATE.total;
+  const hit=total>=tgt;
+  const pct=Math.round((total/tgt)*100);
+
+  const badge=document.getElementById('challResBadge');
+  const totalEl=document.getElementById('challResTotal');
+  const targetEl=document.getElementById('challResTarget');
+  const verdictEl=document.getElementById('challResVerdict');
+  const breakdown=document.getElementById('challResBreakdown');
+
+  if(badge) badge.textContent=(hit?'🏆':'😤')+' Challenge '+(hit?'Complete!':'Failed');
+  if(totalEl){ totalEl.textContent=total.toLocaleString()+' yds'; totalEl.style.color=hit?'var(--grn)':'var(--red)'; }
+  if(targetEl) targetEl.textContent='Target: '+tgt.toLocaleString()+' yds · '+pct+'% of goal';
+
+  let verdict,vsub;
+  if(pct>=100){
+    if(pct>=130){verdict='LEGENDARY';vsub='You absolutely destroyed the target.';}
+    else if(pct>=115){verdict='DOMINANT';vsub='Well above the target. Elite roster.';}
+    else{verdict='CHALLENGE CLEARED';vsub='Hit the target. Well done.';}
+  } else {
+    if(pct>=90){verdict='SO CLOSE';vsub='Just short. Try again with better picks.';}
+    else if(pct>=75){verdict='NOT ENOUGH';vsub='Good spin, but fell short.';}
+    else{verdict='BUST';vsub='Bad luck on the spin. Try again.';}
+  }
+  if(verdictEl){ verdictEl.textContent=verdict; verdictEl.style.color=hit?'var(--grn)':'var(--red)'; }
+
+  if(breakdown){
+    breakdown.innerHTML=CHALL_STATE.players.map((p,i)=>{
+      const m=CHALL_STATE.mults[i];
+      const contrib=Math.round(p.y*m);
+      const multBadge=m!==1?`<span class="cres-mult">${m}x</span>`:'<span class="cres-mult" style="background:var(--surf2);color:var(--muted)">1x</span>';
+      return `<div class="cres-row">${multBadge}<span class="cres-name">${p.n} <span style="color:var(--muted);font-weight:400">${p.t}</span></span><span style="color:var(--muted);font-size:.75rem">${p.y.toLocaleString()}</span><span class="cres-yds">${m!==1?'= '+contrib.toLocaleString():''}</span></div>`;
+    }).join('');
+  }
+  show('challResScr',null);
+}
+
 
 // Init slot grid on load
 (function(){buildFantSlotGrid();})();
