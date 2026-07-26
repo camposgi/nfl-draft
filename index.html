@@ -2286,7 +2286,7 @@ function lockSlot(idx){
   if(slot){slot.classList.remove('choosing','spinning-anim');slot.classList.add('locked');slot.style.pointerEvents='none';slot.onclick=null;}
   var lg=document.getElementById('clogo'+idx);
   if(lg){lg.classList.remove('spinning');lg.src=challLogoUrl(abbr);}
-  var tEl=document.getElementById('cteam'+idx); if(tEl)tEl.textContent=(td&&td.name)||abbr;
+  var tEl=document.getElementById('cteam'+idx); if(tEl)tEl.textContent=(CHALL_TEAM_STATS[abbr]&&CHALL_TEAM_STATS[abbr].name)||abbr;
   var pEl=document.getElementById('cplayer'+idx); if(pEl)pEl.textContent=player;
   var yEl=document.getElementById('cyds'+idx); if(yEl)yEl.textContent=yds.toLocaleString()+' yds';
   var cEl=document.getElementById('ccontrib'+idx); if(cEl)cEl.textContent=(m!==1?m+'x × ':'')+contrib.toLocaleString();
