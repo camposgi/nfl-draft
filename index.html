@@ -1566,32 +1566,46 @@ document.getElementById('mainScr').addEventListener('click',function(e){
 .copt-diff{display:flex;gap:10px;justify-content:center;margin:8px 0 20px}
 .cdiff-pill{padding:10px 28px;border-radius:999px;background:var(--surf);border:2px solid var(--brd);cursor:pointer;font-weight:700;font-size:.85rem;transition:all .2s}
 .cdiff-pill.sel{border-color:var(--acc);background:rgba(124,58,237,.12);color:#a78bfa}
-#challDraftScr{padding:16px!important;align-items:stretch!important;justify-content:flex-start!important;max-width:100%!important}
-.cdraft-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 0 14px;border-bottom:1px solid var(--brd);margin-bottom:16px;flex-wrap:wrap;gap:8px}
-.cdraft-title{font-size:1rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
-.cdraft-total{font-size:1.5rem;font-weight:900;color:var(--acc)}
-.cdraft-target{font-size:.75rem;color:var(--muted)}
-.cdraft-progress{width:100%;height:8px;background:var(--surf2);border-radius:4px;margin:8px 0 18px;overflow:hidden}
-.cdraft-progress-bar{height:100%;background:linear-gradient(90deg,var(--acc),#06b6d4);border-radius:4px;transition:width .5s ease;width:0%}
-.cdraft-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;width:100%;max-width:900px;margin:0 auto}
-@media(max-width:600px){.cdraft-grid{grid-template-columns:repeat(2,1fr)}}
-.ccard{border-radius:12px;background:var(--surf);border:2px solid var(--brd);padding:12px 8px;text-align:center;min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;transition:border-color .3s,background .3s}
-.ccard.locked{border-color:var(--acc);background:rgba(124,58,237,.1)}
-.ccard.spinning .ccard-name{animation:cspin .08s linear infinite}
-@keyframes cspin{0%{opacity:1}50%{opacity:.3}100%{opacity:1}}
-.cmult-badge{position:absolute;top:6px;right:6px;padding:2px 7px;border-radius:999px;font-size:.62rem;font-weight:800;background:var(--yel);color:#000;letter-spacing:.5px}
-.ccard-pos{font-size:.6rem;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:4px}
-.ccard-name{font-size:.78rem;font-weight:800;color:var(--txt);line-height:1.2;min-height:32px;display:flex;align-items:center;justify-content:center}
-.ccard-team{font-size:.62rem;color:var(--muted);margin:2px 0}
-.ccard-yds{font-size:.85rem;font-weight:900;color:var(--acc)}
-.ccard-contrib{font-size:.65rem;color:var(--grn);margin-top:2px;min-height:14px}
-.cspin-btn-wrap{display:flex;justify-content:center;margin-top:20px}
-#challResScr .cres-total{font-size:3rem;font-weight:900;margin:12px 0 4px}
-.cres-breakdown{width:100%;max-width:620px;margin:16px auto;display:flex;flex-direction:column;gap:6px}
-.cres-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;background:var(--surf);font-size:.8rem}
-.cres-mult{padding:2px 8px;border-radius:999px;background:var(--yel);color:#000;font-size:.68rem;font-weight:800;min-width:36px;text-align:center}
-.cres-name{flex:1;font-weight:700}
-.cres-yds{color:var(--acc);font-weight:900;min-width:70px;text-align:right}
+/* Draft screen */
+#challDraftScr{padding:14px!important;align-items:stretch!important;justify-content:flex-start!important}
+.chalkboard{background:#2d5a27;border:4px solid #1a3a16;border-radius:14px;padding:14px 20px;text-align:center;margin-bottom:16px;box-shadow:inset 0 2px 8px rgba(0,0,0,.4);font-family:'Courier New',monospace}
+.chalkboard .chalk-title{color:#e8f5e2;font-size:.75rem;letter-spacing:3px;text-transform:uppercase;opacity:.7;margin-bottom:4px}
+.chalkboard .chalk-cat{color:#fff;font-size:.95rem;font-weight:700;letter-spacing:2px;margin-bottom:8px}
+.chalkboard .chalk-total-label{color:#b8d4b4;font-size:.7rem;letter-spacing:2px;text-transform:uppercase}
+.chalkboard .chalk-total{color:#fff;font-size:2.2rem;font-weight:900;font-family:'Courier New',monospace;letter-spacing:2px;transition:all .3s}
+.chalkboard .chalk-target{color:#b8d4b4;font-size:.72rem;margin-top:4px}
+.chalk-progress{width:100%;height:6px;background:rgba(0,0,0,.3);border-radius:3px;margin-top:8px;overflow:hidden}
+.chalk-progress-bar{height:100%;background:#7fff4f;border-radius:3px;transition:width .5s ease;width:0%}
+/* Two-column slot grid */
+.cslots-wrap{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:720px;margin:0 auto}
+.cslot{display:flex;align-items:center;gap:10px;background:var(--surf);border:2px solid var(--brd);border-radius:12px;padding:8px 10px;min-height:72px;transition:all .3s}
+.cslot.locked{border-color:var(--acc);background:rgba(124,58,237,.1)}
+.cslot.mult-slot{border-color:#fbbf2460}
+.cslot.mult-slot.locked{border-color:var(--yel);background:rgba(251,191,36,.08)}
+.cmult-tag{min-width:38px;padding:4px 6px;border-radius:8px;text-align:center;font-size:.75rem;font-weight:900;flex-shrink:0}
+.cmult-10{background:#ffd700;color:#000}
+.cmult-8{background:#ff8c00;color:#fff}
+.cmult-6{background:#00bcd4;color:#000}
+.cmult-4{background:#4caf50;color:#fff}
+.cmult-2{background:#2196f3;color:#fff}
+.cmult-1{background:var(--surf2);color:var(--muted);font-size:.65rem}
+.cslot-logo{width:48px;height:48px;object-fit:contain;flex-shrink:0;border-radius:6px;background:var(--surf2)}
+.cslot-logo.spinning{animation:logoSpin .15s linear infinite}
+@keyframes logoSpin{0%{opacity:1;transform:scale(1)}50%{opacity:.2;transform:scale(.85)}100%{opacity:1;transform:scale(1)}}
+.cslot-info{flex:1;min-width:0}
+.cslot-team{font-size:.72rem;font-weight:800;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cslot-player{font-size:.63rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cslot-yds{font-size:.78rem;font-weight:900;color:var(--acc);white-space:nowrap}
+.cslot-contrib{font-size:.68rem;color:var(--grn);font-weight:700}
+/* Results */
+#challResScr .cres-total{font-size:3rem;font-weight:900;margin:8px 0 4px}
+.cres-breakdown{width:100%;max-width:640px;margin:12px auto;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+@media(max-width:500px){.cres-breakdown{grid-template-columns:1fr}}
+.cres-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:10px;background:var(--surf);font-size:.78rem}
+.cres-logo{width:32px;height:32px;object-fit:contain;flex-shrink:0}
+.cres-mult{padding:2px 7px;border-radius:6px;font-size:.65rem;font-weight:900;min-width:32px;text-align:center}
+.cres-name{flex:1;font-weight:700;font-size:.72rem;line-height:1.3}
+.cres-yds-val{color:var(--acc);font-weight:900;font-size:.8rem;text-align:right;white-space:nowrap}
 </style>
 
 <!-- FANTASY SETUP SCREEN -->
@@ -1684,24 +1698,24 @@ document.getElementById('mainScr').addEventListener('click',function(e){
 <div id="challOptScr" class="scr">
   <div class="badge">🎰 The Challenge</div>
   <h1 class="mm-title" style="font-size:clamp(1.8rem,6vw,3.5rem)">The<br><span class="hl">Challenge</span></h1>
-  <p class="mm-sub" style="margin-bottom:24px">Spin 10 players — multipliers are pre-set — hit your yardage target</p>
+  <p class="mm-sub" style="margin-bottom:24px">10 teams spin in — multipliers are pre-set — hit your yardage target</p>
   <div style="width:100%;max-width:500px">
     <div class="fopt-lbl" style="margin-bottom:12px">Choose Your Challenge</div>
     <div class="copt-cats" id="challCatCards">
       <div class="copt-cat sel" id="ccatWR" onclick="setChallCat('WR',this)">
         <div class="ccat-ico">🏃</div>
         <div class="ccat-name">RECEIVING</div>
-        <div class="ccat-target" id="ccatWRtgt">WR · 40K / 50K yds</div>
+        <div class="ccat-target">WR · 40K / 50K yds</div>
       </div>
       <div class="copt-cat" id="ccatRB" onclick="setChallCat('RB',this)">
         <div class="ccat-ico">💨</div>
         <div class="ccat-name">RUSHING</div>
-        <div class="ccat-target" id="ccatRBtgt">RB · 20K / 26K yds</div>
+        <div class="ccat-target">RB · 20K / 26K yds</div>
       </div>
       <div class="copt-cat" id="ccatQB" onclick="setChallCat('QB',this)">
         <div class="ccat-ico">🎯</div>
         <div class="ccat-name">PASSING</div>
-        <div class="ccat-target" id="ccatQBtgt">QB · 55K / 75K yds</div>
+        <div class="ccat-target">QB · 55K / 75K yds</div>
       </div>
     </div>
     <div class="fopt-lbl" style="margin:18px 0 10px">Difficulty</div>
@@ -1713,36 +1727,36 @@ document.getElementById('mainScr').addEventListener('click',function(e){
       Target: <strong style="color:var(--txt)">40,000</strong> receiving yards from 10 WRs
     </div>
   </div>
-  <button class="btn-p" onclick="initChallenge()">🎰 Spin &amp; Play</button>
+  <button class="btn-p" onclick="initChallenge()">🎰 Start Challenge</button>
   <button class="btn-s" onclick="show('mainScr',null)" style="margin-top:12px">← Back</button>
 </div>
 
 <!-- THE CHALLENGE — DRAFT SCREEN -->
 <div id="challDraftScr" class="scr">
-  <div class="cdraft-hdr">
-    <div>
-      <div class="cdraft-title" id="challDraftLabel">Receiving Challenge</div>
-      <div class="cdraft-target" id="challTargetLbl">Target: 40,000 yds</div>
-    </div>
-    <div style="text-align:right">
-      <div class="cdraft-total" id="challTotalDisp">0</div>
-      <div class="cdraft-target">yards so far</div>
-    </div>
+  <!-- Chalkboard scoreboard -->
+  <div class="chalkboard" style="width:100%;max-width:720px;margin:0 auto 14px">
+    <div class="chalk-title">The Challenge</div>
+    <div class="chalk-cat" id="challChalkCat">Receiving · Normal</div>
+    <div class="chalk-total-label">Total</div>
+    <div class="chalk-total" id="challTotalDisp">0</div>
+    <div class="chalk-target" id="challTargetLbl">Target: 40,000 yds</div>
+    <div class="chalk-progress"><div class="chalk-progress-bar" id="challProgBar"></div></div>
   </div>
-  <div class="cdraft-progress"><div class="cdraft-progress-bar" id="challProgBar"></div></div>
-  <div class="cdraft-grid" id="challCardGrid"></div>
-  <div class="cspin-btn-wrap">
-    <button class="btn-p" id="challSpinBtn" onclick="runChallSpin()" style="min-width:180px">🎰 SPIN</button>
-    <button class="btn-s" id="challNextBtn" onclick="showChallResults()" style="display:none;min-width:180px">See Results →</button>
+  <!-- Slot grid -->
+  <div class="cslots-wrap" id="challSlotGrid"></div>
+  <!-- Buttons -->
+  <div style="display:flex;gap:12px;justify-content:center;margin-top:16px;flex-wrap:wrap">
+    <button class="btn-p" id="challSpinBtn" onclick="runChallSpin()" style="min-width:160px">🎰 SPIN</button>
+    <button class="btn-p" id="challNextBtn" onclick="showChallResults()" style="display:none;min-width:160px">See Results →</button>
   </div>
-  <button class="btn-s" onclick="show('challOptScr',null)" style="margin-top:12px;font-size:.75rem">← Back</button>
+  <button class="btn-s" onclick="show('challOptScr',null)" style="margin-top:10px;font-size:.75rem">← Back</button>
 </div>
 
 <!-- THE CHALLENGE — RESULTS -->
-<div id="challResScr" class="scr" style="padding:28px 16px;align-items:flex-start">
-  <div style="width:100%;max-width:640px;margin:0 auto;text-align:center">
-    <div class="badge" id="challResBadge">🎰 Challenge Complete</div>
-    <div class="cres-total" id="challResTotal" style="color:var(--acc)">0</div>
+<div id="challResScr" class="scr" style="padding:28px 16px;align-items:center">
+  <div style="width:100%;max-width:660px;text-align:center">
+    <div class="badge" id="challResBadge">🏆 Challenge Complete</div>
+    <div class="cres-total" id="challResTotal">0</div>
     <div style="color:var(--muted);font-size:.85rem;margin-bottom:4px" id="challResTarget"></div>
     <div style="font-size:1.4rem;font-weight:900;margin-bottom:16px" id="challResVerdict"></div>
     <div class="cres-breakdown" id="challResBreakdown"></div>
