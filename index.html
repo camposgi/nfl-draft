@@ -2242,6 +2242,23 @@ function _challSpin(){
 }
 function _challStopAndChoose(){
   CHALL_STATE.phase='choosing';
+  // Deduplicate: ensure no two unlocked slots show the same team
+  var usedNow={};
+  var needsNew=[];
+  for(var i=0;i<10;i++){
+    if(CHALL_STATE.locked[i])continue;
+    var a=CHALL_STATE.currentAbbr[i];
+    if(a&&!usedNow[a]){usedNow[a]=true;}
+    else{needsNew.push(i);}
+  }
+  if(needsNew.length){
+    var pool=CHALL_TEAMS_32.slice().sort(function(){return Math.random()-.5;});
+    var pi=0;
+    needsNew.forEach(function(si){
+      while(pi<pool.length&&usedNow[pool[pi]])pi++;
+      if(pi<pool.length){CHALL_STATE.currentAbbr[si]=pool[pi];usedNow[pool[pi]]=true;pi++;}
+    });
+  }
   var picked=CHALL_STATE.lockedCount+1;
   var pc=document.getElementById('challPickedCount');
   if(pc)pc.textContent='Pick '+picked;
