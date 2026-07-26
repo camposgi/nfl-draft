@@ -10983,7 +10983,7 @@ function mpCheckBothDone() {
 
   var _max = MP.maxPlayers || 2;
   if (_max <= 2) {
-    if (MP.myScore !== null && (MP.oppScore !== null || MP.oppDone)) {
+    if (MP.myScore !== null && MP.oppDone) {
       setTimeout(mpShowComparison, 1200);
     } else if (MP.myScore !== null && !MP.oppDone) {
       mpShowOppToast('Waiting for opponent to finish...');
