@@ -861,13 +861,13 @@ function startGame(){
   G.round=0; G.roster=[]; G.used=[]; G.team=null; G.pick=null;
   // 17-0 and Ultimate record mode add HC; Ultimate also adds FLEX
   if(G.mode==='draft') G.record=RECORDS[0]; // lock to 17-0 target
-  const activeDPOS=(G.mode==='record'&&G.ultimate)
+  G.activeDPOS=(G.mode==='record'&&G.ultimate)
     ?["QB","RB","RB","WR","WR","TE","OL","DEF","HC","FLEX"]
     :G.mode==='draft'
     ?["QB","RB","RB","WR","WR","TE","OL","DEF","HC"]
     :DPOS;
-  G.TOTAL=activeDPOS.length;
-  G.remaining=[...activeDPOS]; G.pickedPos=null;
+  G.TOTAL=G.activeDPOS.length;
+  G.remaining=[...G.activeDPOS]; G.pickedPos=null;
 
   // Set game title
   const gt=document.getElementById('gameTitle');
@@ -904,7 +904,7 @@ function buildRosterSlots(){
   const container=document.getElementById('rosterSlots');
   if(!container) return;
   container.innerHTML='';
-  DPOS.forEach((pos,i)=>{
+  (G.activeDPOS||DPOS).forEach((pos,i)=>{
     const slot=document.createElement('div');
     slot.className='rslot'+(i===0?' cur':'');
     slot.id='slot'+i;
@@ -955,7 +955,7 @@ function updatePills(){
   const filledByPos={};
   G.roster.forEach(r=>{filledByPos[r.pos]=(filledByPos[r.pos]||0)+1;});
   const remainByPos={};
-  DPOS.forEach(p=>{remainByPos[p]=(remainByPos[p]||0)+1;});
+  (G.activeDPOS||DPOS).forEach(p=>{remainByPos[p]=(remainByPos[p]||0)+1;});
   // Show each roster entry as a pill
   G.roster.forEach(({pos,player})=>{
     const pill=document.createElement('div');
@@ -1108,7 +1108,7 @@ function choosePosition(pos){
 
 // ── PICK PHASE ─────────────────────────────────────────────────────────────────
 function showPickPhase(pos){
-  if(!pos) pos=G.pickedPos||DPOS[G.round];
+  if(!pos) pos=G.pickedPos||(G.activeDPOS||DPOS)[G.round];
   const teamName=G.mode==='alltime'?G.team.name:(G.team.city+' '+G.team.name);
 
   const titleEl=document.getElementById('pickTitle');
@@ -1219,10 +1219,10 @@ function selectCard(card, player){
 
 function confirmPick(){
   if(!G.pick) return;
-  const pos=G.pickedPos||DPOS[G.round];
+  const pos=G.pickedPos||(G.activeDPOS||DPOS)[G.round];
   // Find the correct slot index for this position
   const filledSlots=new Set(G.roster.map(r=>r.slotIdx));
-  const slotIdx=DPOS.findIndex((p,i)=>p===pos&&!filledSlots.has(i));
+  const slotIdx=(G.activeDPOS||DPOS).findIndex((p,i)=>p===pos&&!filledSlots.has(i));
   if(slotIdx===-1) return; // safety check
   G.roster.push({pos,player:G.pick,team:G.team,slotIdx});
   // Remove one instance of this pos from remaining
@@ -1693,7 +1693,7 @@ async function initFantasyDraft(){
   document.getElementById('fantPoolList').innerHTML='<div style="padding:20px;color:var(--muted);text-align:center">Loading...</div>';
 
   try{
-    const url=`https://api.sleeper.com/projections/nfl/2025?season_type=regular&position[]=QB&position[]=RB&position[]=WR&position[]=TE&position[]=K&position[]=DEF&order_by=${adpKey}&limit=300`;
+    const url=`https://api.sleeper.com/projections/nfl/2026?season_type=regular&position[]=QB&position[]=RB&position[]=WR&position[]=TE&position[]=K&position[]=DEF&order_by=${adpKey}&limit=300`;
     const res=await fetch(url);
     const data=await res.json();
 
