@@ -3531,13 +3531,11 @@ function setChallCat(cat, el) {
 }
 
 // Also load when challOptScr is first shown (pre-warm)
-const _origShow2 = show;
 function show(scr, mode) {
   if (scr === 'challOptScr' && !_challTDLoaded && !_challTDLoading) {
     loadChallTDStats();
   }
-  return _origShow2(scr, mode);
-}
+  return _origShow(scr, mode);}
 
 // Init slot grid on load
 (function(){buildFantSlotGrid();})();
