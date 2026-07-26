@@ -3596,11 +3596,21 @@ document.getElementById('mainScr').addEventListener('click',function(e){
 
       <div class="copt-cat" id="ccatTD" onclick="setChallCat('TD',this)">
 
-        <div class="ccat-ico">🏆</div>
+        <div class="ccat-ico">🎯</div>
 
-        <div class="ccat-name">TOUCHDOWNS</div>
+        <div class="ccat-name">PASSING TDs</div>
 
-        <div class="ccat-target">Team · 300 / 380 TDs</div>
+        <div class="ccat-target">QB · 200 / 260 TDs</div>
+
+      </div>
+
+      <div class="copt-cat" id="ccatRecTD" onclick="setChallCat('RecTD',this)">
+
+        <div class="ccat-ico">🙌</div>
+
+        <div class="ccat-name">REC TDs</div>
+
+        <div class="ccat-target">WR/TE · 100 / 130 TDs</div>
 
       </div>
 
@@ -4452,7 +4462,7 @@ function challLogoUrl(abbr){
 
 }
 
-const CHALL_CFG2={WR:{label:'Receiving',mults:[10,8,6,4,2],targets:{normal:40000,hard:50000},unit:'yds'},RB:{label:'Rushing',mults:[10,8,6,4,2],targets:{normal:20000,hard:26000},unit:'yds'},QB:{label:'Passing',mults:[5,4,3,2,1.5],targets:{normal:55000,hard:75000},unit:'yds'},TD:{label:'Touchdowns',mults:[5,4,3,2,1.5],targets:{normal:300,hard:380},unit:'TDs'}};
+const CHALL_CFG2={WR:{label:'Receiving',mults:[10,8,6,4,2],targets:{normal:40000,hard:50000},unit:'yds',desc:'receiving yards from 10 WRs'},RB:{label:'Rushing',mults:[10,8,6,4,2],targets:{normal:20000,hard:26000},unit:'yds',desc:'rushing yards from 10 RBs'},QB:{label:'Passing',mults:[5,4,3,2,1.5],targets:{normal:55000,hard:75000},unit:'yds',desc:'passing yards from 10 QBs'},TD:{label:'Passing TDs',mults:[5,4,3,2,1.5],targets:{normal:200,hard:260},unit:'TDs',desc:'passing TDs from 10 QBs',needsApi:true},RecTD:{label:'Receiving TDs',mults:[5,4,3,2,1.5],targets:{normal:100,hard:130},unit:'TDs',desc:'receiving TDs from 10 WR/TE leaders',needsApi:true}};
 
 const CHALL_TEAMS_32=['ARI','ATL','BAL','BUF','CAR','CHI','CIN','CLE','DAL','DEN','DET','GB','HOU','IND','JAX','KC','LAC','LAR','LV','MIA','MIN','NE','NO','NYG','NYJ','PHI','PIT','SEA','SF','TB','TEN','WAS'];
 
@@ -4464,7 +4474,7 @@ function setChallCat(cat,el){CHALL_STATE.cat=cat;document.querySelectorAll('.cop
 
 function setChallDiff(diff,el){CHALL_STATE.diff=diff;document.querySelectorAll('.cdiff-pill').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');_updateChallTarget();}
 
-function _updateChallTarget(){var cfg=CHALL_CFG2[CHALL_STATE.cat];var tgt=cfg.targets[CHALL_STATE.diff];var unit=cfg.unit||'yds';var el=document.getElementById('challTargetLine');if(el)el.innerHTML='Target: <strong style="color:var(--txt)">'+tgt.toLocaleString()+'</strong> '+cfg.label.toLowerCase()+' '+unit+' from 10 '+CHALL_STATE.cat+'s';}
+function _updateChallTarget(){var cfg=CHALL_CFG2[CHALL_STATE.cat];var tgt=cfg.targets[CHALL_STATE.diff];var loadNote=(cfg.needsApi&&!_challTDLoaded)?' <span style="color:var(--acc);font-size:.7rem">(loading 2025 stats…)</span>':'';var el=document.getElementById('challTargetLine');if(el)el.innerHTML='Target: <strong style="color:var(--txt)">'+tgt.toLocaleString()+'</strong> '+(cfg.desc||'from 10 teams')+loadNote;}
 
 function initChallenge(){
 
