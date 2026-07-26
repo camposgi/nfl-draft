@@ -9564,11 +9564,9 @@ const MP = {
 
   allDone: {},
 
-  opponents: []
+  opponents: [],      // [{role, name}]
 
-
-
-
+  challPicks: []      // per-slot pick log
 
 };
 
@@ -10841,17 +10839,19 @@ lockSlot = function(idx) {
 
 
 
-  // Sync my running total to Firebase
+  // Sync my running total + this pick to Firebase
 
+  if (!MP.challPicks) MP.challPicks = [];
 
+  MP.challPicks.push({ spin: MP.challSpinIdx || 0, slot: idx, abbr: abbr,
+    team: (CHALL_TEAM_STATS[abbr] && CHALL_TEAM_STATS[abbr].name) || abbr,
+    player: player, yds: yds, mult: m, contrib: contrib });
+
+  if (MP.ref) MP.ref.child(MP.role + '/challPicks').set(MP.challPicks);
 
   mpWriteMyScore(CHALL_STATE.total, false);
 
-
-
   // Advance spin index
-
-
 
   MP.challSpinIdx = (MP.challSpinIdx || 0) + 1;
 
@@ -11207,6 +11207,18 @@ function mpShowComparison() {
 
   MP.phase = 'done';
 
+  if (MP.ref) {
+
+    MP.ref.once('value', function(snap) {
+
+      var room = snap.val() || {};
+
+      mpAppendPicksComparison(room);
+
+    });
+
+  }
+
 }
 
 
@@ -11292,6 +11304,206 @@ function mpShowLeaderboard() {
   show('mpResScr', null);
 
   MP.phase = 'done';
+
+  if (MP.ref) {
+
+    MP.ref.once('value', function(snap) {
+
+      var room = snap.val() || {};
+
+      mpAppendPicksComparison(room);
+
+    });
+
+  }
+
+}
+
+
+
+// ── mpAppendPicksComparison — show each player's picks after results ────────
+
+function mpAppendPicksComparison(room) {
+
+  var mode = MP.mode;
+
+  var max = MP.maxPlayers || 2;
+
+  var allRoles = ['p1','p2','p3','p4'].slice(0, max);
+
+  var detEl = document.getElementById('mpResDetails');
+
+  if (!detEl) return;
+
+
+
+  // ── Draft / All-Time: position-by-position table ──
+
+  if (mode === 'draft' || mode === 'alltime') {
+
+    var byPos = {};
+
+    allRoles.forEach(function(role) {
+
+      var picks = (room[role] && room[role].picks) || [];
+
+      picks.forEach(function(p) {
+
+        if (!byPos[p.pos]) byPos[p.pos] = {};
+
+        byPos[p.pos][role] = p;
+
+      });
+
+    });
+
+    var positions = Object.keys(byPos);
+
+    if (!positions.length) return;
+
+
+
+    var header = '<div style="display:grid;grid-template-columns:3rem ' + allRoles.map(function(){ return '1fr'; }).join(' ') + ';gap:4px 8px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700">'
+
+      + '<div>POS</div>'
+
+      + allRoles.map(function(role) {
+
+          var isMe = role === MP.role;
+
+          var nm = isMe ? (MP.myName || 'You') : ((MP.opponents||[]).reduce(function(a,o){ return o.role===role?o.name:a; }, role.toUpperCase()));
+
+          return '<div style="color:' + (isMe?'var(--acc)':'#f59e0b') + '">' + nm + '</div>';
+
+        }).join('')
+
+      + '</div>';
+
+
+
+    var rows = positions.map(function(pos) {
+
+      var cols = allRoles.map(function(role) {
+
+        var p = byPos[pos][role];
+
+        if (!p) return '<div style="color:var(--muted);font-size:.75rem">—</div>';
+
+        return '<div style="font-size:.75rem;line-height:1.3">'
+
+          + '<div style="font-weight:700;color:#e2e8f0">' + p.player + '</div>'
+
+          + '<div style="color:var(--muted)">' + p.ovr + ' OVR · ' + p.team + '</div>'
+
+          + '</div>';
+
+      }).join('');
+
+      return '<div style="display:grid;grid-template-columns:3rem ' + allRoles.map(function(){ return '1fr'; }).join(' ') + ';gap:4px 8px;align-items:start;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
+
+        + '<div style="font-size:.65rem;font-weight:800;color:var(--muted);padding-top:2px">' + pos + '</div>'
+
+        + cols + '</div>';
+
+    }).join('');
+
+
+
+    var section = '<div style="margin-top:20px">'
+
+      + '<div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;margin-bottom:6px">Picks Comparison</div>'
+
+      + header + rows + '</div>';
+
+    detEl.insertAdjacentHTML('beforeend', section);
+
+
+
+  // ── Challenge: spin-by-spin table ──
+
+  } else if (mode === 'challenge') {
+
+    var rows2 = [];
+
+    var maxSpins = 0;
+
+    allRoles.forEach(function(role) {
+
+      var cp = (room[role] && room[role].challPicks) || [];
+
+      if (cp.length > maxSpins) maxSpins = cp.length;
+
+    });
+
+    if (!maxSpins) return;
+
+
+
+    for (var s = 0; s < maxSpins; s++) {
+
+      (function(spin) {
+
+        var cols = allRoles.map(function(role) {
+
+          var cp = (room[role] && room[role].challPicks) || [];
+
+          var p = cp[spin];
+
+          if (!p) return '<div style="color:var(--muted);font-size:.75rem">—</div>';
+
+          var multStr = p.mult !== 1 ? p.mult + 'x ' : '';
+
+          return '<div style="font-size:.75rem;line-height:1.3">'
+
+            + '<div style="font-weight:700;color:#e2e8f0">' + p.player + '</div>'
+
+            + '<div style="color:var(--muted)">' + p.team + '</div>'
+
+            + '<div style="color:var(--acc)">' + multStr + p.yds.toLocaleString() + ' yds = ' + p.contrib.toLocaleString() + '</div>'
+
+            + '</div>';
+
+        }).join('');
+
+        rows2.push('<div style="display:grid;grid-template-columns:2rem ' + allRoles.map(function(){ return '1fr'; }).join(' ') + ';gap:4px 8px;align-items:start;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
+
+          + '<div style="font-size:.65rem;font-weight:800;color:var(--muted);padding-top:2px">' + (spin+1) + '</div>'
+
+          + cols + '</div>');
+
+      })(s);
+
+    }
+
+
+
+    var header2 = '<div style="display:grid;grid-template-columns:2rem ' + allRoles.map(function(){ return '1fr'; }).join(' ') + ';gap:4px 8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700">'
+
+      + '<div>#</div>'
+
+      + allRoles.map(function(role) {
+
+          var isMe = role === MP.role;
+
+          var nm = isMe ? (MP.myName || 'You') : ((MP.opponents||[]).reduce(function(a,o){ return o.role===role?o.name:a; }, role.toUpperCase()));
+
+          return '<div style="color:' + (isMe?'var(--acc)':'#f59e0b') + '">' + nm + '</div>';
+
+        }).join('')
+
+      + '</div>';
+
+
+
+    var section2 = '<div style="margin-top:20px">'
+
+      + '<div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;margin-bottom:6px">Picks Comparison</div>'
+
+      + header2 + rows2.join('') + '</div>';
+
+    detEl.insertAdjacentHTML('beforeend', section2);
+
+  }
 
 }
 
@@ -13243,6 +13455,7 @@ function mpReset() {
 
   MP.oppDone = false; MP.oppSlot = null;
   MP.maxPlayers = 2; MP.allScores = {}; MP.allDone = {}; MP.opponents = [];
+  MP.challPicks = [];
 
 
 
