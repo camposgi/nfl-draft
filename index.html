@@ -8488,9 +8488,10 @@ function showFantResults(){
   const totalPts = _starters.reduce((s, p) => s + (p.pts || 0), 0);
 
   // Value score: pts gained/lost vs the ADP-par player at each pick number
+  // All 15 picks count (starters + bench) — bench sleepers are real value too
   // K and DEF excluded — Sleeper ADP is unreliable for those positions
-  const _skillStarters = _starters.filter(p => !['K','DEF'].includes(p.pos));
-  const _draftValue = _skillStarters.reduce((sum, p) => {
+  const _skillPicks = picks.filter(p => !['K','DEF'].includes(p.pos));
+  const _draftValue = _skillPicks.reduce((sum, p) => {
     if (!p.pickNum) return sum;
     const par = FANT_STATE.players[p.pickNum - 1];
     return sum + (p.pts || 0) - (par ? par.pts || 0 : 0);
@@ -8498,13 +8499,13 @@ function showFantResults(){
 
   const fmt=FOPT.scoring==='ppr'?'PPR':FOPT.scoring==='half_ppr'?'Half-PPR':'Standard';
 
-  // Grade based on value relative to ADP — did you beat the board?
+  // Grade based on value relative to ADP across all 13 skill picks (starters + bench)
   let grade, sub;
-  if(_draftValue >= 150){grade='S Tier';sub='Elite value — you beat the board on almost every pick';}
-  else if(_draftValue >= 75){grade='A+ Team';sub='Strong value — consistently drafted above ADP';}
-  else if(_draftValue >= 20){grade='A Team';sub='Good value — found upside where it mattered';}
-  else if(_draftValue >= -20){grade='B Team';sub='Market rate — you drafted at expected value';}
-  else if(_draftValue >= -75){grade='C Team';sub='Some reaches — a few picks cost you expected value';}
+  if(_draftValue >= 250){grade='S Tier';sub='Elite value — you beat the board on almost every pick';}
+  else if(_draftValue >= 130){grade='A+ Team';sub='Strong value — consistently drafted above ADP';}
+  else if(_draftValue >= 40){grade='A Team';sub='Good value — found upside where it mattered';}
+  else if(_draftValue >= -40){grade='B Team';sub='Market rate — you drafted at expected value';}
+  else if(_draftValue >= -130){grade='C Team';sub='Some reaches — a few picks cost you expected value';}
   else{grade='Needs Work';sub='Heavy reaching — paid top price for below-projection players';}
 
 
