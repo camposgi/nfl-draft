@@ -7228,9 +7228,9 @@ document.getElementById('mainScr').addEventListener('click',function(e){
 
 
 
-  <p id="fantResSub" style="color:var(--muted);margin-bottom:14px;font-size:.88rem"></p>
+  <p id="fantResSub" style="color:var(--muted);margin-bottom:10px;font-size:.88rem"></p>
 
-
+  <div id="fantResValue" style="display:none;font-size:.8rem;font-weight:700;padding:4px 14px;border-radius:999px;border:1px solid currentColor;margin-bottom:12px"></div>
 
   <div class="frr-pts" id="fantResPts">0</div>
 
@@ -8482,40 +8482,30 @@ function showFantResults(){
 
   const picks=FANT_STATE.rosters[FOPT.slot-1]||[];
 
-  // Grade on starting lineup only — bench inflates the total and makes S Tier trivial
-  const _startingSpots = ROSTER_SPOTS.filter(s => s !== 'BN');
+  // Grade on starting lineup only — bench inflates the total
   const _assigned = assignRosterSpots(picks, ROSTER_SPOTS);
   const _starters = _assigned.filter((p, i) => ROSTER_SPOTS[i] !== 'BN' && p);
   const totalPts = _starters.reduce((s, p) => s + (p.pts || 0), 0);
 
-
+  // Value score: pts gained/lost vs the ADP-par player at each pick number
+  // K and DEF excluded — Sleeper ADP is unreliable for those positions
+  const _skillStarters = _starters.filter(p => !['K','DEF'].includes(p.pos));
+  const _draftValue = _skillStarters.reduce((sum, p) => {
+    if (!p.pickNum) return sum;
+    const par = FANT_STATE.players[p.pickNum - 1];
+    return sum + (p.pts || 0) - (par ? par.pts || 0 : 0);
+  }, 0);
 
   const fmt=FOPT.scoring==='ppr'?'PPR':FOPT.scoring==='half_ppr'?'Half-PPR':'Standard';
 
-
-
-
-
-
-
-  // Scale thresholds by scoring format — PPR projects ~15% higher than Standard
-  // Thresholds based on starting lineup (9 spots) projected points only
-  const _tierScale = FOPT.scoring==='ppr' ? 1.0 : FOPT.scoring==='half_ppr' ? 0.9 : 0.82;
-  const _t = n => Math.round(n * _tierScale);
-
-  let grade,sub;
-
-  if(totalPts>=_t(1800)){grade='S Tier';sub='All-time great draft — top 2% of leagues';}
-
-  else if(totalPts>=_t(1650)){grade='A+ Team';sub='Elite squad — strong title contender';}
-
-  else if(totalPts>=_t(1500)){grade='A Team';sub='Very strong — clear playoff team';}
-
-  else if(totalPts>=_t(1350)){grade='B Team';sub='Solid roster — should make playoffs';}
-
-  else if(totalPts>=_t(1200)){grade='C Team';sub='Average — waiver wire will matter';}
-
-  else{grade='Needs Work';sub='Rough draft — get to the wire early';}
+  // Grade based on value relative to ADP — did you beat the board?
+  let grade, sub;
+  if(_draftValue >= 150){grade='S Tier';sub='Elite value — you beat the board on almost every pick';}
+  else if(_draftValue >= 75){grade='A+ Team';sub='Strong value — consistently drafted above ADP';}
+  else if(_draftValue >= 20){grade='A Team';sub='Good value — found upside where it mattered';}
+  else if(_draftValue >= -20){grade='B Team';sub='Market rate — you drafted at expected value';}
+  else if(_draftValue >= -75){grade='C Team';sub='Some reaches — a few picks cost you expected value';}
+  else{grade='Needs Work';sub='Heavy reaching — paid top price for below-projection players';}
 
 
 
@@ -8528,6 +8518,15 @@ function showFantResults(){
 
 
   document.getElementById('fantResSub').textContent=sub;
+
+  // Value badge — show pts above/below expected
+  const _valEl = document.getElementById('fantResValue');
+  if(_valEl){
+    const _vSign = _draftValue >= 0 ? '+' : '';
+    _valEl.textContent = _vSign + Math.round(_draftValue) + ' pts vs expected';
+    _valEl.style.color = _draftValue >= 20 ? 'var(--grn)' : _draftValue <= -20 ? 'var(--red)' : 'var(--muted)';
+    _valEl.style.display = '';
+  }
 
 
 
@@ -12881,7 +12880,7 @@ function fantDraft(playerId) {
 
 
 
-  FANT_STATE.rosters[FOPT.slot - 1].push(player);
+  FANT_STATE.rosters[FOPT.slot - 1].push({...player, pickNum: _pickNum});
 
 
 
