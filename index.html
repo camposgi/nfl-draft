@@ -8496,29 +8496,22 @@ function showFantResults(){
 
 
 
+  // Scale thresholds by scoring format — PPR projects ~15% higher than Standard
+  // because receptions score; Half-PPR sits in between
+  const _tierScale = FOPT.scoring==='ppr' ? 1.0 : FOPT.scoring==='half_ppr' ? 0.9 : 0.82;
+  const _t = n => Math.round(n * _tierScale);
+
   let grade,sub;
 
+  if(totalPts>=_t(2400)){grade='S Tier';sub='All-time great draft — top 2% of leagues';}
 
+  else if(totalPts>=_t(2100)){grade='A+ Team';sub='Elite squad — strong title contender';}
 
-  if(totalPts>=2400){grade='S Tier';sub='All-time great draft — top 2% of leagues';}
+  else if(totalPts>=_t(1850)){grade='A Team';sub='Very strong — clear playoff team';}
 
+  else if(totalPts>=_t(1600)){grade='B Team';sub='Solid roster — should make playoffs';}
 
-
-  else if(totalPts>=2100){grade='A+ Team';sub='Elite squad — strong title contender';}
-
-
-
-  else if(totalPts>=1850){grade='A Team';sub='Very strong — clear playoff team';}
-
-
-
-  else if(totalPts>=1600){grade='B Team';sub='Solid roster — should make playoffs';}
-
-
-
-  else if(totalPts>=1350){grade='C Team';sub='Average — waiver wire will matter';}
-
-
+  else if(totalPts>=_t(1350)){grade='C Team';sub='Average — waiver wire will matter';}
 
   else{grade='Needs Work';sub='Rough draft — get to the wire early';}
 
