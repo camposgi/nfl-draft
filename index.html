@@ -9091,7 +9091,7 @@ function _challSpin(){
 
 
 
-      var rand=CHALL_TEAMS_32[Math.floor(Math.random()*CHALL_TEAMS_32.length)];
+      var _sp=CHALL_TEAMS_32.filter(function(t){return !CHALL_STATE.usedTeams[t];});if(!_sp.length)_sp=CHALL_TEAMS_32;var rand=_sp[Math.floor(Math.random()*_sp.length)];
 
 
 
@@ -9159,6 +9159,22 @@ function _challStopAndChoose(){
 
 
 
+  // Deduplicate: no unlocked slot can share a team with a locked/used slot or another unlocked slot
+  var _dd_seen = Object.assign({}, CHALL_STATE.usedTeams);
+  var _dd_avail = CHALL_TEAMS_32.filter(function(t){ return !_dd_seen[t]; });
+  _dd_avail.sort(function(){ return Math.random() - 0.5; });
+  var _dd_pi = 0;
+  for(var _ddi = 0; _ddi < 10; _ddi++){
+    if(CHALL_STATE.locked[_ddi]) continue;
+    var _dda = CHALL_STATE.currentAbbr[_ddi];
+    if(_dd_seen[_dda]){
+      var _ddn = _dd_avail[_dd_pi++ % Math.max(1, _dd_avail.length)];
+      CHALL_STATE.currentAbbr[_ddi] = _ddn || _dda;
+      if(_ddn) _dd_seen[_ddn] = true;
+    } else {
+      _dd_seen[_dda] = true;
+    }
+  }
   for(var i=0;i<10;i++){
 
 
@@ -10278,6 +10294,22 @@ function _challStopAndChooseMP() {
 
 
 
+  // Deduplicate: no unlocked slot can share a team with a locked/used slot or another unlocked slot
+  var _dd_seen = Object.assign({}, CHALL_STATE.usedTeams);
+  var _dd_avail = CHALL_TEAMS_32.filter(function(t){ return !_dd_seen[t]; });
+  _dd_avail.sort(function(){ return Math.random() - 0.5; });
+  var _dd_pi = 0;
+  for(var _ddi = 0; _ddi < 10; _ddi++){
+    if(CHALL_STATE.locked[_ddi]) continue;
+    var _dda = CHALL_STATE.currentAbbr[_ddi];
+    if(_dd_seen[_dda]){
+      var _ddn = _dd_avail[_dd_pi++ % Math.max(1, _dd_avail.length)];
+      CHALL_STATE.currentAbbr[_ddi] = _ddn || _dda;
+      if(_ddn) _dd_seen[_ddn] = true;
+    } else {
+      _dd_seen[_dda] = true;
+    }
+  }
   for (var i = 0; i < 10; i++) {
 
 
