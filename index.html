@@ -8482,9 +8482,11 @@ function showFantResults(){
 
   const picks=FANT_STATE.rosters[FOPT.slot-1]||[];
 
-
-
-  const totalPts=picks.reduce((s,p)=>s+(p.pts||0),0);
+  // Grade on starting lineup only — bench inflates the total and makes S Tier trivial
+  const _startingSpots = ROSTER_SPOTS.filter(s => s !== 'BN');
+  const _assigned = assignRosterSpots(picks, ROSTER_SPOTS);
+  const _starters = _assigned.filter((p, i) => ROSTER_SPOTS[i] !== 'BN' && p);
+  const totalPts = _starters.reduce((s, p) => s + (p.pts || 0), 0);
 
 
 
@@ -8497,21 +8499,21 @@ function showFantResults(){
 
 
   // Scale thresholds by scoring format — PPR projects ~15% higher than Standard
-  // because receptions score; Half-PPR sits in between
+  // Thresholds based on starting lineup (9 spots) projected points only
   const _tierScale = FOPT.scoring==='ppr' ? 1.0 : FOPT.scoring==='half_ppr' ? 0.9 : 0.82;
   const _t = n => Math.round(n * _tierScale);
 
   let grade,sub;
 
-  if(totalPts>=_t(2400)){grade='S Tier';sub='All-time great draft — top 2% of leagues';}
+  if(totalPts>=_t(1800)){grade='S Tier';sub='All-time great draft — top 2% of leagues';}
 
-  else if(totalPts>=_t(2100)){grade='A+ Team';sub='Elite squad — strong title contender';}
+  else if(totalPts>=_t(1650)){grade='A+ Team';sub='Elite squad — strong title contender';}
 
-  else if(totalPts>=_t(1850)){grade='A Team';sub='Very strong — clear playoff team';}
+  else if(totalPts>=_t(1500)){grade='A Team';sub='Very strong — clear playoff team';}
 
-  else if(totalPts>=_t(1600)){grade='B Team';sub='Solid roster — should make playoffs';}
+  else if(totalPts>=_t(1350)){grade='B Team';sub='Solid roster — should make playoffs';}
 
-  else if(totalPts>=_t(1350)){grade='C Team';sub='Average — waiver wire will matter';}
+  else if(totalPts>=_t(1200)){grade='C Team';sub='Average — waiver wire will matter';}
 
   else{grade='Needs Work';sub='Rough draft — get to the wire early';}
 
@@ -8533,7 +8535,7 @@ function showFantResults(){
 
 
 
-  document.getElementById('fantResPtsSub').textContent=`Projected season total · ${fmt} scoring · Slot ${FOPT.slot} of ${FOPT.teams}`;
+  document.getElementById('fantResPtsSub').textContent=`Projected starters total · ${fmt} scoring · Slot ${FOPT.slot} of ${FOPT.teams}`;
 
 
 
