@@ -8111,22 +8111,11 @@ function fantAdvanceToUser(){
 
 
 
-  // AI pick — paced so user can see picks
-
-
-
+  // AI pick — disable pool first so stale Pick buttons don't confuse user
+  renderFantPool();
   fantAIDraft(fantCurrentSlot()-1);
-
-
-
   fantAdvancePick();
-
-
-
   setTimeout(fantAdvanceToUser,220);
-
-
-
 }
 
 
@@ -12906,18 +12895,11 @@ function fantDraft(playerId) {
 
 
   fantAdvancePick();
-
-
-
+  renderFantPool();  // disable pool immediately while bots pick
   renderFantRoster();
-
-
-
   fantAdvanceToUser();
-
-
-
 }
+
 
 
 
