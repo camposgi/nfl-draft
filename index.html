@@ -14469,7 +14469,7 @@ function _rBYT(){
   const pos=_BP[slot];_bpl=_tmGetPlayers(pos);const cp=picks[slot];const rf=rem+(cp?_tmCost(cp.r):0);
   const plH=_bpl.map((p,i)=>{const cost=_tmCost(p.r);const t=_tmTier(p.r);const sel=cp&&cp.n===p.n&&cp.team===p.team;const costly=!sel&&cost>rf;return`<div class="byt-prow${sel?' byt-sel':''}${costly?' byt-costly':''}" onclick="bytPickIdx(${i})"><div class="byt-prow-ovr ${t.cls}">${p.r}</div><div class="byt-prow-name">${p.n}</div><div class="byt-prow-team">${p.team}</div><div class="byt-prow-stat">${(p.st||'').substring(0,36)}</div><div class="byt-prow-cost">$${cost}M</div></div>`;}).join('');
   const rH=_BS.map(s=>{const p=picks[s];const t=p?_tmTier(p.r):null;return`<div class="byt-rslot${p?' byt-rfill':''}"><div class="byt-rslot-pos">${s}</div>${p?`<div class="byt-rslot-name">${p.n}</div><div class="byt-rslot-ovr ${t.cls}">${p.r}</div>`:`<div class="byt-rslot-name" style="color:var(--muted)">&#8212;</div>`}</div>`;}).join('');
-  let gH='';if(af){const avg=Math.round(_BS.reduce((s,sl)=>s+picks[sl].r,0)/_BS.length);const{gr,col}=_tmGrade(avg);gH=`<div class="grade-box" style="border-color:${col}"><div class="grade-lbl">Team Grade</div><div class="grade-letter" style="color:${col}">${gr}</div><div class="grade-ovr" style="color:${col}">${avg} OVR Avg</div><div style="font-size:.7rem;color:var(--muted);margin-top:5px">$${spent}M / $${cap}M &#8226; $${rem}M unused</div></div><div style="display:flex;gap:10px;justify-content:center"><button class="btn-s" onclick="show('mainScr',null)">&#8592; Menu</button><button class="btn-p" onclick="initBuildTeam()">&#128260; Rebuild</button></div>`;}
+  let gH='';if(af){const avgRaw=_BS.reduce((s,sl)=>s+picks[sl].r,0)/_BS.length;const avg=Math.round(avgRaw*10)/10;const{gr,col}=_tmGrade(Math.round(avgRaw));const best=bytSolveBest();window._bytBest=best;const eff=best?Math.round((avgRaw/best.avgOvr)*100):null;const ec=!eff?'#6b7280':eff>=98?'#10b981':eff>=92?'#fbbf24':eff>=85?'#f97316':'#ef4444';gH=`<div class="grade-box" style="border-color:${col}"><div style="display:flex;gap:0;justify-content:center;align-items:stretch;flex-wrap:wrap"><div style="flex:1;min-width:120px;padding:0 16px 0 0;border-right:1px solid var(--brd)"><div class="grade-lbl">Team Grade</div><div class="grade-letter" style="color:${col}">${gr}</div><div class="grade-ovr" style="color:${col}">${avg} OVR</div></div><div style="flex:1;min-width:120px;padding:0 0 0 16px"><div class="grade-lbl">Cap Efficiency</div><div class="grade-letter" style="color:${ec}">${eff?eff+'%':'—'}</div><div style="font-size:.68rem;color:var(--muted);margin-top:4px">${best?'Best: '+Math.round(best.avgOvr*10)/10+' OVR':''}  </div></div></div><div style="font-size:.68rem;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px solid var(--brd)">$${spent}M used &#8226; $${rem}M left &#8226; ${eff===100?'&#127881; Perfect':eff>=95?'Elite cap mgmt':eff>=85?'Good value':'Room to improve'}}</div></div><div id="bytBestReveal" style="margin-bottom:2px"></div><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn-s" onclick="show('mainScr',null)">&#8592; Menu</button><button class="btn-s" id="bytRevealBtn" onclick="bytRevealBest()">&#128065; Reveal Best Team</button><button class="btn-p" onclick="initBuildTeam()">&#128260; Rebuild</button></div>`;} 
   el.innerHTML=`<div class="byt-wrap">${capH}<div class="byt-tabs">${tabH}</div><div class="byt-plist">${plH}</div><div class="byt-rgrid">${rH}</div>${gH}</div>`;
 }
 /* DOND Team Builder */
@@ -14508,6 +14508,58 @@ function _rDTFinal(){
   const pgH=_DTS.map(({slot})=>{const p=DT.roster[slot];const t=p?_tmTier(p.r):null;return`<div class="dtp-slot dtp-done"><div class="dtp-pos">${slot}</div>${p?`<div class="dtp-name">${p.n.split(' ').pop()}</div><div class="dtp-ovr ${t.cls}">${p.r}</div>`:''}</div>`;}).join('');
   const rH=_DTS.map(({slot})=>{const p=DT.roster[slot];const t=p?_tmTier(p.r):null;return`<div class="byt-rslot byt-rfill"><div class="byt-rslot-pos">${slot}</div>${p?`<div class="byt-rslot-name">${p.n}</div><div class="byt-rslot-ovr ${t.cls}">${p.r}</div>`:''}</div>`;}).join('');
   el.innerHTML=`<div style="text-align:center;width:100%"><div class="dtp-bar">${pgH}</div><div class="grade-box" style="border-color:${col}"><div class="grade-lbl">Final Team Grade</div><div class="grade-letter" style="color:${col}">${gr}</div><div class="grade-ovr" style="color:${col}">${avg} OVR Avg</div></div><div class="byt-rgrid" style="max-width:820px;margin:0 auto 16px">${rH}</div><div style="display:flex;gap:10px;justify-content:center"><button class="btn-s" onclick="show('mainScr',null)">&#8592; Menu</button><button class="btn-p" onclick="initDONDTeam()">&#128260; Play Again</button></div></div>`;
+}
+
+function bytSolveBest(){
+  const CAP=BYT.cap;
+  const slotPos={QB:'QB',RB1:'RB',RB2:'RB',WR1:'WR',WR2:'WR',WR3:'WR',TE:'TE',DEF:'DEF'};
+  const poolCache={};
+  const getPool=pos=>{if(!poolCache[pos])poolCache[pos]=_tmGetPlayers(pos);return poolCache[pos];};
+  const team={};
+  // Start with top players, deduplicating shared pools
+  const usedPerPos={RB:new Set(),WR:new Set()};
+  _BS.forEach(slot=>{
+    const pos=slotPos[slot];const pool=getPool(pos);
+    const used=usedPerPos[pos]||new Set();
+    const pick=pool.find(p=>!used.has(p.n));
+    if(pick){team[slot]=pick;if(used)used.add(pick.n);}
+  });
+  const totalCost=()=>_BS.reduce((s,sl)=>s+(team[sl]?_tmCost(team[sl].r):0),0);
+  let iters=0;
+  while(totalCost()>CAP&&iters++<300){
+    let best=null;
+    _BS.forEach(slot=>{
+      const cur=team[slot];if(!cur)return;
+      const pos=slotPos[slot];const pool=getPool(pos);
+      const curIdx=pool.findIndex(p=>p.n===cur.n);
+      const used=new Set(_BS.filter(s=>s!==slot&&slotPos[s]===pos).map(s=>team[s]?.n).filter(Boolean));
+      for(let i=curIdx+1;i<pool.length;i++){
+        const nxt=pool[i];if(used.has(nxt.n))continue;
+        const sav=_tmCost(cur.r)-_tmCost(nxt.r);if(sav<=0)continue;
+        const ratio=(cur.r-nxt.r)/sav;
+        if(!best||ratio<best.ratio)best={slot,nxt,ratio};
+        break;
+      }
+    });
+    if(best)team[best.slot]=best.nxt;else break;
+  }
+  if(totalCost()>CAP)return null;
+  const totalOvr=_BS.reduce((s,sl)=>s+(team[sl]?.r||0),0);
+  return{team,avgOvr:totalOvr/_BS.length,cost:totalCost()};
+}
+
+function bytRevealBest(){
+  const best=window._bytBest;const el=document.getElementById('bytBestReveal');
+  if(!best||!el)return;
+  const rH=_BS.map(slot=>{
+    const p=best.team[slot];const t=_tmTier(p.r);
+    const mine=BYT.picks[slot];const diff=mine?p.r-mine.r:0;
+    const dc=diff>0?'#10b981':diff<0?'#ef4444':'#6b7280';
+    const dl=diff>0?'+'+diff:diff===0?'&#10003;':diff;
+    return`<div class="byt-rslot byt-rfill"><div class="byt-rslot-pos">${slot}</div><div class="byt-rslot-name">${p.n}</div><div class="byt-rslot-ovr ${t.cls}">${p.r}</div><div style="font-size:.58rem;font-weight:800;color:${dc};margin-top:2px">${dl}</div></div>`;
+  }).join('');
+  el.innerHTML=`<div style="background:var(--surf);border:1px solid var(--brd);border-radius:12px;padding:14px;margin-bottom:12px"><div style="font-size:.58rem;font-weight:800;letter-spacing:2px;color:var(--muted);text-align:center;margin-bottom:10px;text-transform:uppercase">Best Possible Team &#8212; $${best.cost}M &#8226; ${Math.round(best.avgOvr*10)/10} OVR Avg</div><div class="byt-rgrid">${rH}</div></div>`;
+  const btn=document.getElementById('bytRevealBtn');if(btn)btn.style.display='none';
 }
 </script>
 </body>
