@@ -770,6 +770,94 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 
 
 
+
+/* ═══════════════════════════════════════════════════════════
+   TEAM MODES: DEAL OR NO DEAL + BUILD YOUR TEAM
+═══════════════════════════════════════════════════════════ */
+.dond-layout{display:flex;gap:14px;width:100%;max-width:920px;align-items:flex-start}
+.dond-known{width:166px;flex-shrink:0;background:var(--surf);border:1px solid var(--brd);border-radius:12px;padding:11px;max-height:480px;overflow-y:auto}
+.dond-known-hdr{font-size:.55rem;font-weight:800;letter-spacing:2px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;text-align:center}
+.dond-li{display:flex;align-items:center;gap:5px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.71rem}
+.dond-li.struck{opacity:.22;text-decoration:line-through}
+.dond-li-pos{font-size:.52rem;font-weight:800;padding:1px 4px;border-radius:3px;white-space:nowrap;flex-shrink:0}
+.p-qb{background:rgba(239,68,68,.2);color:#f87171}
+.p-rb{background:rgba(16,185,129,.2);color:#34d399}
+.p-wr{background:rgba(251,191,36,.2);color:#fcd34d}
+.p-te{background:rgba(99,102,241,.2);color:#818cf8}
+.p-def{background:rgba(107,114,128,.2);color:#9ca3af}
+.dond-li-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dond-li-ovr{font-weight:900;font-size:.76rem;min-width:22px;text-align:right}
+.dond-main{flex:1;display:flex;flex-direction:column;align-items:center;gap:12px;min-width:0}
+.dond-status{font-size:.88rem;font-weight:700;text-align:center;padding:8px 14px;background:var(--surf);border-radius:8px;border:1px solid var(--brd);width:100%}
+.dond-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;width:100%}
+.dond-case{background:var(--surf);border:2px solid var(--brd);border-radius:10px;padding:11px 6px;text-align:center;min-height:74px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:all .18s}
+.dond-case.dond-can{cursor:pointer}
+.dond-case.dond-can:hover{border-color:var(--acc);background:rgba(124,58,237,.1);transform:translateY(-2px)}
+.dond-case.dond-mine{border-color:#fbbf24;background:rgba(251,191,36,.06)}
+.dond-case.dond-open{background:rgba(255,255,255,.02);border-style:dashed;opacity:.55}
+.dond-case-num{font-size:.52rem;font-weight:800;color:var(--muted)}
+.dond-case-ico{font-size:1.65rem;line-height:1}
+.dond-case-ovr{font-size:1.25rem;font-weight:900}
+.dond-case-nm{font-size:.56rem;color:var(--muted);font-weight:600;overflow:hidden;text-overflow:ellipsis;max-width:92%}
+.t-s{color:#10b981}.t-a{color:#fbbf24}.t-b{color:#f97316}.t-c{color:#6b7280}.t-d{color:#ef4444}
+.banker-card{background:linear-gradient(135deg,rgba(16,185,129,.07),rgba(124,58,237,.07));border:2px solid #10b981;border-radius:16px;padding:18px 22px;text-align:center;width:100%}
+.banker-phone{font-size:1.7rem;margin-bottom:5px;display:inline-block;animation:bkring .5s ease-in-out infinite}
+@keyframes bkring{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(12deg)}}
+.banker-lbl{font-size:.55rem;font-weight:800;letter-spacing:3px;color:#10b981;text-transform:uppercase;margin-bottom:10px}
+.banker-row{display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:5px;flex-wrap:wrap}
+.banker-name{font-size:1.15rem;font-weight:900;color:var(--txt)}
+.banker-ovr{font-size:1.05rem;font-weight:900}
+.banker-stat{font-size:.68rem;color:var(--muted);margin-bottom:13px}
+.banker-btns{display:flex;gap:10px;justify-content:center}
+.btn-deal{background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;padding:10px 28px;border-radius:10px;font-size:.88rem;font-weight:800;cursor:pointer;transition:transform .15s}
+.btn-deal:hover{transform:scale(1.05)}
+.btn-nodeal{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;border:none;padding:10px 28px;border-radius:10px;font-size:.88rem;font-weight:800;cursor:pointer;transition:transform .15s}
+.btn-nodeal:hover{transform:scale(1.05)}
+.dond-final{text-align:center;padding:10px 0;width:100%}
+.dond-final-ovr{font-size:3.2rem;font-weight:900;line-height:1;margin:6px 0}
+.dond-final-name{font-size:1.5rem;font-weight:900;margin:4px 0}
+.dond-final-tier{font-size:.62rem;font-weight:800;letter-spacing:3px;text-transform:uppercase;margin-bottom:10px}
+.dond-regret{background:var(--surf);border:1px solid var(--brd);border-radius:10px;padding:12px;margin-top:12px;font-size:.77rem;color:var(--muted)}
+.byt-wrap{width:100%;max-width:820px}
+.byt-capbar{display:flex;align-items:center;gap:12px;background:var(--surf);border:1px solid var(--brd);border-radius:12px;padding:13px 16px;margin-bottom:16px}
+.byt-cap-lbl{font-size:.58rem;font-weight:800;letter-spacing:2px;color:var(--muted);text-transform:uppercase;white-space:nowrap}
+.byt-cap-track{flex:1;height:8px;background:var(--surf2);border-radius:99px;overflow:hidden}
+.byt-cap-fill{height:100%;border-radius:99px;transition:width .35s,background .35s}
+.byt-cap-num{font-size:.92rem;font-weight:900;white-space:nowrap;min-width:96px;text-align:right}
+.byt-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.byt-tab{padding:6px 13px;background:var(--surf);border:1px solid var(--brd);border-radius:8px;font-size:.74rem;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap}
+.byt-tab:hover{border-color:var(--acc)}
+.byt-tab.byt-active{background:rgba(124,58,237,.15);border-color:var(--acc);color:#a78bfa}
+.byt-tab.byt-done{background:rgba(16,185,129,.08);border-color:#10b981;color:#34d399}
+.byt-plist{display:flex;flex-direction:column;gap:6px;max-height:290px;overflow-y:auto;margin-bottom:16px}
+.byt-prow{display:flex;align-items:center;gap:9px;background:var(--surf);border:1px solid var(--brd);border-radius:9px;padding:8px 12px;cursor:pointer;transition:all .18s}
+.byt-prow:hover{border-color:var(--acc);background:rgba(124,58,237,.05)}
+.byt-prow.byt-sel{border-color:#10b981;background:rgba(16,185,129,.06)}
+.byt-prow.byt-costly{opacity:.34;cursor:not-allowed;pointer-events:none}
+.byt-prow-ovr{font-weight:900;font-size:.96rem;min-width:28px;text-align:center}
+.byt-prow-name{flex:1;font-weight:700;font-size:.86rem}
+.byt-prow-team{font-size:.6rem;color:var(--muted);background:var(--surf2);padding:2px 5px;border-radius:3px;font-weight:600;flex-shrink:0}
+.byt-prow-stat{font-size:.66rem;color:var(--muted);flex:2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.byt-prow-cost{font-size:.76rem;font-weight:800;color:#fbbf24;min-width:46px;text-align:right;flex-shrink:0}
+.byt-rgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.byt-rslot{background:var(--surf);border:1px solid var(--brd);border-radius:10px;padding:11px 8px;text-align:center;min-height:78px}
+.byt-rslot.byt-rfill{border-color:#10b981}
+.byt-rslot-pos{font-size:.52rem;font-weight:800;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
+.byt-rslot-name{font-size:.78rem;font-weight:700;color:var(--txt);line-height:1.2}
+.byt-rslot-ovr{font-size:.98rem;font-weight:900;margin-top:3px}
+.dtp-bar{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;margin-bottom:14px;width:100%}
+.dtp-slot{background:var(--surf);border:2px solid var(--brd);border-radius:8px;padding:6px 9px;text-align:center;min-width:62px;transition:all .2s}
+.dtp-slot.dtp-active{border-color:var(--acc);background:rgba(124,58,237,.1)}
+.dtp-slot.dtp-done{border-color:#10b981;background:rgba(16,185,129,.05)}
+.dtp-pos{font-size:.52rem;font-weight:800;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:2px}
+.dtp-name{font-size:.67rem;font-weight:700;color:var(--txt);line-height:1.2}
+.dtp-ovr{font-size:.86rem;font-weight:900}
+.grade-box{background:var(--surf);border:2px solid var(--brd);border-radius:16px;padding:22px;text-align:center;margin:14px 0}
+.grade-letter{font-size:5rem;font-weight:900;line-height:1}
+.grade-lbl{font-size:.58rem;font-weight:800;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-top:4px}
+.grade-ovr{font-size:1.3rem;font-weight:900;margin-top:5px}
+@media(max-width:640px){.dond-layout{flex-direction:column}.dond-known{width:100%;max-height:130px}.byt-rgrid{grid-template-columns:repeat(2,1fr)}.dtp-slot{min-width:54px}}
+
 </style>
 
 
@@ -814,7 +902,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 
 
 
-  <p class="mm-sub">Three ways to build the greatest roster in NFL history</p>
+  <p class="mm-sub">Six ways to play. Draft legends, build under the cap, or test your luck.</p>
 
 
 
@@ -968,18 +1056,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 
   </div>
 
-
-
-
-
+    <div class="mode-card" onclick="show('dondOptScr',null)">
+      <div class="mc-ico">💼</div>
+      <div class="mc-ttl">Team Modes</div>
+      <div class="mc-dsc">Deal or No Deal, Build Your Team under a salary cap, or the DOND Team Builder — fill all 8 positions one briefcase at a time.</div>
+      <div class="mc-tag">3 Modes · Salary Cap · Banker Offers</div>
+    </div>
 
 
 </div>
-
-
-
-
-
 
 
 <!-- INTRO (shared for draft + alltime) -->
@@ -14287,6 +14372,142 @@ setChallCat = function(cat, el) {
 
 
 
+
+<!-- ═══ TEAM MODES OPTIONS ═══ -->
+<div id="dondOptScr" class="scr">
+  <div class="badge">💼 Team Modes</div>
+  <h1 class="mm-title" style="font-size:clamp(1.5rem,5vw,2.8rem)">Pick Your<br><span class="hl">Team Mode</span></h1>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;max-width:400px;margin-top:8px">
+    <div style="font-size:.58rem;font-weight:800;letter-spacing:2px;color:var(--muted);text-align:center">POSITION FILTER (Classic DOND only)</div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;justify-content:center" id="dondPosBtns">
+      <button class="btn-s" style="border-color:var(--acc);color:#a78bfa" onclick="dondSetPos(null,this)">All</button>
+      <button class="btn-s" onclick="dondSetPos('QB',this)">QB</button>
+      <button class="btn-s" onclick="dondSetPos('RB',this)">RB</button>
+      <button class="btn-s" onclick="dondSetPos('WR',this)">WR</button>
+      <button class="btn-s" onclick="dondSetPos('TE',this)">TE</button>
+    </div>
+    <div style="width:100%;border-top:1px solid var(--brd);padding-top:14px;display:flex;flex-direction:column;gap:10px">
+      <button class="btn-p" onclick="initDOND(window._dondPos)">💼 Classic Deal or No Deal</button>
+      <button class="btn-p" style="background:linear-gradient(135deg,#10b981,#059669)" onclick="initDONDTeam()">🏆 DOND Team Builder</button>
+      <button class="btn-p" style="background:linear-gradient(135deg,#f97316,#dc2626)" onclick="initBuildTeam()">💰 Build Your Team</button>
+    </div>
+    <button class="btn-s" style="margin-top:4px" onclick="show('mainScr',null)">← Back</button>
+  </div>
+</div>
+<!-- ═══ DOND CLASSIC ═══ -->
+<div id="dondGameScr" class="scr" style="justify-content:flex-start;padding-top:20px">
+  <div style="display:flex;align-items:center;justify-content:space-between;width:100%;max-width:920px;margin-bottom:12px">
+    <button class="btn-s" onclick="show('dondOptScr',null)" style="font-size:.74rem;padding:7px 13px">← Back</button>
+    <div class="badge" style="margin:0">💼 DEAL OR NO DEAL</div>
+    <div style="width:76px"></div>
+  </div>
+  <div id="dondGame" style="width:100%;max-width:920px"></div>
+</div>
+<!-- ═══ DOND TEAM BUILDER ═══ -->
+<div id="dondTeamScr" class="scr" style="justify-content:flex-start;padding-top:20px">
+  <div style="display:flex;align-items:center;justify-content:space-between;width:100%;max-width:920px;margin-bottom:12px">
+    <button class="btn-s" onclick="show('dondOptScr',null)" style="font-size:.74rem;padding:7px 13px">← Back</button>
+    <div class="badge" style="margin:0">🏆 DOND TEAM BUILDER</div>
+    <div style="width:76px"></div>
+  </div>
+  <div id="dondTeamGame" style="width:100%;max-width:920px"></div>
+</div>
+<!-- ═══ BUILD YOUR TEAM ═══ -->
+<div id="buildTeamScr" class="scr" style="justify-content:flex-start;padding-top:20px">
+  <div style="display:flex;align-items:center;justify-content:space-between;width:100%;max-width:820px;margin-bottom:12px">
+    <button class="btn-s" onclick="show('dondOptScr',null)" style="font-size:.74rem;padding:7px 13px">← Back</button>
+    <div class="badge" style="margin:0">💰 BUILD YOUR TEAM</div>
+    <div style="width:76px"></div>
+  </div>
+  <div id="buildTeamGame" style="width:100%;max-width:820px"></div>
+</div>
+
+<script>
+/* TEAM MODES */
+window._dondPos=null;
+function _tmTier(r){if(r>=93)return{lbl:'ELITE',cls:'t-s'};if(r>=85)return{lbl:'GREAT',cls:'t-a'};if(r>=77)return{lbl:'GOOD',cls:'t-b'};if(r>=69)return{lbl:'AVG',cls:'t-c'};return{lbl:'POOR',cls:'t-d'};}
+function _tmCost(r){if(r>=98)return 50;if(r>=95)return 38;if(r>=92)return 28;if(r>=88)return 20;if(r>=84)return 13;if(r>=80)return 8;if(r>=75)return 5;if(r>=70)return 3;if(r>=65)return 2;return 1;}
+function _tmGrade(v){if(v>=94)return{gr:'S',col:'#10b981'};if(v>=90)return{gr:'A',col:'#34d399'};if(v>=86)return{gr:'B',col:'#fbbf24'};if(v>=82)return{gr:'C',col:'#f97316'};if(v>=78)return{gr:'D',col:'#ef4444'};return{gr:'F',col:'#dc2626'};}
+function _tmPosCls(p){return{QB:'p-qb',RB:'p-rb',WR:'p-wr',TE:'p-te',DEF:'p-def'}[p]||'p-def';}
+function _tmShuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function _tmGetPlayers(pos){const all=[];CURRENT_TEAMS.forEach(t=>{if(pos==='DEF'){if(t.DEF)all.push({...t.DEF,pos:'DEF',team:t.abbr});}else{(t[pos]||[]).forEach(p=>all.push({...p,pos,team:t.abbr}));}});return all.sort((a,b)=>b.r-a.r);}
+function _tmBuildMixedPool(){const tiers=[{mn:90,mx:99},{mn:80,mx:89},{mn:70,mx:79},{mn:60,mx:69}];const pool=[];const used=new Set();['QB','RB','WR','TE'].forEach(pos=>{const all=_tmGetPlayers(pos);tiers.forEach(tier=>{const c=all.filter(p=>p.r>=tier.mn&&p.r<=tier.mx&&!used.has(p.n));if(c.length){const pick=c[Math.floor(Math.random()*c.length)];pool.push(pick);used.add(pick.n);}});});return _tmShuffle(pool);}
+function _tmBuildSinglePool(pos){const all=_tmGetPlayers(pos);const tiers=[{mn:90,mx:99,n:3},{mn:80,mx:89,n:5},{mn:70,mx:79,n:5},{mn:0,mx:69,n:3}];const pool=[];const used=new Set();tiers.forEach(({mn,mx,n})=>{const c=_tmShuffle(all.filter(p=>p.r>=mn&&p.r<=mx&&!used.has(p.n)));c.slice(0,n).forEach(p=>{pool.push(p);used.add(p.n);});});all.filter(p=>!used.has(p.n)).forEach(p=>{if(pool.length<16)pool.push(p);});return _tmShuffle(pool.slice(0,16));}
+function _tmBanker(pool,opened,myCase){const rem=pool.filter((_,i)=>!opened.has(i)&&i!==myCase);if(!rem.length)return pool[myCase];const avg=rem.reduce((s,p)=>s+p.r,0)/rem.length;return rem.reduce((best,p)=>Math.abs(p.r-avg)<Math.abs(best.r-avg)?p:best);}
+/* Classic DOND */
+const _DC={pool:[],myCase:-1,opened:new Set(),round:0,ort:0,rs:[4,3,3,2,1,1],offer:null,up:false,done:false,taken:null};
+function dondSetPos(pos,btn){window._dondPos=pos;document.querySelectorAll('#dondPosBtns .btn-s').forEach(b=>{b.style.borderColor='';b.style.color='';});btn.style.borderColor='var(--acc)';btn.style.color='#a78bfa';}
+function initDOND(pf){const pool=pf?_tmBuildSinglePool(pf):_tmBuildMixedPool();Object.assign(_DC,{pool,myCase:-1,opened:new Set(),round:0,ort:0,offer:null,up:false,done:false,taken:null});show('dondGameScr',null);_rDC();}
+function _rDC(){
+  const el=document.getElementById('dondGame');if(!el)return;
+  const{pool,myCase,opened,round,ort,rs,up,done,taken,offer}=_DC;
+  const sorted=[...pool].map((p,i)=>({...p,_i:i})).sort((a,b)=>b.r-a.r);
+  const lh=sorted.map(({_i,n,r,pos})=>{const t=_tmTier(r);return`<div class="dond-li${opened.has(_i)?' struck':''}"><span class="dond-li-pos ${_tmPosCls(pos)}">${pos}</span><span class="dond-li-name">${n.split(' ').pop()}</span><span class="dond-li-ovr ${t.cls}">${r}</span></div>`;}).join('');
+  const ch=pool.map((p,i)=>{const io=opened.has(i),im=i===myCase;let cl='dond-case',co='';if(im){cl+=' dond-mine';co=`<div class="dond-case-num">&#9733; YOURS</div><div class="dond-case-ico">&#128188;</div>`;}else if(io){cl+=' dond-open';const t=_tmTier(p.r);co=`<div class="dond-case-num">#${i+1}</div><div class="dond-case-ovr ${t.cls}">${p.r}</div><div class="dond-case-nm">${p.n}</div>`;return`<div class="${cl}">${co}</div>`;}else{const cc=!up&&!done&&(myCase===-1||(myCase>-1&&ort<rs[round]));if(cc)cl+=' dond-can';co=`<div class="dond-case-num">#${i+1}</div><div class="dond-case-ico">&#128188;</div>`;return`<div class="${cl}" ${cc?`onclick="dondClick(${i})"`:''} >${co}</div>`;}return`<div class="${cl}">${co}</div>`;}).join('');
+  let sh='';if(myCase===-1){sh=`<div class="dond-status">&#127919; Pick the briefcase you want to keep</div>`;}else if(!up&&!done){const l=rs[round]-ort;sh=`<div class="dond-status">Round ${round+1} — Open <strong>${l}</strong> more briefcase${l!==1?'s':''}</div>`;}
+  let bh='';if(up&&offer){const t=_tmTier(offer.r);const fin=round>=rs.length;bh=`<div class="banker-card"><div class="banker-phone">&#128222;</div><div class="banker-lbl">${fin?'&#128260; SWAP OR KEEP?':'THE BANKER IS CALLING'}</div><div class="banker-row"><span class="dond-li-pos ${_tmPosCls(offer.pos)}">${offer.pos}</span><span class="banker-name">${offer.n}</span><span class="banker-ovr ${t.cls}">${offer.r} OVR</span></div><div class="banker-stat">${offer.st}</div><div class="banker-btns"><button class="btn-deal" onclick="dondDeal()">${fin?'&#128260; SWAP':'&#9989; DEAL'}</button><button class="btn-nodeal" onclick="dondNoDeal()">${fin?'&#128188; KEEP MINE':'&#10060; NO DEAL'}</button></div></div>`;}
+  let fh='';if(done&&taken){const p=taken,mine=pool[myCase],t=_tmTier(p.r),mt=_tmTier(mine.r),ok=p.r>=mine.r;fh=`<div class="dond-final"><div class="dond-final-tier" style="color:${ok?'#10b981':'#ef4444'}">${ok?'&#9989; GOOD DEAL!':'&#128556; YOUR CASE WAS BETTER'}</div><div class="dond-final-name">${p.pos} — ${p.n}</div><div class="dond-final-ovr ${t.cls}">${p.r} OVR</div><div class="dond-final-tier ${t.cls}">${t.lbl}</div><div class="dond-regret">Your original case had: <strong>${mine.pos} ${mine.n} — ${mine.r} OVR (${mt.lbl})</strong></div><div style="display:flex;gap:10px;justify-content:center;margin-top:16px"><button class="btn-s" onclick="show('dondOptScr',null)">&#8592; Back</button><button class="btn-p" onclick="initDOND(window._dondPos)">Play Again</button></div></div>`;}
+  el.innerHTML=`<div class="dond-layout"><div class="dond-known"><div class="dond-known-hdr">Player Pool</div>${lh}</div><div class="dond-main">${sh}<div class="dond-grid">${ch}</div>${bh}${fh}</div></div>`;
+}
+function dondClick(i){if(_DC.up||_DC.done)return;if(_DC.myCase===-1){Object.assign(_DC,{myCase:i,round:0,ort:0});_rDC();return;}if(_DC.opened.has(i)||i===_DC.myCase)return;if(_DC.ort>=_DC.rs[_DC.round])return;_DC.opened.add(i);_DC.ort++;if(_DC.ort>=_DC.rs[_DC.round]){_DC.offer=_tmBanker(_DC.pool,_DC.opened,_DC.myCase);_DC.up=true;}_rDC();}
+function dondDeal(){_DC.done=true;_DC.up=false;_DC.taken=_DC.offer;_rDC();}
+function dondNoDeal(){_DC.up=false;_DC.round++;_DC.ort=0;if(_DC.round>=_DC.rs.length){const r=_DC.pool.map((_,i)=>i).filter(i=>!_DC.opened.has(i)&&i!==_DC.myCase);if(r.length){_DC.offer=_DC.pool[r[0]];_DC.up=true;}else{_DC.taken=_DC.pool[_DC.myCase];_DC.done=true;}}_rDC();}
+/* Build Your Team */
+const _BS=['QB','RB1','RB2','WR1','WR2','WR3','TE','DEF'];
+const _BP={QB:'QB',RB1:'RB',RB2:'RB',WR1:'WR',WR2:'WR',WR3:'WR',TE:'TE',DEF:'DEF'};
+const BYT={cap:200,spent:0,picks:{},slot:'QB'};
+let _bpl=[];
+function initBuildTeam(){Object.assign(BYT,{cap:200,spent:0,picks:{},slot:'QB'});show('buildTeamScr',null);_rBYT();}
+function bytSetSlot(s){BYT.slot=s;_rBYT();}
+function bytPickIdx(idx){const p=_bpl[idx];if(!p)return;const s=BYT.slot;const cost=_tmCost(p.r);const old=BYT.picks[s];const ref=old?_tmCost(old.r):0;if(BYT.spent-ref+cost>BYT.cap)return;BYT.spent=BYT.spent-ref+cost;BYT.picks[s]=p;const nx=_BS.find(x=>!BYT.picks[x]);if(nx)BYT.slot=nx;_rBYT();}
+function _rBYT(){
+  const el=document.getElementById('buildTeamGame');if(!el)return;
+  const{cap,spent,picks,slot}=BYT;const rem=cap-spent;const pct=(spent/cap)*100;const cc=pct>90?'#ef4444':pct>70?'#fbbf24':'#10b981';const af=_BS.every(s=>picks[s]);
+  const capH=`<div class="byt-capbar"><div class="byt-cap-lbl">Salary Cap</div><div class="byt-cap-track"><div class="byt-cap-fill" style="width:${pct.toFixed(1)}%;background:${cc}"></div></div><div class="byt-cap-num" style="color:${cc}">$${rem}M left</div></div>`;
+  const tabH=_BS.map(s=>{let cl='byt-tab';if(s===slot)cl+=' byt-active';else if(picks[s])cl+=' byt-done';return`<button class="${cl}" onclick="bytSetSlot('${s}')">${picks[s]?'&#10003; '+s:s}</button>`;}).join('');
+  const pos=_BP[slot];_bpl=_tmGetPlayers(pos);const cp=picks[slot];const rf=rem+(cp?_tmCost(cp.r):0);
+  const plH=_bpl.map((p,i)=>{const cost=_tmCost(p.r);const t=_tmTier(p.r);const sel=cp&&cp.n===p.n&&cp.team===p.team;const costly=!sel&&cost>rf;return`<div class="byt-prow${sel?' byt-sel':''}${costly?' byt-costly':''}" onclick="bytPickIdx(${i})"><div class="byt-prow-ovr ${t.cls}">${p.r}</div><div class="byt-prow-name">${p.n}</div><div class="byt-prow-team">${p.team}</div><div class="byt-prow-stat">${(p.st||'').substring(0,36)}</div><div class="byt-prow-cost">$${cost}M</div></div>`;}).join('');
+  const rH=_BS.map(s=>{const p=picks[s];const t=p?_tmTier(p.r):null;return`<div class="byt-rslot${p?' byt-rfill':''}"><div class="byt-rslot-pos">${s}</div>${p?`<div class="byt-rslot-name">${p.n}</div><div class="byt-rslot-ovr ${t.cls}">${p.r}</div>`:`<div class="byt-rslot-name" style="color:var(--muted)">&#8212;</div>`}</div>`;}).join('');
+  let gH='';if(af){const avg=Math.round(_BS.reduce((s,sl)=>s+picks[sl].r,0)/_BS.length);const{gr,col}=_tmGrade(avg);gH=`<div class="grade-box" style="border-color:${col}"><div class="grade-lbl">Team Grade</div><div class="grade-letter" style="color:${col}">${gr}</div><div class="grade-ovr" style="color:${col}">${avg} OVR Avg</div><div style="font-size:.7rem;color:var(--muted);margin-top:5px">$${spent}M / $${cap}M &#8226; $${rem}M unused</div></div><div style="display:flex;gap:10px;justify-content:center"><button class="btn-s" onclick="show('mainScr',null)">&#8592; Menu</button><button class="btn-p" onclick="initBuildTeam()">&#128260; Rebuild</button></div>`;}
+  el.innerHTML=`<div class="byt-wrap">${capH}<div class="byt-tabs">${tabH}</div><div class="byt-plist">${plH}</div><div class="byt-rgrid">${rH}</div>${gH}</div>`;
+}
+/* DOND Team Builder */
+const _DTS=[{slot:'QB',pos:'QB'},{slot:'RB1',pos:'RB'},{slot:'RB2',pos:'RB'},{slot:'WR1',pos:'WR'},{slot:'WR2',pos:'WR'},{slot:'WR3',pos:'WR'},{slot:'TE',pos:'TE'},{slot:'DEF',pos:'DEF'}];
+const DT={si:0,roster:{},pool:[],myCase:-1,opened:new Set(),round:0,ort:0,rs:[3,2,1],offer:null,up:false};
+function initDONDTeam(){Object.assign(DT,{si:0,roster:{},pool:[],myCase:-1,opened:new Set(),round:0,ort:0,offer:null,up:false});show('dondTeamScr',null);_dtStart();}
+function _dtStart(){
+  const{pos}=_DTS[DT.si];const used=new Set(Object.values(DT.roster).map(p=>p.n));
+  let all=_tmGetPlayers(pos).filter(p=>!used.has(p.n));
+  const tiers=[{mn:85,mx:99,n:2},{mn:75,mx:84,n:3},{mn:65,mx:74,n:2},{mn:0,mx:64,n:1}];
+  const pool=[];const pn=new Set();
+  tiers.forEach(({mn,mx,n})=>{const c=_tmShuffle(all.filter(p=>p.r>=mn&&p.r<=mx&&!pn.has(p.n)));c.slice(0,n).forEach(p=>{pool.push(p);pn.add(p.n);});});
+  all.filter(p=>!pn.has(p.n)).forEach(p=>{if(pool.length<8){pool.push(p);pn.add(p.n);}});
+  DT.pool=_tmShuffle(pool.slice(0,8));Object.assign(DT,{myCase:-1,opened:new Set(),round:0,ort:0,offer:null,up:false});_rDT();
+}
+function _rDT(){
+  const el=document.getElementById('dondTeamGame');if(!el)return;
+  const{si,roster,pool,myCase,opened,round,ort,rs,up,offer}=DT;
+  const pgH=_DTS.map(({slot},idx)=>{const p=roster[slot];const t=p?_tmTier(p.r):null;let cl='dtp-slot';if(idx===si)cl+=' dtp-active';else if(p)cl+=' dtp-done';return`<div class="${cl}"><div class="dtp-pos">${slot}</div>${p?`<div class="dtp-name">${p.n.split(' ').pop()}</div><div class="dtp-ovr ${t.cls}">${p.r}</div>`:`<div class="dtp-name" style="color:var(--muted)">${idx===si?'&#9654;':'&#8212;'}</div>`}</div>`;}).join('');
+  const sorted=[...pool].map((p,i)=>({...p,_i:i})).sort((a,b)=>b.r-a.r);
+  const lh=sorted.map(({_i,n,r,pos})=>{const t=_tmTier(r);return`<div class="dond-li${opened.has(_i)?' struck':''}"><span class="dond-li-pos ${_tmPosCls(pos)}">${pos}</span><span class="dond-li-name">${n.split(' ').pop()}</span><span class="dond-li-ovr ${t.cls}">${r}</span></div>`;}).join('');
+  const ch=pool.map((p,i)=>{const io=opened.has(i),im=i===myCase;let cl='dond-case',co='';if(im){cl+=' dond-mine';co=`<div class="dond-case-num">&#9733;</div><div class="dond-case-ico">&#128188;</div>`;}else if(io){cl+=' dond-open';const t=_tmTier(p.r);co=`<div class="dond-case-num">#${i+1}</div><div class="dond-case-ovr ${t.cls}">${p.r}</div><div class="dond-case-nm">${p.n}</div>`;return`<div class="${cl}">${co}</div>`;}else{const left=rs[round]!==undefined?rs[round]-ort:0;const cc=!up&&(myCase===-1||(myCase>-1&&left>0));if(cc)cl+=' dond-can';co=`<div class="dond-case-num">#${i+1}</div><div class="dond-case-ico">&#128188;</div>`;return`<div class="${cl}" ${cc?`onclick="dtClick(${i})"`:''} >${co}</div>`;}return`<div class="${cl}">${co}</div>`;}).join('');
+  let sh='';if(myCase===-1){sh=`<div class="dond-status">Picking <strong>${_DTS[si].slot}</strong> &#8212; Choose your briefcase</div>`;}else if(!up&&round<rs.length){const l=rs[round]-ort;sh=`<div class="dond-status">Open <strong>${l}</strong> more case${l!==1?'s':''}</div>`;}
+  let bh='';if(up&&offer){const t=_tmTier(offer.r);const fin=round>=rs.length;bh=`<div class="banker-card"><div class="banker-phone">&#128222;</div><div class="banker-lbl">${fin?'&#128260; SWAP OR KEEP?':'THE BANKER OFFERS'}</div><div class="banker-row"><span class="dond-li-pos ${_tmPosCls(offer.pos)}">${offer.pos}</span><span class="banker-name">${offer.n}</span><span class="banker-ovr ${t.cls}">${offer.r} OVR</span></div><div class="banker-stat">${offer.st}</div><div class="banker-btns"><button class="btn-deal" onclick="dtDeal()">${fin?'&#128260; SWAP':'&#9989; DEAL'}</button><button class="btn-nodeal" onclick="dtNoDeal()">${fin?'&#128188; KEEP MINE':'&#10060; NO DEAL'}</button></div></div>`;}
+  el.innerHTML=`<div class="dtp-bar">${pgH}</div><div class="dond-layout"><div class="dond-known"><div class="dond-known-hdr">${_DTS[si].slot} Pool</div>${lh}</div><div class="dond-main">${sh}<div class="dond-grid" style="grid-template-columns:repeat(4,1fr)">${ch}</div>${bh}</div></div>`;
+}
+function dtClick(i){if(DT.up)return;if(DT.myCase===-1){Object.assign(DT,{myCase:i,round:0,ort:0});_rDT();return;}if(DT.opened.has(i)||i===DT.myCase)return;const left=DT.rs[DT.round]!==undefined?DT.rs[DT.round]-DT.ort:0;if(left<=0)return;DT.opened.add(i);DT.ort++;if(DT.ort>=DT.rs[DT.round]){DT.offer=_tmBanker(DT.pool,DT.opened,DT.myCase);DT.up=true;}_rDT();}
+function dtDeal(){_dtApply(DT.offer);}
+function dtNoDeal(){DT.up=false;DT.round++;DT.ort=0;if(DT.round>=DT.rs.length){const r=DT.pool.map((_,i)=>i).filter(i=>!DT.opened.has(i)&&i!==DT.myCase);if(r.length){DT.offer=DT.pool[r[0]];DT.up=true;}else _dtApply(DT.pool[DT.myCase]);}else _rDT();}
+function _dtApply(player){const{slot}=_DTS[DT.si];DT.roster[slot]=player;DT.si++;if(DT.si>=_DTS.length){_rDTFinal();return;}_dtStart();}
+function _rDTFinal(){
+  const el=document.getElementById('dondTeamGame');if(!el)return;
+  const avg=Math.round(_DTS.reduce((s,{slot})=>s+(DT.roster[slot]?.r||0),0)/_DTS.length);
+  const{gr,col}=_tmGrade(avg);
+  const pgH=_DTS.map(({slot})=>{const p=DT.roster[slot];const t=p?_tmTier(p.r):null;return`<div class="dtp-slot dtp-done"><div class="dtp-pos">${slot}</div>${p?`<div class="dtp-name">${p.n.split(' ').pop()}</div><div class="dtp-ovr ${t.cls}">${p.r}</div>`:''}</div>`;}).join('');
+  const rH=_DTS.map(({slot})=>{const p=DT.roster[slot];const t=p?_tmTier(p.r):null;return`<div class="byt-rslot byt-rfill"><div class="byt-rslot-pos">${slot}</div>${p?`<div class="byt-rslot-name">${p.n}</div><div class="byt-rslot-ovr ${t.cls}">${p.r}</div>`:''}</div>`;}).join('');
+  el.innerHTML=`<div style="text-align:center;width:100%"><div class="dtp-bar">${pgH}</div><div class="grade-box" style="border-color:${col}"><div class="grade-lbl">Final Team Grade</div><div class="grade-letter" style="color:${col}">${gr}</div><div class="grade-ovr" style="color:${col}">${avg} OVR Avg</div></div><div class="byt-rgrid" style="max-width:820px;margin:0 auto 16px">${rH}</div><div style="display:flex;gap:10px;justify-content:center"><button class="btn-s" onclick="show('mainScr',null)">&#8592; Menu</button><button class="btn-p" onclick="initDONDTeam()">&#128260; Play Again</button></div></div>`;
+}
+</script>
 </body>
 
 
