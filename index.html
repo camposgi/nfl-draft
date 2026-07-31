@@ -14498,7 +14498,7 @@ function _rDT(){
 }
 function dtClick(i){if(DT.up)return;if(DT.myCase===-1){Object.assign(DT,{myCase:i,round:0,ort:0});_rDT();return;}if(DT.opened.has(i)||i===DT.myCase)return;const left=DT.rs[DT.round]!==undefined?DT.rs[DT.round]-DT.ort:0;if(left<=0)return;DT.opened.add(i);DT.ort++;if(DT.ort>=DT.rs[DT.round]){DT.offer=_tmBanker(DT.pool,DT.opened,DT.myCase);DT.up=true;}_rDT();}
 function dtDeal(){_dtApply(DT.offer);}
-function dtNoDeal(){DT.up=false;DT.round++;DT.ort=0;if(DT.round>=DT.rs.length){const r=DT.pool.map((_,i)=>i).filter(i=>!DT.opened.has(i)&&i!==DT.myCase);if(r.length){DT.offer=DT.pool[r[0]];DT.up=true;}else _dtApply(DT.pool[DT.myCase]);}else _rDT();}
+function dtNoDeal(){DT.up=false;DT.round++;DT.ort=0;if(DT.round>=DT.rs.length){const r=DT.pool.map((_,i)=>i).filter(i=>!DT.opened.has(i)&&i!==DT.myCase);if(r.length){DT.offer=DT.pool[r[0]];DT.up=true;_rDT();}else _dtApply(DT.pool[DT.myCase]);}else _rDT();}
 function dtKeepMine(){_dtApply(DT.pool[DT.myCase]);}
 function _dtApply(player){const{slot}=_DTS[DT.si];DT.roster[slot]=player;DT.si++;if(DT.si>=_DTS.length){_rDTFinal();return;}_dtStart();}
 function _rDTFinal(){
