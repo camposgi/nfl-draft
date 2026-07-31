@@ -14476,6 +14476,15 @@ function _rBYT(){
 const _DTS=[{slot:'QB',pos:'QB'},{slot:'RB1',pos:'RB'},{slot:'RB2',pos:'RB'},{slot:'WR1',pos:'WR'},{slot:'WR2',pos:'WR'},{slot:'WR3',pos:'WR'},{slot:'TE',pos:'TE'},{slot:'DEF',pos:'DEF'}];
 const DT={si:0,roster:{},pool:[],myCase:-1,opened:new Set(),round:0,ort:0,rs:[3,2,1],offer:null,up:false};
 function initDONDTeam(){Object.assign(DT,{si:0,roster:{},pool:[],myCase:-1,opened:new Set(),round:0,ort:0,offer:null,up:false});show('dondTeamScr',null);_dtStart();}
+function _dtBankerExternal(){
+  const{pos}=_DTS[DT.si];
+  const usedNames=new Set([...DT.pool.map(p=>p.n),...Object.values(DT.roster).filter(Boolean).map(p=>p.n)]);
+  const rem=DT.pool.filter((_,i)=>!DT.opened.has(i)&&i!==DT.myCase);
+  const avg=rem.length?rem.reduce((s,p)=>s+p.r,0)/rem.length:80;
+  const avail=_tmGetPlayers(pos).filter(p=>!usedNames.has(p.n));
+  if(!avail.length)return _tmBanker(DT.pool,DT.opened,DT.myCase);
+  return avail.reduce((best,p)=>Math.abs(p.r-avg)<Math.abs(best.r-avg)?p:best);
+}
 function _dtStart(){
   const{pos}=_DTS[DT.si];const used=new Set(Object.values(DT.roster).map(p=>p.n));
   let all=_tmGetPlayers(pos).filter(p=>!used.has(p.n));
@@ -14496,9 +14505,9 @@ function _rDT(){
   let bh='';if(up&&offer){const t=_tmTier(offer.r);const fin=round>=rs.length;bh=`<div class="banker-card"><div class="banker-phone">&#128222;</div><div class="banker-lbl">${fin?'&#128260; SWAP OR KEEP?':'THE BANKER OFFERS'}</div><div class="banker-row"><span class="dond-li-pos ${_tmPosCls(offer.pos)}">${offer.pos}</span><span class="banker-name">${offer.n}</span><span class="banker-ovr ${t.cls}">${offer.r} OVR</span></div><div class="banker-stat">${offer.st}</div><div class="banker-btns"><button class="btn-deal" onclick="dtDeal()">${fin?'&#128260; SWAP':'&#9989; DEAL'}</button><button class="btn-nodeal" onclick="${fin?'dtKeepMine()':'dtNoDeal()'}">${fin?'&#128188; KEEP MINE':'&#10060; NO DEAL'}</button></div></div>`;}
   el.innerHTML=`<div class="dtp-bar">${pgH}</div><div class="dond-layout"><div class="dond-known"><div class="dond-known-hdr">${_DTS[si].slot} Pool</div>${lh}</div><div class="dond-main">${sh}<div class="dond-grid" style="grid-template-columns:repeat(4,1fr)">${ch}</div>${bh}</div></div>`;
 }
-function dtClick(i){if(DT.up)return;if(DT.myCase===-1){Object.assign(DT,{myCase:i,round:0,ort:0});_rDT();return;}if(DT.opened.has(i)||i===DT.myCase)return;const left=DT.rs[DT.round]!==undefined?DT.rs[DT.round]-DT.ort:0;if(left<=0)return;DT.opened.add(i);DT.ort++;if(DT.ort>=DT.rs[DT.round]){DT.offer=_tmBanker(DT.pool,DT.opened,DT.myCase);DT.up=true;}_rDT();}
+function dtClick(i){if(DT.up)return;if(DT.myCase===-1){Object.assign(DT,{myCase:i,round:0,ort:0});_rDT();return;}if(DT.opened.has(i)||i===DT.myCase)return;const left=DT.rs[DT.round]!==undefined?DT.rs[DT.round]-DT.ort:0;if(left<=0)return;DT.opened.add(i);DT.ort++;if(DT.ort>=DT.rs[DT.round]){DT.offer=_dtBankerExternal();DT.up=true;}_rDT();}
 function dtDeal(){_dtApply(DT.offer);}
-function dtNoDeal(){DT.up=false;DT.round++;DT.ort=0;if(DT.round>=DT.rs.length){const r=DT.pool.map((_,i)=>i).filter(i=>!DT.opened.has(i)&&i!==DT.myCase);if(r.length){DT.offer=DT.pool[r[0]];DT.up=true;_rDT();}else _dtApply(DT.pool[DT.myCase]);}else _rDT();}
+function dtNoDeal(){DT.up=false;DT.round++;DT.ort=0;if(DT.round>=DT.rs.length){const r=DT.pool.map((_,i)=>i).filter(i=>!DT.opened.has(i)&&i!==DT.myCase);if(r.length){DT.offer=_dtBankerExternal();DT.up=true;_rDT();}else _dtApply(DT.pool[DT.myCase]);}else _rDT();}
 function dtKeepMine(){_dtApply(DT.pool[DT.myCase]);}
 function _dtApply(player){const{slot}=_DTS[DT.si];DT.roster[slot]=player;DT.si++;if(DT.si>=_DTS.length){_rDTFinal();return;}_dtStart();}
 function _rDTFinal(){
